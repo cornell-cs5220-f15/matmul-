@@ -18,6 +18,44 @@ In practice, this took X time.  This includes
 Consider the following questions:
 
 1. What is a simple model that would predict this time?
+
+To come up with a simple model, we will make the following assumptions:
+(a) the class is distributed in n rows and m columns
+(b) the time (t_init) to start the process does not depend on the number of people
+(c) the time to compute rows is proportional to the number of people in each row
+		(i.e. the number of columns)
+(d) the time for the instructor to gather counts is proportional to the number of rows
+(e) the time for the instructor to do the arithmetic is proportional to the number of rows
+Thus we get that the total time to count attendance is:
+	total_time = t_init + a*m + b*n + c*n
+
 2. What about a simple model to predict time for one person to count?
+
+In the serial case, we now assume that:
+(a) the class is distributed in n rows and m columns
+(b) the time to start is now 0 since the person counting already knows the counting 		procedure and does not need to explain it to themselves
+(c) the time for the instructor to count attendance is proportional to the total number of people
+Thus we get that the total time for the serial case is:
+	total_time = a*m*n
+
 3. How big should the class be before the parallel method takes less time?
+
+The parallel method takes less time when:
+t_init + a*m + b*n + c*n < a*m*n
+Now we will estimate some parameter values:
+t_init = time to explain procedure     = 30sec
+a      = time to count each person     = 0.5sec/person
+b      = time to gather count from row = 1 sec/person
+c      = time to do arithmetic         = 1 sec/row
+
+Then the parallel method takes less time when:
+
+30 + 0.5*m + 2*n < 0.5*m*n
+
+If we further assume that the number of rows and columns are the same (i.e. m=n), then
+the parallel method takes less time when:
+30 + 2.5*n < 0.5*n^2
+this occurs whenever n > 10.6394, in other words whenever there are at least 11 rows and columns, and thus at least 121 people.
+
+
 
