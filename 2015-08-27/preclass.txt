@@ -7,25 +7,14 @@
     according to Amdahl's law for up to 128 cores.  If you know how,
     you should use a script to produce this plot, with both the serial
     fraction and the maximum number of cores as parameters.
-    
-A script to make the plot using matplotlib is in parallel_plot.py in this directory.
 
 2.  Suppose a particular program can be partitioned into perfectly
     independent tasks, each of which takes time tau.  Tasks are
     set up, scheduled, and communicated to p workers at a (serial)
     central server; this takes an overhead time alpha per task.
     What is the theoretically achievable throughput (tasks/time)?
-    
-The theoretically available throughput is when the central server and all p workers 
-	are always working. In such a case, the central server has a throughput of 1/alpha,
-	and all the workers together have a throughput of tau/p. Thus the total throughput is:
-	1/(alpha + tau/p)
 
 3.  Under what circumstances is it best to not tune?
-
-It is best not to tune when the human time required to tune is more valuable than the computer time that is saved by tuning
-	This can be the case because implementing and maintaining better performance can become very difficult,
-	or because a particular part of the code does not consume much of the total time
 
 4.  The class cluster consists of eight nodes and fifteen Xeon Phi
     accelerator boards.  Based on an online search for information on
@@ -35,20 +24,4 @@ It is best not to tune when the human time required to tune is more valuable tha
     in your calculation.  (We will return to this question again after
     we cover some computer architecture.)
     
-Each of the Xeon Phi 5110P boards has a frequency of 1.053 GHz with 60 cores
-	Source: http://ark.intel.com/products/71992/Intel-Xeon-Phi-Coprocessor-5110P-8GB-1_053-GHz-60-core
-Each core can compute 16 double precision floating point operations per cycle
-	Source: https://software.intel.com/en-us/articles/intel-xeon-phi-core-micro-architecture
-I'm going to assume that the cores in the nodes have the same frequency and can compute the same number of double precision flops per cycle
-
-This means that the theoretical peak flop rate is:
-(# of cores)*(cycles per second)*(flops per cycle) 
-= (15*60 + 8*12)*(1.053 GHz)*(16) = 16780.608 GFlop/sec = 16.8 TFlop/sec
-    
 5.  What is the approximate theoretical peak flop rate for your own machine?
-
-My machine is a mid-2012 13-inch Macbook Air. It has a 1.8 GHz Intel Core i5 processor with two cores, each with four threads.
-Source: http://ark.intel.com/products/64903/Intel-Core-i5-3427U-Processor-3M-Cache-up-to-2_80-GHz
-Assuming each thread can execute one flop per cycle, the theoretical peak flop rate is:
-(# of cores)*(cycles per second)*(flops per cycle) 
-= (2)*(1.8 GHz)*(4) = 14.4 GFlop/sec
