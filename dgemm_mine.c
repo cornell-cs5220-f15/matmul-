@@ -38,7 +38,7 @@ void do_block(const int lda,
 }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
-{	BLOCK_SIZE=8;
+{	BLOCK_SIZE=(void *)8;
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
 	
     int bi, bj, bk;
