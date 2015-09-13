@@ -6,6 +6,7 @@ CC=gcc
 FC=gfortran
 LD=gcc
 
+
 # Compiler optimization flags.  You will definitely want to play with these!
 OPTFLAGS = -O3 
 CFLAGS = -std=gnu99 
@@ -20,5 +21,5 @@ LIBS = -lm
 OBJS = matmul.o
 
 # Libraries and include files for BLAS
-LIBBLAS=-lopenblas
+LIBBLAS=-L/Users/rmc298/lib_builds/oblas -lopenblas
 INCBLAS=
