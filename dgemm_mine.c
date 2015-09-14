@@ -4,11 +4,11 @@ const char* dgemm_desc = "My super awesome dgemm.";
 #include <math.h>
 
 #ifndef block_size
-#define block_size ((int) 16)
+#define block_size ((int) 128)
 #endif
 
 #ifndef rect_length
-#define rect_length ((int) 128)
+#define rect_length ((int) 256)
 #endif
 
 // Blocked type
@@ -20,7 +20,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
   // Block loop
   for(int J=0; J<n_blocks; ++J) {
     for(int K=0; K<n_blocks; ++K) {
-      for(int I=0; I<n_rect; ++I) {
+      for(int I=0; I<n_rect; ++I){
         //Inner block loop
           int j_end = ((J+1)*block_size < M? (J+1)*block_size : M);
           for(int j=J*block_size;j< j_end; ++j) {
