@@ -4,7 +4,7 @@ const char* dgemm_desc = "My super awesome dgemm.";
 #include <math.h>
 
 #ifndef block_size
-#define block_size ((int) 128)
+#define block_size ((int) 64)
 #endif
 
 #ifndef rect_length
