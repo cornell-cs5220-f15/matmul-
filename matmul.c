@@ -241,6 +241,7 @@ int main(int argc, char** argv)
     fprintf(fp, "size,mflop\n");
     for (int i = 0; i < N_SIZES; ++i) {
         const int M = test_sizes[i];
+		fprint(M);
         validate_dgemm(M, A, B, C);
         fprintf(fp, "%u,%lg\n", M, time_dgemm(M, A, B, C));
     }
