@@ -3,7 +3,7 @@ const char* dgemm_desc = "My awesome matmul.";
 #include <stdlib.h>
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 32)
+#define BLOCK_SIZE ((int) 16)
 #endif
 /*
   A,B,C are M-by-M
