@@ -83,7 +83,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 		block j = column index of block
 		nblock = number of blocks
 	*/
-	int pad_size, bi, bj, bk nblock;
+	int pad_size, bi, bj, bk, nblock;
 	
 	if (M%BLOCK_SIZE==0){
 		nblock=M/BLOCK_SIZE;
