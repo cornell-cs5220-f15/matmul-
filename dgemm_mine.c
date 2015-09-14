@@ -3,7 +3,7 @@ const char* dgemm_desc = "My awesome matmul.";
 #include <stdlib.h>
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 16)
+#define BLOCK_SIZE ((int) 64)
 #endif
 /* template by David Bindel,
 written by Marc Aurele Gilles
