@@ -6,6 +6,9 @@ const char* dgemm_desc = "My awesome matmul.";
 #define BLOCK_SIZE ((int) 32)
 #endif
 
+
+//ts693: comment
+//
 /*
   A is M-by-K
   B is K-by-N
