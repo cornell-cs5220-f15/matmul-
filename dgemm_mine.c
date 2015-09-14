@@ -5,13 +5,16 @@ const char* dgemm_desc = "My awesome matmul.";
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 32)
 #endif
+/* template by David Bindel,
+written by Marc Aurele Gilles
+
+*/
+
+
 
 /*
-  A is M-by-K
-  B is K-by-N
-  C is M-by-N
+  A,B,C are M-by-M
 
-  lda is the leading dimension of the matrix (the M of square_>=m).
 */
 
 
@@ -58,7 +61,6 @@ void block_to_row(const int M, const int nblock, double *A, const double *newA){
 	
 	
 	
-	
 
 void do_block(const int M, const int nblock,
               const double *A, const double *B, double *C,
@@ -69,7 +71,7 @@ void do_block(const int M, const int nblock,
         for (j = 0; j < BLOCK_SIZE; ++j) {
             double cij = C[((bj*nblock+bi)*BLOCK_SIZE*BLOCK_SIZE+ i*BLOCK_SIZE+j)];
             for (k = 0; k < BLOCK_SIZE; ++k) {
-                cij += A[((bj*nblock+bi))*BLOCK_SIZE*BLOCK_SIZE+BLOCK_SIZE*i+k] * B[((bj*nblock)+bi)*BLOCK_SIZE*BLOCK_SIZE+BLOCK_SIZE*k+j];
+                cij += A[((bj*nblock+bk))*BLOCK_SIZE*BLOCK_SIZE+BLOCK_SIZE*i+k] * B[((bk*nblock)+bi)*BLOCK_SIZE*BLOCK_SIZE+BLOCK_SIZE*k+j];
             }
             C[((bj*nblock+bi)*BLOCK_SIZE*BLOCK_SIZE+ i*BLOCK_SIZE+j)]= cij;
         }
@@ -94,7 +96,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 	double *bA= (double*) malloc(pad_size*pad_size*sizeof(double));
 	double *bB= (double*) malloc(pad_size*pad_size*sizeof(double));
 	double *bC= (double*) malloc(pad_size*pad_size*sizeof(double));
-	// cha>= indexing
+	// change indexing
 	row_to_block(M,nblock, A, bA);
 	row_to_block(M,nblock, B, bB);
 	row_to_block(M,nblock, C, bC);
