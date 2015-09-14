@@ -2,7 +2,6 @@
   Ideally, you won't need to change this file.  You may want to change
   a few settings to speed debugging runs, but remember to change back
   to the original settings during final testing.
-
   These hands have touched the file:
     David Bindel
     David Garmire
@@ -33,7 +32,6 @@ extern void square_dgemm();
   We try to run enough iterations to get reasonable timings.  The matrices
   are multiplied at least MIN_RUNS times.  If that doesn't take MIN_SECS
   seconds, then we double the number of iterations and try again.
-
   You may want to modify these to speed debugging...
 */
 #define MIN_RUNS 4
@@ -254,4 +252,3 @@ int main(int argc, char** argv)
     fclose(fp);
     return 0;
 }
-
