@@ -31,7 +31,14 @@ void do_block(const int lda,
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-    basic_dgemm(lda, M, N, K,
+
+	for (b = 0; b < K; ++b) {
+		for (a = 0; a < M; ++a) {
+			// Anew[a + b*M] = A[k*BLOCK_SIZE*BLOCK_SIZE + b*M]
+		}
+	}
+	
+	basic_dgemm(lda, M, N, K,
                 A + i + k*lda, B + k + j*lda, C + i + j*lda);
 }
 
