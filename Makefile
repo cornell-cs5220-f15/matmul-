@@ -18,7 +18,7 @@ all:	$(DRIVERS)
 # Rules to build the drivers
 
 matmul-%: $(OBJS) dgemm_%.o
-	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBBLAS)
 
 matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o fdgemm.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) 
@@ -39,7 +39,7 @@ matmul.o: matmul.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) $(INCBLAS) $<
 
 %.o: %.f
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
