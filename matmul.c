@@ -55,6 +55,9 @@ const int test_sizes[] = {
 #endif
 };
 
+// const int test_sizes[] = { 4 };
+// #define MAX_SIZE 229u
+
 #define N_SIZES (sizeof (test_sizes) / sizeof (int))
 
 

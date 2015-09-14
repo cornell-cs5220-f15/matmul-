@@ -1,13 +1,14 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 2
 #endif
 
 #ifndef BLOCK_SIZE_SQ
-#define BLOCK_SIZE_SQ 256
+#define BLOCK_SIZE_SQ 4
 #endif
 
 /* Copies the input matrix so that we optimize for cache hits.
@@ -113,7 +114,7 @@ void block_multiply_kernel( const int num_blocks, const int M, const int I, cons
     const int B_idx = ( K * num_blocks + L ) * BLOCK_SIZE_SQ;
 
     // index of first element in matrix C.
-    const int C_idx = ( J * num_blocks + K ) * BLOCK_SIZE_SQ;
+    const int C_idx = ( K * num_blocks + J ) * BLOCK_SIZE_SQ;
 
     int i, j;
     int i_BLOCK_SIZE = 0;
@@ -182,6 +183,38 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
     const double* B_copied = copy_optimize_colmajor( num_blocks, M, B );
     double* C_copied = copy_optimize_colmajor( num_blocks, M, C );
 
+    // printf( "A = \n" );
+    // for( int l = 0; l < M * M; ++ l )
+    // {
+    //     printf( " %f, ", A[l] );
+    // }
+
+    // printf( "\n\n" );
+
+    // printf( "A_copied = \n" );
+    // for( int l = 0; l < M * M; ++ l )
+    // {
+    //     printf( " %f, ", A_copied[l] );
+    // }
+
+    // printf( "\n\n" );
+
+    // printf( "B = \n" );
+    // for( int l = 0; l < M * M; ++ l )
+    // {
+    //     printf( " %f, ", B[l] );
+    // }
+
+    // printf( "\n\n" );
+
+    // printf( "B_copied = \n" );
+    // for( int l = 0; l < M * M; ++ l )
+    // {
+    //     printf( " %f, ", B_copied[l] );
+    // }
+
+    // printf( "\n\n" );
+
     int i, j, k;
     for( i = 0; i < num_blocks; ++i ) 
     {
@@ -189,8 +222,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
         {
             for( k = 0; k < num_blocks; ++k )
             {
-                block_multiply_kernel( num_blocks, M, k, i * num_blocks,
-                                       j * num_blocks, k, A_copied, B_copied, C_copied );
+                block_multiply_kernel( num_blocks, M, k, i,
+                                       j, k, A_copied, B_copied, C_copied );
             }
         }
     }
