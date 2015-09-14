@@ -8,7 +8,8 @@ const char* dgemm_desc = "My awesome matmul.";
 /*
   A,B,C are M-by-M
 */
-void row_to_block(const int M, const int nblock, const double *A, double *newA){
+void row_to_block(const int M, const int nblock, const double *A, double *newA)
+{
 	// converts to block indexing and pads the new matrix with zeros so that it is divisble by BLOCK_SIZE
 	int bi,bj,i,j;	
 	for(bi=0; bi < nblock; ++bi){
@@ -26,9 +27,10 @@ void row_to_block(const int M, const int nblock, const double *A, double *newA){
 			}
 		}
 	}
-	}
+}
 
-void block_to_row(const int M, const int nblock, double *A, const double *newA){
+void block_to_row(const int M, const int nblock, double *A, const double *newA)
+{
 	int bi, bj,i,j;	
 	for(bi=0; bi < nblock; ++bi){
 		for(bj=0; bj < nblock; ++bj){
@@ -51,7 +53,7 @@ void do_block(const int M, const int nblock,
               const double *A, const double *B, double *C,
               const int bi, const int bj, const int bk)
 {
-	    int i, j, k;
+	int i, j, k;
     for (i = 0; i < BLOCK_SIZE; ++i) {
         for (j = 0; j < BLOCK_SIZE; ++j) {
             double cij = C[((bj*nblock+bi)*BLOCK_SIZE*BLOCK_SIZE+ i*BLOCK_SIZE+j)];
@@ -74,18 +76,21 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
 	if (M%BLOCK_SIZE==0){
 		nblock=M/BLOCK_SIZE;
-		pad_size=M;}
-	else{ pad_size=((M/BLOCK_SIZE)+1)*BLOCK_SIZE;
-		nblock=M/BLOCK_SIZE+1;}
+		pad_size=M;
+	}
+	else{ 
+		pad_size=((M/BLOCK_SIZE)+1)*BLOCK_SIZE;
+		nblock=M/BLOCK_SIZE+1;
+	}
 
 	double *bA= (double*) malloc(pad_size*pad_size*sizeof(double));
 	double *bB= (double*) malloc(pad_size*pad_size*sizeof(double));
 	double *bC= (double*) malloc(pad_size*pad_size*sizeof(double));
+
 	// change indexing
 	row_to_block(M,nblock, A, bA);
 	row_to_block(M,nblock, B, bB);
 	row_to_block(M,nblock, C, bC);
-
 
 	for (bi = 0; bi < nblock; ++bi) {
 		for (bj = 0; bj < nblock; ++bj) {
