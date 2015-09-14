@@ -4,11 +4,11 @@ const char* dgemm_desc = "My super awesome dgemm.";
 #include <math.h>
 
 #ifndef block_size
-#define block_size ((int) 64)
+#define block_size ((int) 32)
 #endif
 
 #ifndef rect_length
-#define rect_length ((int) 256)
+#define rect_length ((int) 512)
 #endif
 
 // Blocked type
