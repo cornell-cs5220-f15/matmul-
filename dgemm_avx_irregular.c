@@ -17,27 +17,31 @@ const char* dgemm_desc = "Blocked dgemm with AVX extensions (gather/scatter).";
 #endif
 
 // Helper for moving gather data from memory into SIMD register
-__m256d gather_vec(const int lda, const double* addr) {
-  double d0 = addr[lda*0];
-  double d1 = addr[lda*1];
-  double d2 = addr[lda*2];
-  double d3 = addr[lda*3];
+__m256d gather_vec(const int lda, const double* addr, char mask) {
+  double d0 = ((mask >> 0) & 0x1) ? addr[lda*0] : 0.0;
+  double d1 = ((mask >> 1) & 0x1) ? addr[lda*1] : 0.0;
+  double d2 = ((mask >> 1) & 0x1) ? addr[lda*2] : 0.0;
+  double d3 = ((mask >> 1) & 0x1) ? addr[lda*3] : 0.0;
   return _mm256_set_pd(d3, d2, d1, d0);
 }
 
 // Helper for storing scatter data in SIMD register to memory
-void scatter_vec(const int lda, double* addr, __m256d data) {
+void scatter_vec(const int lda, double* addr, __m256d data, char mask) {
   // Extract lower 128b from SIMD register and store each double to
   // appropriate memory location.
   __m128d lower_data = _mm256_extractf128_pd(data, 0);
-  _mm_storel_pd(addr+lda*0, lower_data);
-  _mm_storeh_pd(addr+lda*1, lower_data);
+  if ((mask >> 0) & 0x1)
+    _mm_storel_pd(addr+lda*0, lower_data);
+  if ((mask >> 1) & 0x1)
+    _mm_storeh_pd(addr+lda*1, lower_data);
 
   // Extract higher 128b from SIMD register and store each double to
   // appropriate memory location.
   __m128d higher_data = _mm256_extractf128_pd(data, 1);
-  _mm_storel_pd(addr+lda*2, higher_data);
-  _mm_storeh_pd(addr+lda*3, higher_data);
+  if ((mask >> 2) & 0x1)
+    _mm_storel_pd(addr+lda*2, higher_data);
+  if ((mask >> 3) & 0x1)
+    _mm_storeh_pd(addr+lda*3, higher_data);
 }
 
 /*
@@ -67,11 +71,19 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 
         for (j = 0; j < num_wide_ops; ++j) {
 
+            // Calculate vector load/store mask to handle the last
+            // iteration if the matrix dimensions are not evenly
+            // divisible by the SIMD width.
+            int  num_valid_ops = M % 4;
+            int  is_last_iter = (i == num_wide_ops - 1);
+            int  shamt        = (num_valid_ops && is_last_iter) ? 4 - num_valid_ops : 0;
+            char mask_vec     = 0xf >> shamt;
+
             // Load partial products in result matrix. Need to use
             // gathers here instead of loads because of the column-major
             // layout for matrices.
             double *cij_vec_addr = C + (j * 4 * lda) + i;
-            __m256d cij_vec      = gather_vec(lda, cij_vec_addr);
+            __m256d cij_vec      = gather_vec(lda, cij_vec_addr, mask_vec);
 
             // Accumulate fused multiply-adds for the current row group
             // across the block length.
@@ -79,12 +91,12 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                 double        aik          = A[k*lda+i];
                 __m256d       aik_vec      = _mm256_set1_pd(aik);
                 const double *bkj_vec_addr = B + (j * 4 * lda) + k;
-                __m256d       bkj_vec      = gather_vec(lda, bkj_vec_addr);
+                __m256d       bkj_vec      = gather_vec(lda, bkj_vec_addr, mask_vec);
                 cij_vec = _mm256_fmadd_pd(aik_vec, bkj_vec, cij_vec);
             }
 
             // Store partial products back into result matrix
-            scatter_vec(lda, cij_vec_addr, cij_vec);
+            scatter_vec(lda, cij_vec_addr, cij_vec, mask_vec);
         }
     }
 }
