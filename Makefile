@@ -41,7 +41,7 @@ matmul.o: matmul.c
 %.o: %.c
 	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) $<
 
-%.o: %.f
+%.o: %.f90
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
 
 dgemm_blas.o: dgemm_blas.c
