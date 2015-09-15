@@ -18,11 +18,11 @@ const char* dgemm_desc = "Blocked dgemm with SSE extensions.";
 
 // Helper for moving gather data from memory into SIMD register
 __m256d gather_vec(const int lda, const double* addr) {
-  double data[4] = { 0.0, 0.0, 0.0, 0.0 };
-  int i;
-  for (i = 0; i < 4; ++i)
-    data[i] = addr[lda*i];
-  return _mm256_set_pd(data[0], data[1], data[2], data[3]);
+  double d0 = addr[lda*0];
+  double d1 = addr[lda*1];
+  double d2 = addr[lda*2];
+  double d3 = addr[lda*3];
+  return _mm256_set_pd(d3, d2, d1, d0);
 }
 
 // Helper for storing scatter data in SIMD register to memory
