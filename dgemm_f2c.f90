@@ -42,12 +42,12 @@ subroutine square_dgemm(M, A, B, C) bind(C)
 
     n_blocks = M / BLOCK_SIZE + merge(1, 0, mod(M,BLOCK_SIZE).gt.0)
 
-    do bi = 0, n_blocks-1
-        i = bi * BLOCK_SIZE
-        do bj = 0, n_blocks-1
-            j = bj * BLOCK_SIZE
-            do bk = 0, n_blocks-1
-                k = bk * BLOCK_SIZE
+    do bj = 0, n_blocks-1
+        j = bj * BLOCK_SIZE
+        do bk = 0, n_blocks-1
+            k = bk * BLOCK_SIZE
+            do bi = 0, n_blocks-1
+                i = bi * BLOCK_SIZE
 !                write(*,*) 'got here'
                 call do_block(M, A, B, C, i, j, k, BLOCK_SIZE)
 !                write(*,*) 'got here'
