@@ -1,20 +1,20 @@
 //========================================================================
-// dgemm_blocked_sse.c
+// dgemm_avx_irregular.c
 //========================================================================
-// DGEMM blocked implementation with SSE extensions.
+// DGEMM blocked implementation with AVX extensions. Assumes a
+// column-major data layout for matrices. Computation is parallelized
+// to produce multiple elements in the same row of the output matrix. Due
+// to the access pattern, we need to use manual gathers/scatters to
+// load/store the vector data. AVX2 has separate intrinsics to do this,
+// but the totient nodes do not support AVX2.
 
 #include <immintrin.h>
 
-const char* dgemm_desc = "Blocked dgemm with SSE extensions.";
+const char* dgemm_desc = "Blocked dgemm with AVX extensions (gather/scatter).";
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 16)
 #endif
-
-//// Need to set the strides for gathering elements of a row into SIMD
-//// registers. Assumes column-major layout for matrices.
-//__m256d vec_strides = _mm256_set_pd((double)lda*0, (double)lda*1,
-//                                    (double)lda*2, (double)lda*3);
 
 // Helper for moving gather data from memory into SIMD register
 __m256d gather_vec(const int lda, const double* addr) {
@@ -55,10 +55,13 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     for (i = 0; i < M; ++i) {
 
         // Use SIMD extensions to parallelize computation across multiple
-        // columns in matrix B with the same row in matrix A. The number
-        // of SIMD operations required for all columns is the number of
-        // elements (doubles) in a row divided by the number of doubles
-        // supported by a SIMD operation (256b -> 4 doubles).
+        // elements within a row in matrix B with the same element in
+        // matrix A. Essentially parallelizes the outer loop for row
+        // traversal in order to compute multiple elements in the same
+        // row of the output matrix. The number of outer loop iterations
+        // required for to compute all columns is the number of elements
+        // (doubles) in a row divided by the number of doubles supported
+        // by a SIMD operation (256b -> 4 doubles).
 
         int num_wide_ops = (N + 3) / 4; // ceil(N/4)
 
@@ -70,8 +73,8 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
             double *cij_vec_addr = C + (j * 4 * lda) + i;
             __m256d cij_vec      = gather_vec(lda, cij_vec_addr);
 
-            // Accumulate fused multiply-adds for the current column
-            // group across the block length.
+            // Accumulate fused multiply-adds for the current row group
+            // across the block length.
             for (k = 0; k < K; ++k) {
                 double        aik          = A[k*lda+i];
                 __m256d       aik_vec      = _mm256_set1_pd(aik);

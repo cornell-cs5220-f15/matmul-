@@ -44,16 +44,17 @@ extern void square_dgemm();
   Note the strange sizes...  You'll see some interesting effects
   around some of the powers-of-two.
 */
-const int test_sizes[] = {
-    31, 32, 96, 97, 127, 128, 129, 191, 192, 229,
-#if defined(DEBUG_RUN)
-# define MAX_SIZE 229u
-#else
-    255, 256, 257, 319, 320, 321, 417, 479, 480, 511, 512, 639, 640,
-    767, 768, 769, 1023, 1024, 1025, 1525, 1526, 1527
-# define MAX_SIZE 1527u
-#endif
-};
+const int test_sizes[] = { 32, 96, 128, 192 };
+#define MAX_SIZE 192u
+//    31, 32, 96, 97, 127, 128, 129, 191, 192, 229,
+//#if defined(DEBUG_RUN)
+//# define MAX_SIZE 229u
+//#else
+//    255, 256, 257, 319, 320, 321, 417, 479, 480, 511, 512, 639, 640,
+//    767, 768, 769, 1023, 1024, 1025, 1525, 1526, 1527
+//# define MAX_SIZE 1527u
+//#endif
+//};
 
 #define N_SIZES (sizeof (test_sizes) / sizeof (int))
 
@@ -210,7 +211,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Usage: matmul [csv]\n");
         exit(2);
     }
-    
+
     FILE* fp;
     if (argc == 1) {
         const char* exename = argv[0];
@@ -224,15 +225,21 @@ int main(int argc, char** argv)
         free(fname);
     } else 
         fp = fopen(argv[1], "w");
-    
+
     if (!fp) {
         fprintf(stderr, "Could not open '%s' for output\n", argv[1]);
         exit(3);
     }
-    
-    double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
-    double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
-    double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
+
+//    double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
+//    double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
+//    double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
+
+    // Align matrices in memory to 64b to allow vector loads/stores
+    double *A, *B, *C;
+    posix_memalign((void**)&A, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
+    posix_memalign((void**)&B, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
+    posix_memalign((void**)&C, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
 
     matrix_init(A);
     matrix_init(B);

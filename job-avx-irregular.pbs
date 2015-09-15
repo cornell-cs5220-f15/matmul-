@@ -6,5 +6,5 @@
 
 module load cs5220
 cd $PBS_O_WORKDIR
-./matmul-avx
+./matmul-avx_irregular
 
