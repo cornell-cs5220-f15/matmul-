@@ -25,33 +25,33 @@ const char* dgemm_desc = "Blocked dgemm with AVX extensions (vector load/store).
 __m256i calculate_mask_vec(int num_valid_ops, int is_last_iter)
 {
   // Lookup table implementation (more control flow, less computation)
-//  if (!is_last_iter)
-//    return _mm256_set_epi64x(MASK_1, MASK_1, MASK_1, MASK_1);
-//  else {
-//    switch (num_valid_ops) {
-//      case 0:
-//        return _mm256_set_epi64x(MASK_1, MASK_1, MASK_1, MASK_1);
-//      case 1:
-//        return _mm256_set_epi64x(MASK_0, MASK_1, MASK_1, MASK_1);
-//      case 2:
-//        return _mm256_set_epi64x(MASK_0, MASK_0, MASK_1, MASK_1);
-//      case 3:
-//        return _mm256_set_epi64x(MASK_0, MASK_0, MASK_0, MASK_1);
-//      default:
-//        exit(1); // Should not be here
-//    }
-//  }
+  if (!is_last_iter)
+    return _mm256_set_epi64x(MASK_1, MASK_1, MASK_1, MASK_1);
+  else {
+    switch (num_valid_ops) {
+      case 0:
+        return _mm256_set_epi64x(MASK_1, MASK_1, MASK_1, MASK_1);
+      case 1:
+        return _mm256_set_epi64x(MASK_0, MASK_0, MASK_0, MASK_1);
+      case 2:
+        return _mm256_set_epi64x(MASK_0, MASK_0, MASK_1, MASK_1);
+      case 3:
+        return _mm256_set_epi64x(MASK_0, MASK_1, MASK_1, MASK_1);
+      default:
+        exit(1); // Should not be here
+    }
+  }
 
-  // Bit masking implementation (less control flow, more computation)
-  char mask  = 0x0f;
-  int  shamt = (num_valid_ops && is_last_iter) ? 4 - num_valid_ops : 0;
-  mask >>= shamt;
-  return _mm256_set_epi64x(
-             ((mask >> 3) & 0x1) ? MASK_1 : MASK_0,
-             ((mask >> 2) & 0x1) ? MASK_1 : MASK_0,
-             ((mask >> 1) & 0x1) ? MASK_1 : MASK_0,
-             ((mask >> 0) & 0x1) ? MASK_1 : MASK_0
-         );
+//  // Bit masking implementation (less control flow, more computation)
+//  char mask  = 0x0f;
+//  int  shamt = (num_valid_ops && is_last_iter) ? 4 - num_valid_ops : 0;
+//  mask >>= shamt;
+//  return _mm256_set_epi64x(
+//             ((mask >> 3) & 0x1) ? MASK_1 : MASK_0,
+//             ((mask >> 2) & 0x1) ? MASK_1 : MASK_0,
+//             ((mask >> 1) & 0x1) ? MASK_1 : MASK_0,
+//             ((mask >> 0) & 0x1) ? MASK_1 : MASK_0
+//         );
 }
 
 /*

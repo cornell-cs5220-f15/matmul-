@@ -20,8 +20,8 @@ const char* dgemm_desc = "Blocked dgemm with AVX extensions (gather/scatter).";
 __m256d gather_vec(const int lda, const double* addr, char mask) {
   double d0 = ((mask >> 0) & 0x1) ? addr[lda*0] : 0.0;
   double d1 = ((mask >> 1) & 0x1) ? addr[lda*1] : 0.0;
-  double d2 = ((mask >> 1) & 0x1) ? addr[lda*2] : 0.0;
-  double d3 = ((mask >> 1) & 0x1) ? addr[lda*3] : 0.0;
+  double d2 = ((mask >> 2) & 0x1) ? addr[lda*2] : 0.0;
+  double d3 = ((mask >> 3) & 0x1) ? addr[lda*3] : 0.0;
   return _mm256_set_pd(d3, d2, d1, d0);
 }
 
@@ -74,8 +74,8 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
             // Calculate vector load/store mask to handle the last
             // iteration if the matrix dimensions are not evenly
             // divisible by the SIMD width.
-            int  num_valid_ops = M % 4;
-            int  is_last_iter = (i == num_wide_ops - 1);
+            int  num_valid_ops = N % 4;
+            int  is_last_iter = (j == num_wide_ops - 1);
             int  shamt        = (num_valid_ops && is_last_iter) ? 4 - num_valid_ops : 0;
             char mask_vec     = 0xf >> shamt;
 
