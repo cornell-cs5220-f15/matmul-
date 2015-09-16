@@ -33,18 +33,18 @@ const double* copy_block(const int lda, const int i, const int j, const double *
     int k,l;
     for(l = 0; l < BLOCK_SIZE; ++l) {
         for(k = 0; k < BLOCK_SIZE; ++k) {
-        	D_block[l*BLOCK_SIZE+k] = D[(j+l)*lda+(i+k)];
+            D_block[l*BLOCK_SIZE+k] = D[(j+l)*lda+(i+k)];
         }
     }
     return D_block;
 }
 
 /* replaces the block in C with C_block */
-void replace_block(const int lda, const double *C, const double *C_block,const int i,const int j) {
+void replace_block(const int lda, double* const C, const double *C_block,const int i,const int j) {
     int k,l;
     for(l = 0; l < BLOCK_SIZE; ++l) {
         for(k = 0; k < BLOCK_SIZE; ++k) {
-        	C[(j+l)*lda+(i+k)] = C_block[l*BLOCK_SIZE+k];
+            C[(j+l)*lda+(i+k)] = C_block[l*BLOCK_SIZE+k];
         }
     }
 }
@@ -53,17 +53,17 @@ void do_block(const int lda,
               const double *A, const double *B, double *C,
               const int i, const int j, const int k)
 {
-	if(i+BLOCK_SIZE > lda || j+BLOCK_SIZE > lda || k+BLOCK_SIZE > lda) {
-		const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
-		const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
-		const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-		basic_dgemm(lda, M, N, K, A + i + k*lda, B + k + j*lda, C + i + j*lda);
+    if(i+BLOCK_SIZE > lda || j+BLOCK_SIZE > lda || k+BLOCK_SIZE > lda) {
+        const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
+        const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
+        const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+        basic_dgemm(lda, M, N, K, A + i + k*lda, B + k + j*lda, C + i + j*lda);
     } else {
-    	const double *A_block = copy_block(lda,i,k,*A);
-    	const double *B_block = copy_block(lda,k,j,*B);
-    	const double *C_block = copy_block(lda,i,j,*C);
-    	basic_dgemm(BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE,A_block,B_block,C_block);
-    	replace_block(lda,C,C_block);
+        const double *A_block = copy_block(lda,i,k,A);
+        const double *B_block = copy_block(lda,k,j,B);
+        const double *C_block = copy_block(lda,i,j,C);
+        basic_dgemm(BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE,BLOCK_SIZE,A_block,B_block,C_block);
+        replace_block(lda,C,C_block,i,j);
     }
 }
 
