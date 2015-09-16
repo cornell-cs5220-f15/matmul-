@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=ijk jik ikj jki kij kji
+BUILDS=outsideijk outsidejik outsideikj outsidejki outsidekij outsidekji
 
 # C and Fortran compilers
 CC=icc

@@ -1,4 +1,4 @@
-const char* dgemm_desc = "Blocked dgemm with loop ordering k,i,j (for blocks) and i,j,k (within blocks).";
+const char* dgemm_desc = "Blocked dgemm with loop ordering k,j,i (for blocks) and j,k,i (within blocks).";
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 16)
@@ -15,13 +15,12 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double *A, const double *B, double *C)
 {
     int i, j, k;
-    for (i = 0; i < M; ++i) {
-        for (j = 0; j < N; ++j) {
-            double cij = C[j*lda+i];
-            for (k = 0; k < K; ++k) {
-                cij += A[k*lda+i] * B[j*lda+k];
+    for (j = 0; j < N; ++j) {
+        for (k = 0; k < K; ++k) {
+        	double bkj = B[j*lda+k];
+            for (i = 0; i < M; ++i) {
+                C[j*lda+i] += A[k*lda+i] * bkj;
             }
-            C[j*lda+i] = cij;
         }
     }
 }
@@ -43,10 +42,10 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
     int bi, bj, bk;
     for (bk = 0; bk < n_blocks; ++bk) {
         const int k = bk * BLOCK_SIZE;
-        for (bi = 0; bi < n_blocks; ++bi) {
-            const int i = bi * BLOCK_SIZE;
-            for (bj = 0; bj < n_blocks; ++bj) {
-                const int j = bj * BLOCK_SIZE;
+        for (bj = 0; bj < n_blocks; ++bj) {
+            const int j = bj * BLOCK_SIZE;
+            for (bi = 0; bi < n_blocks; ++bi) {
+                const int i = bi * BLOCK_SIZE;
                 do_block(M, A, B, C, i, j, k);
             }
         }
