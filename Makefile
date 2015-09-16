@@ -69,7 +69,7 @@ run-local:
 	( for build in $(BUILDS) ; do ./matmul-$$build ; done )
 
 timing-%.csv: matmul-%
-	qsub job-$*.pbs
+	qsub -n -p 1023 job-$*.pbs
 
 # ---
 #  Rules for plotting
