@@ -32,6 +32,9 @@ matmul-mkl: $(OBJS) dgemm_mkl.o
 matmul-veclib: $(OBJS) dgemm_veclib.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) -framework Accelerate
 
+matmul-compiler: $(OBJS) dgemm_compiler.o
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+
 # --
 # Rules to build object files
 
@@ -54,7 +57,7 @@ dgemm_veclib.o: dgemm_blas.c
 	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $<
 
 dgemm_compiler.o: dgemm_compiler.c
-	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
 
 # ---
 # Rules for building timing CSV outputs
