@@ -230,9 +230,9 @@ int main(int argc, char** argv)
         exit(3);
     }
     
-    double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
-    double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
-    double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
+    double* A = (double*) _mm_malloc(MAX_SIZE * MAX_SIZE * sizeof(double),16);
+    double* B = (double*) _mm_malloc(MAX_SIZE * MAX_SIZE * sizeof(double),16);
+    double* C = (double*) _mm_malloc(MAX_SIZE * MAX_SIZE * sizeof(double),16);
 
     matrix_init(A);
     matrix_init(B);
@@ -247,9 +247,9 @@ int main(int argc, char** argv)
         fprintf(fp, "%u,%lg\n", M, time_dgemm(M, A, B, C));
     }
 
-    free(C);
-    free(B);
-    free(A);
+    _mm_free(C);
+    _mm_free(B);
+    _mm_free(A);
 
     fclose(fp);
     return 0;
