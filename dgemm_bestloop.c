@@ -3,7 +3,7 @@
 const char* dgemm_desc = "Blocked dgemm with loop ordering i,k,j (for blocks) and j,k,i (within blocks).";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 16)
+#define BLOCK_SIZE ((int) 384)
 #endif
 
 /*
@@ -17,23 +17,14 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double *A, const double *B, double *C)
 {
     int i, j, k;
-    double* D = (double*) malloc(M * K * sizeof(double));
-
-    // copy data from A->D to align memory accesses
-    // j = column
-    // i = row
-    for (i = 0; i < M; ++i) {
-        for (j = 0; j < K; ++j) {
-            D[i*K + j] = A[j*lda + i];
-        }
-    }
 
     for (i = 0; i < M; ++i) {
         for (j = 0; j < N; ++j) {
-            double bkj = B[j*lda+k];
+            double cij = C[j*lda+i];
             for (k = 0; k < K; ++k) {
-                C[j*lda+i] += D[i*K+k] * B[j*lda+k];
+                cij += A[i*lda+k] * B[j*lda+k];
             }
+            C[j*lda+i] = cij;
         }
     }
 }
@@ -46,11 +37,19 @@ void do_block(const int lda,
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
     basic_dgemm(lda, M, N, K,
-                A + i + k*lda, B + k + j*lda, C + i + j*lda);
+                A + i*lda + k, B + k + j*lda, C + i + j*lda);
 }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
+    double* D = (double*) malloc(M * M * sizeof(double));
+    
+    for (int i = 0; i < M; ++i) {
+        for (int j = 0; j < M; ++j) {
+            D[j*M + i] = A[i*M + j];
+        }
+    } 
+
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
     for (bi = 0; bi < n_blocks; ++bi) {
@@ -59,7 +58,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
             const int k = bk * BLOCK_SIZE;
             for (bj = 0; bj < n_blocks; ++bj) {
                 const int j = bj * BLOCK_SIZE;
-                do_block(M, A, B, C, i, j, k);
+                do_block(M, D, B, C, i, j, k);
             }
         }
     }
