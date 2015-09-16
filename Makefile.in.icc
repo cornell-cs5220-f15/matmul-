@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl compiler
+BUILDS=mine basic blocked f2c blas mkl compiler bestloop mine_ian_basic_copying
 
 # C and Fortran compilers
 CC=icc
