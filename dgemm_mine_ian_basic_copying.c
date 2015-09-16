@@ -3,19 +3,6 @@
 
 const char* dgemm_desc = "My awesome dgemm.";
 
-union U {
-    __m128d v;    // SSE 4 x float vector
-    double a[2];  // scalar array of 4 floats
-};
-
-double vectorGetByIndex(__m128d V, unsigned int i)
-{
-    union U u;
-
-    u.v = V;
-    return u.a[i];
-}
-
 void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
     int i, j, k;
@@ -30,15 +17,15 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
         }
     }
 
-    // i = column
-    // j = row
+    // j = column
+    // i = row
     for (i = 0; i < M; ++i) {
         for (j = 0; j < M; j++) {
-            double cij = C[i*M + j];
+            double cij = C[j*M + i];
             for (k = 0; k < M; ++k) {
-                cij += D[j*M + k] * B[i*M + k];
+                cij += D[i*M + k] * B[j*M + k];
             }
-            C[i*M + j] = cij;
+            C[j*M + i] = cij;
         }
     }
 }
