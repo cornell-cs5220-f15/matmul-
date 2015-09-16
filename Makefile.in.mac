@@ -7,8 +7,8 @@ FC=gfortran-5
 LD=$(FC)
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3 
-CFLAGS = -std=gnu99 
+OPTFLAGS = -O3
+CFLAGS = -std=gnu99
 FFLAGS =
 LDFLAGS = -fopenmp
 
@@ -17,7 +17,7 @@ CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm
-OBJS = matmul.o 
+OBJS = matmul.o
 
 # Libraries and include files for ATLAS
 LIBBLAS=-framework Accelerate

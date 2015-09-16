@@ -1,6 +1,6 @@
 const char* dgemm_desc = "Basic, three-loop dgemm.";
 
-void square_dgemm(const int M, 
+void square_dgemm(const int M,
                   const double *A, const double *B, double *C)
 {
     int i, j, k;
