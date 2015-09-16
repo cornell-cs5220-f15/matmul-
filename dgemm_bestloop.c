@@ -30,12 +30,14 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 
     for (i = 0; i < M; ++i) {
         for (j = 0; j < N; ++j) {
-            double bkj = B[j*lda+k];
+            double cij = C[j*lda+i];
             for (k = 0; k < K; ++k) {
-                C[j*lda+i] += D[i*K+k] * B[j*lda+k];
+                cij += D[i*K+k] * B[j*lda+k];
             }
+            C[j*lda+i] = cij;
         }
     }
+    free(D);
 }
 
 void do_block(const int lda,
