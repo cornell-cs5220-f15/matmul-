@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=copyopt 
+BUILDS=copyopt bestloop
 
 # C and Fortran compilers
 CC=icc
