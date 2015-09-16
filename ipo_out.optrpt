@@ -1,0 +1,31 @@
+
+Begin optimization report for: square_dgemm(const int, const double *, const double *, double *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(6,3)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(7,5)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(9,7)
+      <Peeled>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(9,7)
+         remark #15300: LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(9,7)
+      <Remainder>
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(9,7)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================

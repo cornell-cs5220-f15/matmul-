@@ -1,19 +1,19 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl
+BUILDS=basic blocked f2c blas mkl mine
 
 # C and Fortran compilers
 CC=icc
-FC=ifort 
+FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3
-CFLAGS = -std=gnu99 
-FFLAGS = 
-LDFLAGS = -fopenmp -nofor_main
+OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -O2 -parallel -ansi-alias
+CFLAGS = -std=gnu99 -openmp
+FFLAGS =
+LDFLAGS = -openmp -nofor_main
 
-# Add -DDEBUG_RUN to CPPFLAGS to cut down on the cases.
-CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
+# Add -DEBUG_RUN to CPPFLAGS to cut down on the cases.
+CPPFLAGS = "-DDEBUG_RUN -DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm -lirng
@@ -23,7 +23,6 @@ OBJS = matmul.o
 LIBBLAS=-lopenblas
 INCBLAS=
 
-# Libraries and include files for BLAS
+# Libraries and include files for MKL
 LIBMKL=-lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
 INCMKL=
-

@@ -1,0 +1,2 @@
+- timing-2015-09-15T08:48:08.052832: Repo default mine with all makefile optimizations
+- timing-2015-09-15T09:09:19.277788: ikj loop with all makefile optimizations
