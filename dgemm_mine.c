@@ -19,7 +19,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
   __assume_aligned(C,16);
   int I,J,K,i,j,k,i_end,j_end,k_end,Aind,Bind,Cind;
   double BRHS;
-
   const int n_rect = M/rect_length + (M%rect_length? 1 : 0);
   const int n_blocks = M / block_size + (M%block_size? 1 : 0);
   
