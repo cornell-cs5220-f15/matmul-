@@ -20,7 +20,7 @@ CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm -lirng
-OBJS = matmul.o
+OBJS = matmul.o indexing.o
 
 # Libraries and include files for BLAS
 LIBBLAS=-lopenblas
@@ -29,4 +29,3 @@ INCBLAS=
 # Libraries and include files for BLAS
 LIBMKL=-lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
 INCMKL=
-
