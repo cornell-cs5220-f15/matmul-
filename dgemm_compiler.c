@@ -1,7 +1,6 @@
-const char* dgemm_desc = "Basic, three-loop dgemm.";
+const char* dgemm_desc = "dgemm optimized with compiler flags and annotations.";
 
-void square_dgemm(const int M,
-                  const double *A, const double *B, double *C)
+void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
     int i, j, k;
     for (i = 0; i < M; ++i) {

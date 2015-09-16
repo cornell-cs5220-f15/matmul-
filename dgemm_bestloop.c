@@ -1,3 +1,5 @@
+#include<stdlib.h>
+
 const char* dgemm_desc = "Blocked dgemm with loop ordering i,k,j (for blocks) and j,k,i (within blocks).";
 
 #ifndef BLOCK_SIZE
@@ -15,11 +17,22 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double *A, const double *B, double *C)
 {
     int i, j, k;
-    for (j = 0; j < N; ++j) {
-        for (k = 0; k < K; ++k) {
-        	double bkj = B[j*lda+k];
-            for (i = 0; i < M; ++i) {
-                C[j*lda+i] += A[k*lda+i] * bkj;
+    double* D = (double*) malloc(M * K * sizeof(double));
+
+    // copy data from A->D to align memory accesses
+    // j = column
+    // i = row
+    for (i = 0; i < M; ++i) {
+        for (j = 0; j < K; ++j) {
+            D[i*K + j] = A[j*lda + i];
+        }
+    }
+
+    for (i = 0; i < M; ++i) {
+        for (j = 0; j < N; ++j) {
+            double bkj = B[j*lda+k];
+            for (k = 0; k < K; ++k) {
+                C[j*lda+i] += D[i*K+k] * B[j*lda+k];
             }
         }
     }

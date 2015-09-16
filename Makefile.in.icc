@@ -1,15 +1,18 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl
+BUILDS=mine basic blocked f2c blas mkl compiler bestloop mine_ian_basic_copying
 
 # C and Fortran compilers
 CC=icc
-FC=ifort 
+FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
+# -qopt-report=5
 OPTFLAGS = -O3
-CFLAGS = -std=gnu99 
-FFLAGS = 
+EXPERIMENTAL_OPT_FLAGS = -xCORE-AVX2 -fast -ansi-alias -no-prec-div -ipo
+PGO_FLAG = # -prof-gen or -prog-use
+CFLAGS = -std=gnu99
+FFLAGS =
 LDFLAGS = -fopenmp -nofor_main
 
 # Add -DDEBUG_RUN to CPPFLAGS to cut down on the cases.

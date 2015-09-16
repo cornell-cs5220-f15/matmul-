@@ -21,7 +21,7 @@ matmul-%: $(OBJS) dgemm_%.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o fdgemm.o
-	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) 
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 matmul-blas: $(OBJS) dgemm_blas.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBBLAS)
@@ -31,6 +31,9 @@ matmul-mkl: $(OBJS) dgemm_mkl.o
 
 matmul-veclib: $(OBJS) dgemm_veclib.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) -framework Accelerate
+
+matmul-compiler: $(OBJS) dgemm_compiler.o
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 # --
 # Rules to build object files
@@ -45,13 +48,16 @@ matmul.o: matmul.c
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
 
 dgemm_blas.o: dgemm_blas.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCBLAS) $< 
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCBLAS) $<
 
 dgemm_mkl.o: dgemm_blas.c
-	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(INCMKL) $< 
+	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(INCMKL) $<
 
 dgemm_veclib.o: dgemm_blas.c
-	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $< 
+	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $<
+
+dgemm_compiler.o: dgemm_compiler.c
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
 
 # ---
 # Rules for building timing CSV outputs
@@ -63,7 +69,7 @@ run-local:
 	( for build in $(BUILDS) ; do ./matmul-$$build ; done )
 
 timing-%.csv: matmul-%
-	qsub job-$*.pbs
+	qsub -n -p 1023 job-$*.pbs
 
 # ---
 #  Rules for plotting
@@ -74,7 +80,7 @@ plot:
 
 # ---
 
-.PHONY:	clean realclean 
+.PHONY:	clean realclean
 clean:
 	rm -f matmul-* *.o
 
