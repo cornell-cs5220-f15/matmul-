@@ -5,3 +5,4 @@ Aligning : double foo[128] __aligned((64));
 icc vectorization report
 Copy optimization to align
 SWAR - SIMD within a register
+Use restrict keyword properly

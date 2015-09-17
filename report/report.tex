@@ -55,12 +55,17 @@ In addition, we attempted block sizes that are not a multiple of 2. Figure \ref{
 \subsubsection{Approach}
 In this approach, we manually unrolled 4 computations in the inner most loop of the matrix multiplication of a block. 
 \subsubsection{Results}
-Figure \ref{3} compares the performance of the unrolled blocked version against the vanilla blocked approach.
+Figure \ref{3} compares the performance of the unrolled blocked version against the vanilla blocked approach. The unrolled versions clearly perform better than the original blocked approach but not by much. 
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_unrolled_vs_nonunrolled.pdf}
-    \caption{Block size variation}
+    \caption{Unrolled blocks vs regular blocks}
     \label{3}
 \end{figure} 
+
+\subsection{Loop reordering}
+\subsubsection{Approach}
+\subsubsection{Results}
+
 
 \subsection{AVX Instructions}
 \subsubsection{Approach}
