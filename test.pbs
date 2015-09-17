@@ -1,8 +1,0 @@
-#!/bin/sh -l
-
-#PBS -N test
-#PBS -j oe
-
-module load cs5220
-cd ~/CS5220/matmul_sheroze/matmul- 
-./test
