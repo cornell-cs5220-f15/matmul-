@@ -1,6 +1,9 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
-void square_dgemm(const int M, const double * restrict A, const double * restrict B, double * restrict C)
+void square_dgemm(const int M,
+                  const double* restrict A,
+                  const double* restrict B,
+                  double* restrict C)
 {
     int i, j, k;
     for (i = 0; i < M; ++i) {
