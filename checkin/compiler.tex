@@ -11,6 +11,8 @@ Empirically, we found that that \icc{} produced the fastest code; in this
 section, we present the \icc{} flags and annotations we explored.
 
 \subsubsection{Compiler Flags}
+We experimented with the following \icc{} flags.
+
 \begin{itemize}
   \item \ttt{-xCORE-AVX2}:
     The \ttt{-x} flag informs the compiler which platform-specific
@@ -46,11 +48,34 @@ section, we present the \icc{} flags and annotations we explored.
     profiles.
 \end{itemize}
 
-% TODO: explain what worked
+We compiled the naive matrix multiplication with all these \icc{} flags
+enabled, yet the performance is negligible at best, as shown by the line titled
+\ttt{compiler} in \figref{compiler}. We hypothesize that the compiler flags may
+be more beneficial when used to compile less naive implementations.
 
 \subsubsection{Compiler Annotations}
-% TODO: align and restrict
-% TODO: explain what worked
+We explored two \icc{} annotations.
+\begin{itemize}
+  \item \ttt{restrict}:
+    By default, when a function receives multiple pointers as arguments, the
+    compiler must assume that the two pointers may point to overlapping regions
+    of memory. This assumption can prevent the compiler from automatically
+    vectorizing the code which can negatively affect performance. By annotating
+    pointer arguments with \ttt{restrict}, the compiler instead assumes the
+    pointers are not aliased and performs the appropriate optimizations.
+
+  \item \ttt{aligned}:
+    The alignment of data structures can affect the performance of vectorized
+    instructions. Ideally, each vector of data accessed by a vector instruction
+    is 16-byte aligned. The \ttt{aligned} annotation can manipulate the
+    alignment of data structures to enforce alignment.
+\end{itemize}
+
+We compiled the naive matrix multiplication with all pointer arguments
+annotated with \ttt{restrict}. This increased the performance of the naive
+matrix multiplication to that of the Fortran implementation, as shown by the
+line labelled \ttt{annotated} in \figref{compiler}. We did experiment yet with
+aligning data structures.
 
 \begin{figure}[h]
   \centering
