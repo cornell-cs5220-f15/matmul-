@@ -1,0 +1,14 @@
+\section{Future work}\label{sec:future}
+There are some further possible attempts at optimization that we would like to
+try, but have not yet managed to implement in this first stage of the
+assignment.
+
+One thing we could possibly do is to more rigorously experiment with the block
+size to determine which is fastest.
+
+Another possible optimization would be to change how we handle the parts of
+matrices that do not fit cleanly into blocks. Currently those are handled in a
+naive way, but one alternative would be to pad the matrix with zeros so that
+all (not almost all) multiplication occurs in consistently sized blocks. If the
+multiplication of blocks is sufficiently well optimized, then this could be
+noticeably faster.

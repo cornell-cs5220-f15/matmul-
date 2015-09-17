@@ -1,0 +1,10 @@
+\subsection{Copy Optimization}
+Our use of copy optimizations was the most successful approach that we found
+for increasing performance. The issue in the naive implementation was that for
+the innermost loop of the calculations, matrix B was accessed with unit stride
+but matrix A was accessed with a stride of M. This non-unit stride vastly
+reduced how effectively we could cache matrix A in a useful way. To fix this we
+simply transposed matrix A to a new array in row-major order.  This allowed us
+to access both matrices, A and B, in unit stride in the innermost loop. This
+alone boosted our performance above all other implementations except for MKL
+and OpenBLAS.

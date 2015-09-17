@@ -1,0 +1,8 @@
+\subsection{Vector Instructions}
+After the copy optimizations, we tried to include explicit SSE instructions to
+operate on multiple doubles at once. This, however, was unsuccessful. We
+suspect the intel compiler already did a good job of leveraging vector
+instructions since the performance only decreased when we tried to use methods
+from xmmintrin.h. Although we did end up getting this implementation to work,
+the added overhead and complications of using data types and operations from
+xmmintrin.h only resulted in slowing down our implementation.
