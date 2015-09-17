@@ -23,6 +23,8 @@
 #  define FLAGS "unknown"
 #endif
 
+/* #define DEBUG_RUN 1 */
+
 /*
   Your function _MUST_ have the following signature:
 */

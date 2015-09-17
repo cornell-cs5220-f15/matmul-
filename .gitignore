@@ -36,3 +36,6 @@
 *.vrb
 *.xdy
 *.tdo
+
+*.csv
+*.o*
