@@ -27,10 +27,13 @@
 \maketitle
 
 \section{Introduction}
-In this project, we tried several methods to fine-tune square matrix multiplication.
-Based on the \texttt{dgemm\_blocked.c}, we tried unrolling index, modifying loop sequence to take advantage of SSE, and experimenting with different optimization flags.
 
-\section{Optimization}
+In this project, we tried several methods to fine-tune square matrix multiplication.
+Based on the \texttt{dgemm\_blocked.c}, we tried unrolling inner loop multiplication, modifying loop sequence to take advantage of SSE, experimenting with different optimization flags, multiple blocks sizes and copy optimizations. 
+
+The next section reflects our various optimization attempts and their results. 
+
+\section{Optimization Attempts}
 \subsection{Block Multiplication with Multiple Block Sizes}
 \subsubsection{Approach}
 Working off of \texttt{dgemm\_blocked.c}, we tried different block sizes to examine the performance changes. 
@@ -86,6 +89,25 @@ Figure \ref{funroll_vanilla} shows the performance of blocked multiplication wit
 The current block multiplication in the innermost loop does not have unit stride with $i, j, k$ loop ordering. 
 \subsubsection{Results}
 
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_loop_reorder_fast.pdf}
+    \caption{Loop reordering \texttt{ijk} vs \texttt{jik} vs \texttt{jik} and outer loop \texttt{jki}}
+    \label{basic_copy_opt}
+\end{figure} 
+
+\subsection{Copy Optimization}
+\subsubsection{Approach}
+In the basic version of dgemm, we see drops near matrix sizes that are a multiple of 2. This is caused by conflict misses due to associative caches. To prevent this, we attempted a copy optimization over the basic dgemm implementation.
+\subsubsection{Results}
+
+There is a clear improvement in performance and the conflict misses are converted to gains in performance as seen in Figure \ref{basic_copy_opt}. Copy optimization is clearly a step in the right direction. 
+
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_basic_vs_copy_opt.pdf}
+    \caption{Basic DGEMM vs DGEMM with Copy Optimization}
+    \label{basic_copy_opt}
+\end{figure} 
 
 \subsection{AVX Instructions}
 \subsubsection{Approach}
@@ -96,7 +118,8 @@ The current block multiplication in the innermost loop does not have unit stride
 
 
 \section{Next Steps}
-\subsection{Copy Optimization}
+\subsection{Copy Optimization with Blocks}
+\subsection{Autotuning}
 
 
 
