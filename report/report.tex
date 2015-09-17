@@ -1,33 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% LaTeX Example: Project Report
-%
-% Source: http://www.howtotex.com
-%
-% Feel free to distribute this example, but please keep the referral
-% to howtotex.com
-% Date: March 2011 
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% How to use writeLaTeX: 
-%
-% You edit the source code here on the left, and the preview on the
-% right shows you the result within a few seconds.
-%
-% Bookmark this page and share the URL with your co-authors. They can
-% edit at the same time!
-%
-% You can upload figures, bibliographies, custom classes and
-% styles using the files menu.
-%
-% If you're new to LaTeX, the wikibook is a great place to start:
-% http://en.wikibooks.org/wiki/LaTeX
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Edit the title below to update the display in My Documents
-%\title{Project Report}
-%
-%%% Preamble
-\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\documentclass[fontsize=11pt]{scrartcl}
 \usepackage[T1]{fontenc}
 \usepackage{fourier}
 
@@ -113,7 +84,8 @@ void square dgemm(const int M,
 \section{Optimization strategies}
 
 At this time, two different optimization strategies have been implemented and
-tested: 
+tested: reorganizing the loops to restructure the order of computation, and 
+partitioning matrix into sub-blocks, in order to promote cache reuse.
 
 \subsection{Loop ordering}
 Notice that in the naive matrix multiply implementation, the innermost loop
@@ -142,7 +114,7 @@ This optimization is supported empirically, as all possible loop orders were
 tested (see Figure~\ref{fig:loop_order}).
 
 This basic optimization brings the naive matrix multiple up to the speed of
-the provided Fortran code (see Figure~\ref{loop_order_opt_comparison}).
+the provided Fortran code (see Figure~\ref{fig:loop_order_opt_comparison}).
 
 \begin{figure}
     \centering
@@ -161,11 +133,26 @@ the provided Fortran code (see Figure~\ref{loop_order_opt_comparison}).
 \subsection{Block and Copy Optimization}
 In order to encourage cache reuse, and thus reducing the overhead of loading 
 data from main memory when performing the floating point operations, it may make
-sense to partition the matrices 
+sense to partition the matrices into sub-matrices.  All possible sub-matrix pairs
+from $A$ and $B$ can then be multiplied together independently, and the resulting
+sub-matrix added to the appropriate memory locations for $C$.  The scheme can be 
+applied recursively to partition into sub-sub-matrices and so on.
+
+Our current implementation is to divide the matrices $A, B, C$ into square sub-matrices
+of fixed size.  We then copy the values from these sub-matrices into temporary working
+arrays of aligned memory.  These sub-matrices are then further divided into sub-sub-matrices
+of size $8 \times 8$.  These $8 \times 8$ matrices are then multiplied together with an 
+optimized loop that can take advantage of vectorization.
+
+Tuning this implementation is still ongoing.  Currently a good sub-matrix size seems
+to be $96 \times 96$, but this barely outperforms the naive unblocked method with 
+optimized loop order.  
 
 \section{Future Work}
 
-
+To further tune our matrix multiplication routine, we will continue to work on the 
+blocking strategy so that we can hopefully significantly outperform an unblocked routine.
+Exploring compiler optimization options will also hopefully lead to speedups.
 
 %%% End document
 \end{document}
