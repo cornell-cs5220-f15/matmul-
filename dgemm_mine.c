@@ -1,34 +1,37 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
 #include <stdlib.h>
+#include <stdio.h>
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 32)
+#define BLOCK_SIZE ((int) 16)
 #endif
 
 
-void basic_dgemm(const int lda, const int M, const int N, const int K,
-	             const double *A, const double *B, double *C)
+// void block_dgemm(const double *A, const double *B, double *C)
+// {
+//     int i, j, k;
+//     for (j = 0; j < N; ++j) {
+//     	for (k = 0; k < K; ++k) {
+//     		double bkj = B[j*lda+k];
+//     		for (i = 0; i < M; ++i) {
+//     			C[j*lda + i] += A[k*lda + i] * bkj;
+//     		}
+//     	}
+//     }
+// }
+
+void basic_dgemm(const int lda, const double *A, const double *B, double *C)
 {
     int i, j, k;
-    for (j = 0; j < N; ++j) {
-    	for (k = 0; k < K; ++k) {
-    		double bkj = B[j*lda+k];
-    		for (i = 0; i < M; ++i) {
-    			C[j*lda + i] += A[k*lda + i] * bkj;
-    		}
-    	}
+    for (j = 0; j < BLOCK_SIZE; ++j) {
+        for (k = 0; k < BLOCK_SIZE; ++k) {
+            double bkj = B[j*lda+k];
+            for (i = 0; i < BLOCK_SIZE; ++i) {
+                C[j*lda + i] += A[k*lda + i] * bkj;
+            }
+        }
     }
-}
-
-void do_block(const int lda,
-              const double *A, const double *B, double *C,
-              const int i, const int j, const int k)
-{
-    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
-    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
-    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-    basic_dgemm(lda, M, N, K, A + i + k*lda, B + k + j*lda, C + i + j*lda);
 }
 
 void pad_square_matrix(const int oldSize, const int newSize, 
@@ -49,22 +52,8 @@ void pad_square_matrix(const int oldSize, const int newSize,
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
-
-	// const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
- //    int bi, bj, bk;
- //    for (bi = 0; bi < n_blocks; ++bi) {
- //        const int i = bi * BLOCK_SIZE;
- //        for (bj = 0; bj < n_blocks; ++bj) {
- //            const int j = bj * BLOCK_SIZE;
- //            for (bk = 0; bk < n_blocks; ++bk) {
- //                const int k = bk * BLOCK_SIZE;
- //                do_block(M, A, B, C, i, j, k);
- //            }
- //        }
- //    }
-
-	const int padSize = M % BLOCK_SIZE;
-	const int newSize = M + padSize;
+    // Round up to nearest multiple of BLOCK_SIZE
+	const int newSize = M + BLOCK_SIZE - 1 - (M - 1) % BLOCK_SIZE;
 
 	double* A_new = (double*) malloc(newSize * newSize * sizeof(double));
     double* B_new = (double*) malloc(newSize * newSize * sizeof(double));
@@ -81,7 +70,10 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
             const int j = bj * BLOCK_SIZE;
             for (bk = 0; bk < n_blocks; ++bk) {
                 const int k = bk * BLOCK_SIZE;
-                do_block(newSize, A_new, B_new, C_new, i, j, k);
+                basic_dgemm( newSize, 
+                             A_new + i + k*newSize, 
+                             B_new + k + j*newSize, 
+                             C_new + i + j*newSize );
             }
         }
     }
