@@ -99,6 +99,10 @@ void do_block_L3(const int lda,
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
+    __assume_aligned(A, 16);
+    __assume_aligned(B, 16);
+    __assume_aligned(C, 16);
+
     const int nL3blocks = M / L3_BLOCK_SIZE + (M%L3_BLOCK_SIZE? 1 : 0);
     int b3i, b3j, b3k;
     for (b3i = 0; b3i < nL3blocks; ++b3i) {
