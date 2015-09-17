@@ -110,9 +110,9 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
 		
 
-	double *bA= (double*) malloc(pad_size*pad_size*sizeof(double));
-	double *bB= (double*) malloc(pad_size*pad_size*sizeof(double));
-	double *bC= (double*) malloc(pad_size*pad_size*sizeof(double));
+	double *restrict bA= (double*) malloc(pad_size*pad_size*sizeof(double));
+	double *restrict bB= (double*) malloc(pad_size*pad_size*sizeof(double));
+	double *restrict bC= (double*) malloc(pad_size*pad_size*sizeof(double));
 
 	// change indexing
 	row_to_block(M,nblock, A, bA);
@@ -120,13 +120,12 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 	row_to_block(M,nblock, C, bC);
 	
 
-	for (L2bi=0; L2bi < L2nblock; ++L2bi){  
+	for (L2bk=0; L2bk < L2nblock; ++L2bk){  
 	for (L2bj=0; L2bj < L2nblock; ++L2bj){
-	for (L2bk=0; L2bk < L2nblock; ++L2bk){
-	for (bi = 0; bi < L2_BS; ++bi) {
+	for (L2bi=0; L2bi < L2nblock; ++L2bi){
+	for (bk = 0; bk < L2_BS; ++bk) {
 		for (bj = 0; bj < L2_BS; ++bj) {
-			for (bk = 0; bk < L2_BS; ++bk) {
-				//printf("%d, %d, %d",L2bi*L2_BS+bi, L2bj*L2_BS+bj, L2bk*L2_BS+bk);
+			for (bi = 0; bi < L2_BS; ++bi) {
 				if ((L2bi*L2_BS+bi <  nblock) && (L2bj*L2_BS+bj < nblock) && (L2bk*L2_BS +bk <nblock)){
 				do_block(M, nblock, bA, bB, bC, L2bi*L2_BS+bi, L2bj*L2_BS+bj, L2bk*L2_BS+bk);}
 			}
