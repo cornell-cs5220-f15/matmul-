@@ -115,7 +115,7 @@ void square dgemm(const int M,
 At this time, two different optimization strategies have been implemented and
 tested: 
 
-\subsubsection{Loop ordering}
+\subsection{Loop ordering}
 Notice that in the naive matrix multiply implementation, the innermost loop
 is where all the work is done.  Thus, the order of the loops does not matter.
 Noting this, we can choose the loop order that best regularizes memory access.
@@ -138,13 +138,34 @@ void square dgemm(const int M,
 }
 \end{lstlisting}
 
+This optimization is supported empirically, as all possible loop orders were
+tested (see Figure~\ref{fig:loop_order}).
 
-\subsubsection{Block and Copy Optimization}
+This basic optimization brings the naive matrix multiple up to the speed of
+the provided Fortran code (see Figure~\ref{loop_order_opt_comparison}).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=6.0in]{../timings/timings loop order.pdf}
+    \caption{Results for all possible loop orders}
+    \label{fig:loop_order}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=6.0in]{../timings/timing show jki good.pdf}
+    \caption{Loop order optimization comparison}
+    \label{fig:loop_order_opt_comparison}
+\end{figure}
+
+\subsection{Block and Copy Optimization}
 In order to encourage cache reuse, and thus reducing the overhead of loading 
 data from main memory when performing the floating point operations, it may make
 sense to partition the matrices 
 
 \section{Future Work}
+
+
 
 %%% End document
 \end{document}
