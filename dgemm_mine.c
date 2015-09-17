@@ -8,15 +8,15 @@ const char* dgemm_desc = "My super awesome dgemm.";
 #endif
 
 #ifndef rect_length
-#define rect_length ((int) 448)
+#define rect_length ((int) 384)
 #endif
 
 // Blocked type
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
-  __assume_aligned(A,16);
-  __assume_aligned(B,16);
-  __assume_aligned(C,16);
+  __assume_aligned(A,64);
+  __assume_aligned(B,64);
+  __assume_aligned(C,64);
   int I,J,K,i,j,k,i_end,j_end,k_end,Aind,Bind,Cind;
   double BRHS;
   const int n_rect = M/rect_length + (M%rect_length? 1 : 0);
