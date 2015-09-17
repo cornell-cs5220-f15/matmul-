@@ -16,9 +16,9 @@ LDFLAGS = -fopenmp
 CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
-LIBS = -lm
+LIBS = -lm -lgfortran
 OBJS = matmul.o
 
 # Libraries and include files for BLAS
-LIBBLAS=-lopenblas
+LIBBLAS=-lblas
 INCBLAS=
