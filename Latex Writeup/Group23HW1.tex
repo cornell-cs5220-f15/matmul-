@@ -26,14 +26,9 @@
 \begin{document}
 
 \title{CS 5220 HW1: Matrix Multiplication}
-\author{Group 23: \\Robert Carson, rac428, Saurabh Netravalkar, sn575}
+\author{Group 23: \\Robert Carson, rac428, Saurabh Netravalkar, sn575, Avi Agarwal, aa2345}
 \renewcommand{\today}{17 Sept. 2015}
 \maketitle
-
-\noindent Results \\
-What didn't and did work \\
-    
-\noindent The precise due date is 11:59 PM. Please have only one group member submit the report. 
 
 \section*{Optimization Methods and Methodology:} 
 
@@ -105,9 +100,47 @@ The O3 flag tells the optimizer to perform a series of aggressive optimizations 
 
 \section*{Results:}
 
+The different optimizations techniques had a profound effect on influencing efficient the matrix-matrx multiplication could become. In Figure 1, the results from a C code from initially blocking the matrix and using a 512 block size  can be seen. It also did not fully at this point fit the 2 arrays into the L3 because at this point it was wrongly assumed that the L3 cache was 15 MB for only the 2. This code also takes some advantage of ensuring the amount of stride lengths for each matrix is a minimum, but it is still not the most optimal design. The only optimization flag turned on at this point is the O3 flag.
 
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{cblocked_no_opt_flags}
+    \caption{Blocked C matrix-matrix multiplication code with a blocked size of 512}
+\end{figure}
+
+\noindent It can be seen from Figure 1 that the blocking has helped stabilize the number of flop/s the program is able to do as the dimensions of the inputted matrices increase. Now this same blocking scheme is applied to a Fortran interfaced with C code, and the Fortran scheme is also taking advantage of allowing the strides taken in memory to be a minimum. The results can be found in Figure 2.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{c_f_blocked_no_opt_flags}
+    \caption{Blocked C and Fortran matrix-matrix multiplication code with a blocked size of 512}
+\end{figure}
+
+\noindent While these results are an improvement over the naive approaches seen in the basic and blocked approaches, they are still only a fraction of the results obtained from the MKL and OpenBLAS libraries tuned to the server. It should be noted that the OpenBLAS results shown in Figure 1 and 2 are not using the optimized version.  Next, the optimized results that are using the optimization flags mentioned in the Compiler Flags subsection are introduced as well ensuring the block size being used will either fit into the L2 or L3 cache. This code also uses the most optimized form of code that takes advantage of the matrices layout in order to reduce the stride lengths taken. The results shown in Figure 3 use a block size of 380 which is a bit under the L3 cache size in order to accommodate for any other data that might end up being in the cache. The results shown in Figure 4 use a block size of 100 which is just under the L2 cache size for the same reasoning used in the L3 cache results. 
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{c_f_blocked_opt_flags_b380}
+    \caption{Optimized blocked C and Fortran matrix-matrix multiplication code with a blocked size of 380}
+\end{figure}
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{c_f_blocked_opt_flags_b100}
+    \caption{Optimized blocked C and Fortran matrix-matrix multiplication code with a blocked size of 100}
+\end{figure}
+
+\noindent  It should be noted that the optimized version of the OpenBLAS was used in the creation of these figures. Finally, these optimization flags were also applied to the naive Fortran code to see what results they have on it, and those can be found in Figure 5.
+
+\begin{figure}[H]
+  \centering
+    \includegraphics[width=0.8\textwidth]{naive_fortran_opt_flags}
+    \caption{Naive Fortran code with optimization flags applied}
+\end{figure}
 
 \section*{Analysis:}
+
+Several tuning methods were shown to work fairly well in improving the performance of the matrix-matrix multiplication. The use of optimization flags had by far the largest effect on improving the performance of the code. Next, the blocking worked in that it stabilized the calculations in most cases and resulted in fairly "constant" performance as the size of the matrix increased. However, it can be seen that when comparing Figure 4 and 6 that the blocking method does not perform as well as the non-blocked code. Therefore, what this suggests is that the blocking is still being slowed down by the memory accesses of noncontinuous memory. Better performance could be seen by implementing a multiple blocked strategy that first fits the blocks into L2 cache and then into L1 cache and then finally that can be broken down even more to fit into the registers. Also, once an L1 size block or small is taken it could be beneficial then to apply the copy optimization so the data can be aligned with the cache and also be all continuous. Lastly, it can be seen from Figure 3 and 4 that the difference between the C and Fortran code has decreased as more optimizations have been applied to both sets of code.
 
 \section*{References:}
 
