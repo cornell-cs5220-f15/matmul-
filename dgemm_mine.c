@@ -72,7 +72,7 @@ void do_block_L2(const int lda,
 }
 
 void do_block_L3(const int lda,
-              const double *A, const double *B, double *C,
+              const double* restrict A, const double* restrict B, double* restrict C,
               const int ii, const int jj, const int kk)
 {
 
