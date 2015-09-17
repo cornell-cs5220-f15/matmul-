@@ -5,7 +5,7 @@ const char* dgemm_desc = "Basic loop dgemm permutations";
 #define B(i, j) B[j*M + i]
 #define C(i, j) C[j*M + i]
 
-#define PERMUTATION 5
+#define PERMUTATION 4
 
 void square_dgemm(const int M, const double *A, const double *B, double *C) {
     int i, j, k;
@@ -15,7 +15,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C) {
         for (j = 0; j < M; ++j) {
             double c_ij = C(i, j);
             for (k = 0; k < M; ++k) {
-                c_ij += A(i, k) * B(i, j);
+                c_ij += A(i, k) * B(k, j);
             }
             C(i, j) = c_ij;
         }
@@ -68,7 +68,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C) {
         for(j = 0; j < M; ++j) {
             double b_kj = B(k, j);
             for(i = 0; i < M; ++i) {
-                C(i, j) += A(i, k) * bjk;
+                C(i, j) += A(i, k) * b_kj;
             }
         }
     }
