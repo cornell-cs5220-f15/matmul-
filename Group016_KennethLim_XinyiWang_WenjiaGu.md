@@ -61,10 +61,17 @@ Transposing the matrix before multiplication allows us to go from finding a matr
 We modified `matmul.c` to allocate the inputs to `square_dgemm` such that they are aligned to 16 byte boundaries in memory. This allows us to assert in `square_dgemm` that the inputs are aligned, and have the compiler skip these checks at runtime. This produces a modest speed improvement at smaller input dimensions, but seems to be detrimental as the dimension size increases. However, as we progress into a more involved implementation of the blocked approach, in which matrix sizes are kept reasonably small, we expect that the benefits from memory alignment will be magnified.
 
 ![16-byte Boundary Alignment](timing-aligned-16.png)
+16-byte Boundary Alignment
+
 ![64-byte Boundary Alignment](timing-aligned-64.png)
+64-byte Boundary Alignment
 
 # Blocking
 
-Starting from `dgemm_blocked.c`, we experimented with block sizes of 8, 16, 32, and 64. In all cases, there was no discernible difference in performance. However, with a modified version of the blocking approach applying the transpose operation detailed in the foregoing paragraphs, we find that a block size of 32 is optimal. This is due to the fact that each compute node has a 256kb 8-way associative cache. Using a block size of 32 allows blocks from A, B, and C to fit comfortably within the cache with wiggle room for the computational overheads.
+Starting from `dgemm_blocked.c`, we experimented with block sizes of 8, 16, 32, and 64. In all cases, there was no discernible difference in performance. However, with a modified version of the blocking approach applying the transpose operation detailed in the foregoing paragraphs, we find that a block size of 32 is optimal. This is due to the fact that each compute node has a 256kb 8-way associative cache. Using a block size of 32 allows blocks from A, B, and C to fit comfortably within the cache with wiggle room for the computational overheads. The following graph also represents our current best result. Moving forward, we expect to focus on this area with an emphasis on creating a multi-level block approach to target the L2 and L1 cache (avoiding L3 since it is shared amongst all cores and can easily be invalidated).
 
 ![Current Best](timing-current-best.png)
+
+# Playing with OpenMP
+
+As an aside, it should be noted that we're currently not giving the compiler any hints on loop parallelization. OpenMP is running in single-threaded mode, whereas it may be possible to improve performance if we are able to design the code such that the loop containing the critical section can be executed in parallel. OpenBLAS and MKL seem to make heavy use of synchronization in order to get to their levels of performance. Time permitting, this would be worthwhile trying!
