@@ -26,7 +26,7 @@ assignment.
 
   \item
     We could perform finer-grained and additional copy optimization. Currently,
-    when we multiple two column-major matrices $A$ and $B$, we transpose $A$.
+    when we multiply two column-major matrices $A$ and $B$, we transpose $A$.
     Preferably, we would transpose blocks of $A$ rather than transposing it in
     its entirety. Furthermore, there could also be benefits to copying blocks
     of $B$ into contiguous memory regions.
