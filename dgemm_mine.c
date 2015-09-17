@@ -3,15 +3,15 @@
 const char* dgemm_desc = "My 3 level blocked dgemm.";
 
 #ifndef L3_BLOCK_SIZE
-#define L3_BLOCK_SIZE ((int) 15)
+#define L3_BLOCK_SIZE ((int) 840)
 #endif
 
 #ifndef L2_BLOCK_SIZE
-#define L2_BLOCK_SIZE ((int) 10)
+#define L2_BLOCK_SIZE ((int) 120)
 #endif
 
 #ifndef L1_BLOCK_SIZE
-#define L1_BLOCK_SIZE ((int) 5)
+#define L1_BLOCK_SIZE ((int) 40)
 #endif
 
 // #include <stdio.h>
