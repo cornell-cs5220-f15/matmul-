@@ -1,7 +1,0 @@
-Matrix multiply failed.
-C(0,0) should be 22.8218, was 20.9212
-Error of 1.90054, acceptable limit 1.45942e-12
-Compiler:	icc
-Options:	-fast -opt-prefetch -unroll-aggressive -O3 -parallel -ansi-alias -ftree-vectorize -xHost -axCORE-AVX2 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout
-Description:	Mine
-
