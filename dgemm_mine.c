@@ -97,7 +97,7 @@ void do_block_L3(const int lda,
     }
 }
 
-void square_dgemm(const int M, const double *A, const double *B, double *C)
+void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
     const int nL3blocks = M / L3_BLOCK_SIZE + (M%L3_BLOCK_SIZE? 1 : 0);
     int b3i, b3j, b3k;
