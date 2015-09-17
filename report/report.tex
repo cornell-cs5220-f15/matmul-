@@ -1,7 +1,8 @@
    
 \documentclass[11pt]{article}
 \usepackage{amsmath,amsthm,verbatim,amssymb,amsfonts,amscd, graphicx}
-\usepackage{graphics}
+\usepackage{graphicx}
+\usepackage{float}
 \topmargin0.0cm
 \headheight0.0cm
 \headsep0.0cm
@@ -32,15 +33,34 @@ Based on the \texttt{dgemm\_blocked.c}, we tried unrolling index, modifying loop
 \section{Optimization}
 \subsection{Block Multiplication with Multiple Block Sizes}
 \subsubsection{Approach}
-//Describe what we did here.
+Working off of \texttt{dgemm\_blocked.c}, we tried different block sizes to examine the performance changes. 
 \subsubsection{Results}
-//Add graphs here.
+Figure \ref{1} shows the performance of different approaches with various block sizes. (block sizes are a multiple of 2). The performance gain for varying block sizes is not immense but a block size of 64 performs better than other block sizes. \\
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_block_size_changes.pdf}
+    \caption{Block size variation}
+    \label{1}
+\end{figure} 
+
+In addition, we attempted block sizes that are not a multiple of 2. Figure \ref{2} is the comparison of the performance against a block size of 64.\\
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_54_64.pdf}
+    \caption{Block size variation}
+    \label{2}
+\end{figure} 
+
 
 \subsection{Block Multiplication with Manual Loop Unrolling}
 \subsubsection{Approach}
-//Describe what we did here.
+In this approach, we manually unrolled 4 computations in the inner most loop of the matrix multiplication of a block. 
 \subsubsection{Results}
-//Add graphs here.
+Figure \ref{3} compares the performance of the unrolled blocked version against the vanilla blocked approach.
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_unrolled_vs_nonunrolled.pdf}
+    \caption{Block size variation}
+    \label{3}
+\end{figure} 
 
 \subsection{AVX Instructions}
 \subsubsection{Approach}

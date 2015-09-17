@@ -1,0 +1,7 @@
+Basic blocked with different block sizes
+4 unrolled blocked with different block sizes
+Copy optimization (May lead to SSE implementation help)****
+Aligning : double foo[128] __aligned((64));
+icc vectorization report
+Copy optimization to align
+SWAR - SIMD within a register
