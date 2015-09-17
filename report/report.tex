@@ -35,19 +35,19 @@ Based on the \texttt{dgemm\_blocked.c}, we tried unrolling index, modifying loop
 \subsubsection{Approach}
 Working off of \texttt{dgemm\_blocked.c}, we tried different block sizes to examine the performance changes. 
 \subsubsection{Results}
-Figure \ref{1} shows the performance of different approaches with various block sizes. (block sizes are a multiple of 2). The performance gain for varying block sizes is not immense but a block size of 64 performs better than other block sizes. \\
+Figure \ref{pow_2_blocks} shows the performance of different approaches with various block sizes. (block sizes are a multiple of 2). The performance gain for varying block sizes is not immense but a block size of 64 performs better than other block sizes. \\
 
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_block_size_changes.pdf}
     \caption{Block size variation}
-    \label{1}
+    \label{pow_2_blocks}
 \end{figure} 
 
-In addition, we attempted block sizes that are not a multiple of 2. Figure \ref{2} is the comparison of the performance against a block size of 64.\\
+In addition, we attempted block sizes that are not a multiple of 2. Figure \ref{odd_blocks} is the comparison of the performance against a block size of 64.\\
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_54_64.pdf}
     \caption{Block size variation}
-    \label{2}
+    \label{odd_blocks}
 \end{figure} 
 
 
@@ -55,12 +55,24 @@ In addition, we attempted block sizes that are not a multiple of 2. Figure \ref{
 \subsubsection{Approach}
 In this approach, we manually unrolled 4 computations in the inner most loop of the matrix multiplication of a block. 
 \subsubsection{Results}
-Figure \ref{3} compares the performance of the unrolled blocked version against the vanilla blocked approach. The unrolled versions clearly perform better than the original blocked approach but not by much. 
+Figure \ref{unrolled_vs_regular} compares the performance of the unrolled blocked version against the vanilla blocked approach. The unrolled versions clearly perform better than the original blocked approach but not by much. 
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_unrolled_vs_nonunrolled.pdf}
     \caption{Unrolled blocks vs regular blocks}
-    \label{3}
+    \label{unrolled_vs_regular}
 \end{figure} 
+
+\subsection{Compiler Optimization Flags}
+\subsubsection{Approach}
+Using the blocked approach as a baseline, we examine the effect of various compiler flags on the multiplication.
+\subsubsection{Results}
+Figure \ref{all_optimized_blocked} shows the performance of blocked multiplication with the flags, \texttt{-march=native -funroll-loops -ftree-vectorize}.
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_flags_blocked.pdf}
+    \caption{Compiler flags \texttt{-march=native -funroll-loops -ftree-vectorize}}
+    \label{all_optimized_blocked}
+\end{figure} 
+
 
 \subsection{Loop reordering}
 \subsubsection{Approach}
@@ -73,11 +85,7 @@ Figure \ref{3} compares the performance of the unrolled blocked version against 
 \subsubsection{Results}
 //Add graphs here.
 
-\subsection{Compiler Optimization Flags}
-\subsubsection{Approach}
-//Describe what we did here.
-\subsubsection{Results}
-//Add graphs here.
+
 
 \section{Next Steps}
 \subsection{Copy Optimization}
