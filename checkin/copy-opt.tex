@@ -6,7 +6,7 @@ efficient than operating on the original data.
 In the context of a naive matrix multiplication $A \times B$, the innermost
 loop of the multiplication accesses matrix $B$ with unit stride but accesses
 matrix A with a stride of $M$ where $M$ is the number of rows and columns of
-$A$ and $B$.This non-unit stride vastly reduced how effectively we could
+$A$ and $B$. This non-unit stride vastly reduced how effectively we could
 operate on matrix $A$. First, the large stride has poor spatial locality which
 can lead to poor caching. Similarly, operating on non-contiguous elements of
 $A$ makes vectorization hard or impossible.

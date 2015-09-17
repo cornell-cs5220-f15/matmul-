@@ -20,9 +20,9 @@ We experimented with the following \icc{} flags.
     \ttt{CORE-AVX2} flag.
 
   \item \ttt{-fast}:
-    The \ttt{-fast} flag enables entire program optimization. Its a meta-flag
-    enables a set of other flags that increase performance including \ttt{-O3},
-    \ttt{-ipo}, and \ttt{no-prec-div}.
+    The \ttt{-fast} flag enables entire program optimization. It's a meta-flag
+    that enables a set of other flags that increase performance including
+    \ttt{-O3}, \ttt{-ipo}, and \ttt{no-prec-div}.
 
   \item \ttt{-ansi-alias}:
     The \ttt{-ansi-alias} flag tells the compiler that our code adheres to the
@@ -31,16 +31,16 @@ We experimented with the following \icc{} flags.
 
   \item \ttt{-no-prec-div}:
     The \ttt{-no-prec-div} flag decreases the accuracy of floating point
-    division at the benefit of increased performance. This is also enabled by
+    division with the benefit of increased performance. This is also enabled by
     \ttt{-fast}.
 
   \item \ttt{-ipo}:
-    The \ttt{-ipo} flag informs the compiler to perform inter-process
+    The \ttt{-ipo} flag informs the compiler to perform inter-procedural
     optimization. When \ttt{-ipo} is enabled, the compiler will optimize code
     from multiple files when they are linked together.
 
   \item \ttt{-prof-gen} and \ttt{-prof-use}:
-    The \ttt{-prof-gen} and \ttt{-prof-use} allow for profile-guided
+    The \ttt{-prof-gen} and \ttt{-prof-use} flags allow for profile-guided
     optimization. A binary compiled with \ttt{-prof-gen} is instrumented such
     that whenever it runs, it generates a profile documenting the most
     frequently executed code paths. A binary compiled with \ttt{-prof-use} is
@@ -74,8 +74,8 @@ We explored two \icc{} annotations.
 We compiled the naive matrix multiplication with all pointer arguments
 annotated with \ttt{restrict}. This increased the performance of the naive
 matrix multiplication to that of the Fortran implementation, as shown by the
-line labelled \ttt{annotated} in \figref{compiler}. We did experiment yet with
-aligning data structures.
+line labelled \ttt{annotated} in \figref{compiler}. We did not yet experiment
+with aligning data structures.
 
 \begin{figure}[h]
   \centering
