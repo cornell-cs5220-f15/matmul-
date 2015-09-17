@@ -7,7 +7,7 @@ const char* dgemm_desc = "My awesome matmul.";
 #endif
 
 #ifndef L2_BS
-#define L2_BS ((int) 16)
+#define L2_BS ((int) 8)
 #endif
 
 #ifndef L3_BS
