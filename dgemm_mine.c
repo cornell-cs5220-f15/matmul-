@@ -109,7 +109,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
             for (b3k = 0; b3k < nL3blocks; ++b3k) {
                 const int k = b3k * L3_BLOCK_SIZE;
                 do_block_L3(M, A, B, C, i, j, k);
-                // printf("fuckfuckfuck\n" );
             }
         }
     }
