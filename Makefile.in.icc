@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=ijk ikj jik jki kij kji
+BUILDS=transpose_ijk transpose_ikj transpose_jik transpose_jki transpose_kij transpose_kji
 
 # C and Fortran compilers
 CC=icc
@@ -7,7 +7,7 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -O2 -parallel -ansi-alias
+OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -O3 -parallel -ansi-alias -ftree-vectorize -xHost -axCORE-AVX2 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout
 CFLAGS = -std=gnu99 -openmp
 FFLAGS =
 LDFLAGS = -openmp -nofor_main
