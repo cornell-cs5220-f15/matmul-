@@ -1,3 +1,4 @@
+Figure out cluster architecture!!!
 Basic blocked with different block sizes
 4 unrolled blocked with different block sizes
 Copy optimization (May lead to SSE implementation help)****
@@ -6,3 +7,6 @@ icc vectorization report
 Copy optimization to align
 SWAR - SIMD within a register
 Use restrict keyword properly
+
+Programming 512 bit vector or use ftree-vectorize
+march for cluster?

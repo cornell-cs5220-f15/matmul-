@@ -66,16 +66,24 @@ Figure \ref{unrolled_vs_regular} compares the performance of the unrolled blocke
 \subsubsection{Approach}
 Using the blocked approach as a baseline, we examine the effect of various compiler flags on the multiplication.
 \subsubsection{Results}
-Figure \ref{all_optimized_blocked} shows the performance of blocked multiplication with the flags, \texttt{-march=native -funroll-loops -ftree-vectorize}.
+Figure \ref{all_optimized_blocked} shows the performance of blocked multiplication with the flags, \texttt{-O3 -march=native -funroll-loops}.
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_flags_blocked.pdf}
-    \caption{Compiler flags \texttt{-march=native -funroll-loops -ftree-vectorize}}
+    \caption{Compiler flags \texttt{-O3 -march=native -funroll-loops}}
     \label{all_optimized_blocked}
+\end{figure} 
+
+Figure \ref{funroll_vanilla} shows the performance of blocked multiplication with the flags, \texttt{-O3 -funroll-loops} vs just \texttt{-O3}. It appears that merely having the \texttt{-O3} flag performs as well as having loops unrolled. 
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_funroll_vanilla.pdf}
+    \caption{Compiler flags \texttt{-O3 -funroll-loops}}
+    \label{funroll_vanilla}
 \end{figure} 
 
 
 \subsection{Loop reordering}
 \subsubsection{Approach}
+The current block multiplication in the innermost loop does not have unit stride with $i, j, k$ loop ordering. 
 \subsubsection{Results}
 
 
