@@ -14,7 +14,7 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #define L1_BLOCK_SIZE ((int) 5)
 #endif
 
-#include <stdio.h>
+// #include <stdio.h>
 /*
   A is M-by-K
   B is K-by-N
@@ -31,14 +31,14 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
             double cij = C[j*lda+i];
             for (k = 0; k < K; ++k) {
                 cij += A[k*lda+i] * B[j*lda+k];
-                if(i == 0 && j == 0){
-                    printf("C(0,0) += A(%d,%d) * B(%d,%d) = %.3f %.3f\n", i, k, k, j, A[k*lda+i], B[j*lda+k]);
-                }
+                // if(i == 0 && j == 0){
+                //     printf("C(0,0) += A(%d,%d) * B(%d,%d) = %.3f %.3f\n", i, k, k, j, A[k*lda+i], B[j*lda+k]);
+                // }
             }
             C[j*lda+i] = cij;
         }
     }
-    printf("----------------------------------------\n");
+    // printf("----------------------------------------\n");
 }
 
 // void do_block_L1(const int lda,
