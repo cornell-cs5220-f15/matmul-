@@ -109,16 +109,15 @@ There is a clear improvement in performance and the conflict misses are converte
     \label{basic_copy_opt}
 \end{figure} 
 
-\subsection{AVX Instructions}
-\subsubsection{Approach}
-//Describe what we did here.
-\subsubsection{Results}
-//Add graphs here.
-
-
 
 \section{Next Steps}
+
+\subsection{AVX Instructions}
+We want to try AVX instructions to take advantage of using multiple registers at once. However we find that there are still bugs in our code and it is difficult to debug on the cluster machines. So we are currently configuring the Intel icc and Parallel Studio on our own laptop.
+
 \subsection{Copy Optimization with Blocks}
+We are also interested in combine copy optimization with block implementation. As shown above, we have implemented the copy optimization on the basic implementation, and when the matrix becomes too big the copy optimization fails. We believe by using the block implementation, we can avoid the performance drop.
+
 \subsection{Autotuning}
 
 
