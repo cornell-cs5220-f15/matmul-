@@ -72,7 +72,8 @@ In this paper, we will be discussing the implementation and results from multipl
 \subsection{Blocking}
 Blocking techniques take advantage of the temporal locality of inner loops. Each chunk, or 'block', of a matrix, is chosen so that the code loads the necessary block into cache for each loop, discarding the block when the loop is finished. Matrix multiplication is performed block by block. By knowing the cache level sizes, the block sizes can be chosen to fit within the cache and avoid cache misses, which will decrease code performance. \\ 
 
-\noindent The head node on the totient cluster used to run this code is a Intel Xeon E5-2620 v3 processor. We first computed the cache sizes to try to figure out the optimal block sizes, as shown in the next subsections. 
+\noindent The head node on the totient cluster used to run this code is a Intel Xeon E5-2620 v3 processor. We first computed the cache sizes to try to figure out the optimal block sizes, as shown in the next subsections. We used the results from these starting calculations for block sizes, and tested block sizes in a range around them as well. 
+
 
 \subsubsection{Level 1 Cache}
 The processor level 1 cache size is 32KB. To fit both blocks for A and B, for a square matrix and double matrix values (8 bytes), the formula to compute the optimal desired block size is:
@@ -88,19 +89,36 @@ For the head node, the processor level 2 cache size is 256KB. At this point, two
 
 Using the same formula as for the level 1 cache, the maximum size for the level 2 blocking is 126. \\ \\
 
-We used the results from these starting calculations for block sizes, and tested block sizes in a range around them as well. 
+Using these two blocking techniques, matrix transposes were taken before the level 2 blocking (Figure \ref{fig:l2t}), and before the level 1 blocking (Figure \ref{l1t}). 
+
+\begin{figure}[H]
+\centering
+  \centering
+  \includegraphics[width=.6\linewidth]{timing-blocksizes-inittranspose.pdf}
+  \caption{Level 1 Transpose Blocking Comparison Graph}
+  \label{fig:l1t}
+  \end{figure}
+
+\begin{figure}[H]
+\centering
+  \centering
+  \includegraphics[width=.6\linewidth]{timing-blocksizes-l2transpose.pdf}
+  \caption{Level 2 Transpose Blocking Comparison Graph}
+  \label{fig:l2t}
+  \end{figure}
+
 
 \section{Index Order}
 All index orders for loops in the smallest blocked matrix multiplication routine were tested. It was found that the default i,j,k ordering was optimal for the code and blocking, as it was written.
 
-** Include graphs here, as possible**
+%** Include graphs here, as possible**
 
-\subsection{Copy Optimization}
+\section{Copy Optimization}
 Copy optimization improves spatial locality and reduces cache conflicts by copying fixed size blocks (row major for matrix A, column major for matrix B) and storing them elsewhere for the computation. Due to the additional data storage, it primarily optimizes code for large matrix computations. 
 
-** Include graphs here as possible **
+%** Include graphs here as possible **
 
-\subsection{SSE Directives}
+\section{SSE Directives}
 
 Intel intrinsic functions were tested, in an attempt to use non-temporal storage instructions. Performance to specify non caching writes. We modified the dgemm\_basic as follows:
 
@@ -136,7 +154,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
   As can be seen in Figure \ref{fig:sse}, the timings for the modified SSE code were actually worse when compared to the basic blocked dgemm\_mine code. 
 
 
-\subsection{Compiler Flags}
+\section{Compiler Flags}
 Compiler flags that were found to improve performance were for this code are listed as follows: \\
 \begin{itemize}
 \item -O2: Maximizes speed, enables vectorization. Basic optimize flag. 
