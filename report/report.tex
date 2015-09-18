@@ -106,11 +106,11 @@ There is a clear improvement in performance and the conflict misses are converte
     \caption{Basic DGEMM vs DGEMM with Copy Optimization}
     \label{basic_copy_opt}
 \end{figure} 
-\subsection{More Flag Optimization on Copy Optimization}
+\subsection{Compiler flags on Copy Optimization}
 \subsubsection{Approach}
-We use -03 and -02 optimizers when compile the copy optimization code.
+We use \texttt{-03} and \texttt{-02} optimization flags when we compile the copy optimization code.
 \subsubsection{result}
--02 optimizer is performing better than -03 especially when the size of the matrix grows larger.
+\texttt{-02} optimizer is performing better than \texttt{-03}  especially when the size of the matrix grows larger.
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_flag0203_copy.pdf}
     \caption{-03 vx -02 on Copy Optimization}
@@ -148,8 +148,7 @@ We want to try AVX instructions to take advantage of using multiple registers at
 We are also interested in combine copy optimization with block implementation. As shown above, we have implemented the copy optimization on the basic implementation, and when the matrix becomes too big the copy optimization fails. We believe by using the block implementation, we can avoid the performance drop.
 
 \subsection{Autotuning}
-
-
+Furthermore, we are interested in automating much of the block size search process once the memory layout and copy optimization ideas are fleshed out. 
 
 
 
