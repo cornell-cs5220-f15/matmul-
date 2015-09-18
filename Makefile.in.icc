@@ -11,7 +11,7 @@ LD=ifort
 -prec-div -ansi-alias -axCORE-AVX2 options from Robert Chiodi make file need to play around with the different ones though because one of these increased the mflops by almost 2x for the Fortran implementation. Though it is most likely one of the vectorization or unroll-loops options.
 #Have also played around with the -Ot option and -unroll options as well but didn't notice any significant difference
 #The -mtune=core-avx2 and -fast don't appear to have a huge advantage, and the -fast might even cause a slow down. 
-OPTFLAGS = -O3 -funroll-loops -ftree-vectorize -mtune=core-avx2 -ipo -xHost -no-prec-div -ansi-alias -axCORE-AVX2 -fast
+OPTFLAGS = -O3 -funroll-loops -ftree-vectorize -mtune=core-avx2 -ipo -xHost -ansi-alias -axCORE-AVX2 -no-prec-div
 CFLAGS = -std=gnu99
 FFLAGS =  
 LDFLAGS = -fopenmp -nofor_main
