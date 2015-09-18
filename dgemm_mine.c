@@ -1,7 +1,7 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 64) // Multiples of 8 bytes!
+#define BLOCK_SIZE ((int) 96) // Multiples of 8 bytes!
 #endif
 
 #ifndef SUBBLOCK_SIZE
