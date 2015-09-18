@@ -65,6 +65,20 @@
 
 \section{Introduction}
 
+Our initial findings for this assignment are somewhat discouraging.  We initially had a bit of trouble figuring out how all of the parts of this assignment fit together.  At this time, we feel that we have a good understanding of how we are supposed to be performing the tasks expected of us, but not much performance has been achieved at this point.
+
+\begin{enumerate}
+    \item The first stage of diagnostics was to begin examining how the different permutations of \texttt{i}, \texttt{j}, and \texttt{k} can have an impact on the speed of the basic matrix multiply.
+
+    \item The next natural piece to examine \emph{at a high level} was comparing how \texttt{icc} and \texttt{gcc} compare with one another.  During this phase we used the basic permutations to help us understand which was superior, but have not gone as far as changing the compilation flags -- yet!
+
+    \item We then began examining how these permutations and best-suited compiler can affect the blocked strategy provided in the initial framework, in conjunction with adjusting the \texttt{BLOCK\_SIZE} variable to see its effect on the blocking efficiency.
+
+    \item Where we are currently is trying to query the hardware to programmatically determine the optimal \texttt{BLOCK\_SIZE}, as well as toying with the idea of transposing the \texttt{A} matrix in memory.
+\end{enumerate}
+
+Part of the reason why we have not made as much progress as we would have liked to is because we only have two group members.  This was not really made apparent to us until tonight.
+
 \section{Permutations of Loop Variables}
 
 %\includepdf[pages=-, width=\textwidth]{timing-perm}
