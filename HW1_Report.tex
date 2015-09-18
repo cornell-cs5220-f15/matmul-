@@ -62,7 +62,7 @@ Matrix multiplication is one of the most fundamental computations required to so
 In this paper, we will be discussing the implementation and results from multiple methods for optimizing matrix multiplication of equation \ref{eq:mm}, with matrix dimensions M, N, and K. Results are compared to often-used matrix multiplication routines, such as those present in BLAS, a basic blocked multiplication method, and a naive matrix multiplication routine. 
 
 \begin{equation}
-C (M x N) = A (M x K) * B (K x N)
+\text{C (M x N) = A (M x K) * B (K x N)}
 \label{eq:mm}
 \end{equation}
 
@@ -78,30 +78,47 @@ C (M x N) = A (M x K) * B (K x N)
 \section{Optimization Techniques}
 
 \subsection{Blocking}
-Blocking techniques take advantage of the temporal locality of inner loops. Each chunk, or 'block', of a matrix, is chosen so that the code loads the necessary block into cache for each loop, discarding the block when the loop is finished. By knowing the cache level sizes, the block sizes can be chosen to fit within the cache and avoid cache misses, which will decrease code performance. 
+Blocking techniques take advantage of the temporal locality of inner loops. Each chunk, or 'block', of a matrix, is chosen so that the code loads the necessary block into cache for each loop, discarding the block when the loop is finished. Matrix multiplication is performed block by block. By knowing the cache level sizes, the block sizes can be chosen to fit within the cache and avoid cache misses, which will decrease code performance. \\ 
 
-The head node on the totient cluster used to run this code is a Intel Xeon E5-2620 v3 processor. 
-
-\subsubsection{Level 2 cache}
-The processor level 2 cache size is 256KB. 
+\noindent The head node on the totient cluster used to run this code is a Intel Xeon E5-2620 v3 processor. 
 
 \subsubsection{Level 1 Cache}
-The processor level 1 cache size is 32KB. A square block containing double precision numbers would thus be able to be ___ size and still fit in the level 1 cache. 
+The processor level 1 cache size is 32KB. To fit both blocks for A and B, for a square matrix and double matrix values (8 bytes), the formula to compute the optimal desired block size is:
 
+\begin{equation}
+\text{2*(block size)$^2$*(double size) = cache size}
+\end{equation}
+
+\noindent Thus, the maximum size for this blocking and for square matrices is 44x44.
+
+\subsubsection{Level 2 cache}
+For the head node, the processor level 2 cache size is 256KB. At this point, two stages of blocking are performed, one for the level 1 cache (smaller blocks), and one for level 2 (larger blocks). \\
+
+\noindent Using the same formula as for the level 1 cache, the maximum size for the level 2 blocking is 126.
+
+\section{Index Order}
+All index orders for loops in the smallest blocked matrix multiplication routine were tested. It was found that the default i,j,k ordering was optimal for the code and blocking, as it was written.
+
+** Include graphs here, as possible**
 
 \subsection{Copy Optimization}
+Copy optimization improves spatial locality and reduces cache conflicts by copying fixed size blocks (row major for matrix A, column major for matrix B) and storing them elsewhere for the computation. Due to the additional data storage, it primarily optimizes code for large matrix computations. 
+
+** Include graphs here as possible **
+
 \subsection{SSE Directives}
 
 Intel intrinsic functions were tested ...
 
 \subsection{Compiler Flags}
-Compiler flags that were found to improve performance were: \\
+Compiler flags that were found to improve performance were for this code are listed as follows: \\
 \begin{itemize}
-\item -O2: enables optimizations for speed, such as compiler vectorization and loop transformations.
-\item -no-prec-div
-\item -funroll-loops
-\item -ipo
+\item -O2: Maximizes speed, enables vectorization. Basic optimize flag. 
+\item -mfpmath=sse: Enables XMM registers in floating point operations
+\item -Ofast: Enables high level aggressive optimizations -O3, -no-prec-div, and -fp-model fast=2. 
+\\ 
 
+Additional options that were tested, such as -ipo, -flto, and -march=native appeared to decrease computational efficiency.
 \end{itemize}
 
 \section{Conclusion}
