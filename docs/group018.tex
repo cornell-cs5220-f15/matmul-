@@ -153,8 +153,8 @@ We have been playing around with transposing things in memory, but generally thi
     naive_transpose(M, bad_idea);
 \end{lstlisting}
 
-We also found that the transposed results really only start having an effect on large matrices since we are looking at an $O(n^2)$ operation in the naive case in order to transpose $A$, and then have to transpose it back.  Asymptotically speaking, as the matrix multiply is $O(n^3)$ we will begin to see better results.
+\noindent We also found that the transposed results really only start having an effect on large matrices since we are looking at an $O(n^2)$ operation in the naive case in order to transpose $A$, and then have to transpose it back.  Asymptotically speaking, as the matrix multiply is $O(n^3)$ we will begin to see better results.\\
 
-We plan to try new methods such as better copy optimization, compliler flags and annotations, and also want to explore the cache-oblivious variants of this project if possible.
+\noindent We plan to try new methods such as better copy optimization, compliler flags and annotations, and also want to explore the cache-oblivious variants of this project if possible.
 
 \end{document}
