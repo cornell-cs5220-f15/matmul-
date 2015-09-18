@@ -110,7 +110,27 @@ There is a clear improvement in performance and the conflict misses are converte
     \label{basic_copy_opt}
 \end{figure} 
 
+\subsection{Restrict Keyword}
 
+\subsubsection{Approach}
+Telling the compiler that our matrix pointers will not be aliasing is another approach suggested on the writeup. 
+\subsubsection{Results}
+
+Figure \ref{basic_restrict} shows the performance difference between the basic DGEMM implementation and the DGEMM implementation with the \texttt{restrict keyword}. \texttt{restrict} keyword provides good performance benefits. There is a caveat here since we assumed that the pointer \texttt{A} and \texttt{B} passed to \texttt{square\_dgemm} will not alias. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_basic_vs_restrict.pdf}
+    \caption{Basic DGEMM vs DGEMM with \texttt{restrict} keyword}
+    \label{basic_restrict}
+\end{figure} 
+
+To eliminate the aliasing assumption, we intended to couple the \texttt{restrict} keyword and copy optimization to provide a stronger guarantee of not aliasing. The result as shown in figure \ref{restrict_copy_opt} shows that the performance decreases. This may be due to incorrect implementation of the restrict keyword in our code. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_copy_opt_restrict.pdf}
+    \caption{Basic DGEMM vs DGEMM with \texttt{restrict} keyword}
+    \label{restrict_copy_opt}
+\end{figure} 
 \section{Next Steps}
 
 \subsection{AVX Instructions}
