@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=ijk ikj jik jki kij kji # mine basic blocked f2c blas mkl
+BUILDS=basic blocked blocked_perm # mine basic blocked f2c blas mkl
 
 # C and Fortran compilers
 CC=icc
