@@ -38,11 +38,13 @@
 
 \section{Method}
 
-We refer to the tuning ideas on the note ``Tuning on a single core''. 
+We refer to the tuning ideas on the note ``Tuning on a single core''.
 
 \subsection{Loop Order}
 
 In the naive implementation, we loop over $i$, then $j$, then $k$.
+\\
+Alternative loop order might be more cache friendly. For example, using the $(i,j,k)$ order, we have to go across a row of $A$ in the inner loop, which is a non-unit-stride access.
 \\
 We compare different orders, including $(i,k,j), (j,i,k), (j,k,i)$.
 
@@ -56,7 +58,11 @@ We compare different block sizes, including 2, 4, 8, 16, 32, 64, 128.
 
 \subsection{Copy Optimization}
 
-We may run into conflict misses associated with cache. Therefore, we add copy optimization to one-layer and two-layer blocking.
+We might run into conflict misses associated with cache. One way to solve the problem is to explicitly copy blocks into a contiguous block of local storage before multiplying them.
+\\
+Another side benefit of copy optimization is that we can use it to gracefully deal with fringe blocks.
+\\
+Therefore, we add copy optimization to one-layer and two-layer blocking.
 \\
 In one-layer blocking with copy optimization, we compare different block sizes, including 2, 4, 8, 16, 32, 64, 128.
 \\
@@ -64,19 +70,19 @@ In two-layer blocking with copy optimization, we compare different block size pa
 
 \subsection{Compiler Flag}
 
-It is worthwhile playing with the flags that control the compiler optimizations.
+It is worthwhile playing with the flags that control the compiler optimizations, since modern compilers do some types of optimizations much better than people do.
 \\
 We compile the code with option \texttt{-funroll-loops} to unroll loops (basic loop unrolling is automatic with -O3).
 
 \section{Result}
 
-We run jobs on the totient cluster, and get the results depicted in several plots.  
+We run jobs on the totient cluster, and get the results depicted in several plots.
 
 \subsection{Loop Order}
 
 See Figure 1, 2, 3 and 4 below for loop order.
 \\
-The plot shows that looping performs the best with loop order $(j, k, i)$, which is more cache friendly. For example, using the $(i,j,k)$ order, we have to go across a row of $A$ in the inner loop, which is a non-unit-stride access.
+The plot shows that looping performs the best with loop order $(j, k, i)$.
 
 \begin{figure}[!ht]
    \begin{subfigure}
