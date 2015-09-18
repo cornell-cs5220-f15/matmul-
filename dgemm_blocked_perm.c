@@ -1,8 +1,15 @@
+#include <unistd.h> // sysconf
+#include <math.h>   // sqrt
+
 const char* dgemm_desc = "Simple blocked dgemm.";
 
+/*
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 16)
 #endif
+*/
+
+static volatile int BLOCK_SIZE = 16;
 
 /*
   A is M-by-K
@@ -38,6 +45,15 @@ void do_block(const int lda,
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
+    size_t page_size = sysconf(_SC_PAGESIZE);
+    size_t blocked_bytes = page_size / 24;
+
+    long double floating_blocked_bytes = (long double) blocked_bytes;
+    long double block_size = sqrt(floating_blocked_bytes);
+
+    size_t floor_block_size = (size_t) block_size;
+    BLOCK_SIZE = (int) floor_block_size;
+
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
     for (bi = 0; bi < n_blocks; ++bi) {
