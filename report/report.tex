@@ -1,33 +1,4 @@
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% LaTeX Example: Project Report
-%
-% Source: http://www.howtotex.com
-%
-% Feel free to distribute this example, but please keep the referral
-% to howtotex.com
-% Date: March 2011 
-% 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% How to use writeLaTeX: 
-%
-% You edit the source code here on the left, and the preview on the
-% right shows you the result within a few seconds.
-%
-% Bookmark this page and share the URL with your co-authors. They can
-% edit at the same time!
-%
-% You can upload figures, bibliographies, custom classes and
-% styles using the files menu.
-%
-% If you're new to LaTeX, the wikibook is a great place to start:
-% http://en.wikibooks.org/wiki/LaTeX
-%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Edit the title below to update the display in My Documents
-%\title{Project Report}
-%
-%%% Preamble
-\documentclass[paper=a4, fontsize=11pt]{scrartcl}
+\documentclass[fontsize=11pt]{scrartcl}
 \usepackage[T1]{fontenc}
 \usepackage{fourier}
 
@@ -36,7 +7,7 @@
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
 \usepackage[pdftex]{graphicx}   
 \usepackage{url}
-
+\usepackage{listings}
 
 %%% Custom sectioning
 \usepackage{sectsty}
@@ -81,19 +52,107 @@
 
 %%% Begin document
 \begin{document}
+
 \maketitle
+
 \section{Intro}
+Matrix multiplication is a ubiquitous operation in science and engineering,
+and thus the efficient and fast computation of matrix products is essential.
+This report serves as an initial report into tuning the performance of matrix
+multiplication on a single core.
 
+\subsection{Matrix Multiplication}
+Throughout this report, we will consider the problem of computing
+$C = A B$, where $C, A, B$ are $M \times M$ square matrices.
 
-\subsection{Matrix mutliply}
+\begin{lstlisting}[frame = single, caption={Naive Square Matrix Multiply}]
+void square dgemm(const int M, 
+                  const double *A, const double *B, double *C)
+{
+    for (int i = 0; i < M; ++i) {
+        for (int j = 0; j < M; ++j) {
+            for (int k = 0; k < M; ++k) {
+                C[j*M+i] += A[k*M+i] * B[j*M+k];
+            }
+        }
+    }
+}
+\end{lstlisting}
 
 \subsection{Testing specs}
 
 \section{Optimization strategies}
 
-\subsubsection{Loop ordering}
+At this time, two different optimization strategies have been implemented and
+tested: reorganizing the loops to restructure the order of computation, and 
+partitioning matrix into sub-blocks, in order to promote cache reuse.
 
-\subsubsection{Block and Copy Optimization}
+\subsection{Loop ordering}
+Notice that in the naive matrix multiply implementation, the innermost loop
+is where all the work is done.  Thus, the order of the loops does not matter.
+Noting this, we can choose the loop order that best regularizes memory access.
+Ideally, we would like to access the arrays with stride 1, and this motivates the
+idea that the `i' variable in the above naive code should be looped over in the 
+innermost loop, as then we are accessing C and A with stride one.  This results in 
+the following code:
+
+\begin{lstlisting}[frame = single, caption={Improved Loop Order Square Matrix Multiply}]
+void square dgemm(const int M, 
+                  const double *A, const double *B, double *C)
+{
+    for (int j = 0; j < M; ++j) {
+        for (int k = 0; k < M; ++k) {
+            double bkj = B[j*M+k];
+            for (int i = 0; i < M; ++i)
+                C[j*M+i] += A[k*M+i] * bkj;
+        }
+    }
+}
+\end{lstlisting}
+
+This optimization is supported empirically, as all possible loop orders were
+tested (see Figure~\ref{fig:loop_order}).
+
+This basic optimization brings the naive matrix multiple up to the speed of
+the provided Fortran code (see Figure~\ref{fig:loop_order_opt_comparison}).
+
+\begin{figure}
+    \centering
+    \includegraphics[width=6.0in]{../timings/timings loop order.pdf}
+    \caption{Results for all possible loop orders}
+    \label{fig:loop_order}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=6.0in]{../timings/timing show jki good.pdf}
+    \caption{Loop order optimization comparison}
+    \label{fig:loop_order_opt_comparison}
+\end{figure}
+
+\subsection{Block and Copy Optimization}
+In order to encourage cache reuse, and thus reducing the overhead of loading 
+data from main memory when performing the floating point operations, it may make
+sense to partition the matrices into sub-matrices.  All possible sub-matrix pairs
+from $A$ and $B$ can then be multiplied together independently, and the resulting
+sub-matrix added to the appropriate memory locations for $C$.  The scheme can be 
+applied recursively to partition into sub-sub-matrices and so on.
+
+Our current implementation is to divide the matrices $A, B, C$ into square sub-matrices
+of fixed size.  We then copy the values from these sub-matrices into temporary working
+arrays of aligned memory.  These sub-matrices are then further divided into sub-sub-matrices
+of size $8 \times 8$.  These $8 \times 8$ matrices are then multiplied together with an 
+optimized loop that can take advantage of vectorization.
+
+Tuning this implementation is still ongoing.  Currently a good sub-matrix size seems
+to be $96 \times 96$, but this barely outperforms the naive unblocked method with 
+optimized loop order.  
+
+\section{Future Work}
+
+To further tune our matrix multiplication routine, we will continue to work on the 
+blocking strategy so that we can hopefully significantly outperform an unblocked routine.
+Exploring compiler optimization options will also hopefully lead to speedups.
 
 %%% End document
 \end{document}
