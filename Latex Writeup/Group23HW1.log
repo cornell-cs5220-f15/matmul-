@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  17 SEP 2015 14:07
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013) (format=pdflatex 2013.5.30)  17 SEP 2015 20:00
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -344,7 +344,7 @@ Here is how much of TeX's memory you used:
  6804 multiletter control sequences out of 15000+600000
  12352 words of font info for 51 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 38i,9n,38p,1284b,267s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 38i,9n,38p,1362b,267s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/local/texlive/201
 3/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx12.pfb></usr/local/texlive/2013
 /texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2013/
@@ -355,7 +355,7 @@ mf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2013/texmf
 ist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/local/texlive/2013/texmf-dis
 t/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2013/texmf-dist/f
 onts/type1/public/amsfonts/cm/cmtt10.pfb>
-Output written on Group23HW1.pdf (6 pages, 338203 bytes).
+Output written on Group23HW1.pdf (6 pages, 338378 bytes).
 PDF statistics:
  92 PDF objects out of 1000 (max. 8388607)
  65 compressed objects within 1 object stream
