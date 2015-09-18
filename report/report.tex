@@ -28,6 +28,7 @@
 
 \section{Overview}
 
+
 In this project, we tried several methods to fine-tune square matrix multiplication.
 Based on the \texttt{dgemm\_blocked.c}, we tried unrolling inner loop multiplication, modifying loop sequence to take advantage of SSE, experimenting with different optimization flags, multiple blocks sizes and copy optimizations. 
 
@@ -99,29 +100,55 @@ The current block multiplication in the innermost loop does not have unit stride
 \subsubsection{Approach}
 In the basic version of dgemm, we see drops near matrix sizes that are a multiple of 2. This is caused by conflict misses due to associative caches. To prevent this, we attempted a copy optimization over the basic dgemm implementation.
 \subsubsection{Results}
-
-There is a clear improvement in performance and the conflict misses are converted to gains in performance as seen in Figure \ref{basic_copy_opt}. Copy optimization is clearly a step in the right direction. 
-
-
+There is a clear improvement in performance and the conflict misses are converted to gains in performance as seen in Figure \ref{basic_copy_opt}. Copy optimization is clearly a step in the right direction.
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_basic_vs_copy_opt.pdf}
     \caption{Basic DGEMM vs DGEMM with Copy Optimization}
     \label{basic_copy_opt}
 \end{figure} 
+\subsection{Compiler flags on Copy Optimization}
+\subsubsection{Approach}
+We use \texttt{-03} and \texttt{-02} optimization flags when we compile the copy optimization code.
+\subsubsection{result}
+\texttt{-02} optimizer is performing better than \texttt{-03}  especially when the size of the matrix grows larger.
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_flag0203_copy.pdf}
+    \caption{-03 vx -02 on Copy Optimization}
+    \label{0203}
+\end{figure}
+ 
+
+\subsection{Restrict Keyword}
+
+\subsubsection{Approach}
+Telling the compiler that our matrix pointers will not be aliasing is another approach suggested on the writeup. 
+\subsubsection{Results}
+
+Figure \ref{basic_restrict} shows the performance difference between the basic DGEMM implementation and the DGEMM implementation with the \texttt{restrict keyword}. \texttt{restrict} keyword provides good performance benefits. There is a caveat here since we assumed that the pointer \texttt{A} and \texttt{B} passed to \texttt{square\_dgemm} will not alias. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_basic_vs_restrict.pdf}
+    \caption{Basic DGEMM vs DGEMM with \texttt{restrict} keyword}
+    \label{basic_restrict}
+\end{figure} 
+
+To eliminate the aliasing assumption, we intended to couple the \texttt{restrict} keyword and copy optimization to provide a stronger guarantee of not aliasing. The result as shown in figure \ref{restrict_copy_opt} shows that the performance decreases. This may be due to incorrect implementation of the restrict keyword in our code. 
+
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_copy_opt_restrict.pdf}
+    \caption{Basic DGEMM vs DGEMM with \texttt{restrict} keyword}
+    \label{restrict_copy_opt}
+\end{figure} 
+\section{Next Steps}
 
 \subsection{AVX Instructions}
-\subsubsection{Approach}
-//Describe what we did here.
-\subsubsection{Results}
-//Add graphs here.
+We want to try AVX instructions to take advantage of using multiple registers at once. However we find that there are still bugs in our code and it is difficult to debug on the cluster machines. So we are currently configuring the Intel icc and Parallel Studio on our own laptop.
 
-
-
-\section{Next Steps}
 \subsection{Copy Optimization with Blocks}
+We are also interested in combine copy optimization with block implementation. As shown above, we have implemented the copy optimization on the basic implementation, and when the matrix becomes too big the copy optimization fails. We believe by using the block implementation, we can avoid the performance drop.
+
 \subsection{Autotuning}
-
-
+Furthermore, we are interested in automating much of the block size search process once the memory layout and copy optimization ideas are fleshed out. 
 
 
 
