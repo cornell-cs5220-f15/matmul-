@@ -1,0 +1,132 @@
+\documentclass[11pt]{article}
+\usepackage{geometry}
+\geometry{letterpaper}
+\geometry{margin=0.75in}
+
+
+\usepackage[utf8]{inputenc}
+\usepackage{listings}
+\usepackage{xcolor}
+% credit: http://tex.stackexchange.com/questions/68091/how-do-i-add-syntax-coloring-to-my-c-source-code-in-beamer
+% https://en.wikibooks.org/wiki/LaTeX/Source_Code_Listings
+\lstset{language=C,
+        basicstyle=\ttfamily,
+        keywordstyle=\color{blue}\ttfamily,
+        stringstyle=\color{red}\ttfamily,
+        commentstyle=\color{green}\ttfamily,
+        morecomment=[l][\color{magenta}]{\#}
+}
+
+\title{\textbf{CS 5220 Project 1 Initial Report}}
+\author{Stephen McDowell (sjm324)\\ Guantian Zheng (gz94)\\ Jingyang Wang (jw598)}
+\date{\textbf{September 2015}}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{pdfpages}
+
+\newcommand{\tab}{\hspace*{2em}}
+\newcommand{\norm}[1]{\lVert#1\rVert}
+\newcommand{\sub}{\textsubscript}
+\newcommand{\Depth}{2}
+\newcommand{\Height}{2}
+\newcommand{\Width}{2}
+
+\usepackage{mathtools}
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\usepackage{relsize}
+
+\def\wl{\par \vspace{\baselineskip}}
+
+\makeatletter
+\renewcommand{\maketitle}{\bgroup\setlength{\parindent}{0pt}
+\begin{flushleft}
+  {\Large \textsc{\@title}}\newline
+  \textsc{\@author}
+  \rule{\textwidth}{1pt}
+\end{flushleft}\egroup
+}
+\makeatother
+
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\rhead{\textsc{Group 018} \thepage}
+\renewcommand{\headrulewidth}{0pt}
+\setlength{\headheight}{0.5in}
+
+\title{CS 5220: Project 1 Initial Report}
+\author{Group 018: Guantian Zheng (gz94), Stephen McDowell (sjm324)}
+
+\begin{document}
+\thispagestyle{empty}
+\maketitle
+
+\section{Introduction}
+
+\section{Permutations of Loop Variables}
+
+%\includepdf[pages=-, width=\textwidth]{timing-perm}
+
+% \begin{figure}[h!]
+% \centering
+% \includegraphics[width=\textwidth]{timing-perm.jpg}
+% \caption{Performance of \texttt{basic} under different permutations of i, j, k.}
+% \label{fig:timing-perm}
+% \end{figure}
+
+We experimented with different permutations of the three loop variables \texttt{i}, \texttt{j} and \texttt{k}. Apparently, \texttt{j, k, i} (starting from the outermost loop) gains the most advantage by reading in continuous blocks of matrix \texttt{C} and \texttt{A}. The loops are as follows:
+
+\begin{lstlisting}
+    for(j = 0; j < M; ++j) {
+        for(k = 0; k < M; ++k) {
+            double b_kj = B(k, j);
+            for(i = 0; i < M; ++i) {
+                C(i, j) += A(i, k) * b_kj;
+            }
+        }
+    }
+\end{lstlisting}
+
+\section{Tuning the Block Size}
+
+Building on previous results, we decided to adopt the \texttt{j-k-i} loop for per-block computation (\texttt{basic\_dgemm}), while searching for an appropriate block size. 
+
+% \begin{figure}[h!]
+% \centering
+% \includegraphics[width=\textwidth]{timing-blocked-1.jpg}
+% \caption{Performance of original and reordered \texttt{blocked} with block sizes under 256.}
+% \label{fig:timing-blocked-1}
+% \end{figure}
+
+Looks like reordered \texttt{blocked} with block size 256 takes the lead. Let's try with larger sizes:
+
+% \begin{figure}[h!]
+% \centering
+% \includegraphics[width=\textwidth]{timing-blocked-2.jpg}
+% \caption{Performance of original and reordered \texttt{blocked} with block sizes under 2048.}
+% \label{fig:timing-blocked-2}
+% \end{figure}
+
+The Gflops of \texttt{blocked\_perm} keeps rising until size 2048, which means \texttt{j-k-i} looping blocked implementation with size 1024 is by far the optimal solution for our test cases.
+
+
+
+
+
+
+
+
+
+\iffalse
+
+\section{Conclusion}
+``I always thought something was fundamentally wrong with the universe'' \citep{adams1995hitchhiker}
+
+\bibliographystyle{plain}
+\bibliography{references}
+
+\fi
+
+\end{document}
