@@ -1,0 +1,8 @@
+#!/bin/sh -l
+
+#PBS -N matmul-restrict
+#PBS -j oe
+
+module load cs5220
+cd $PBS_O_WORKDIR
+./matmul-restrict
