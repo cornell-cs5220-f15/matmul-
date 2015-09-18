@@ -96,7 +96,9 @@ We experimented with different permutations of the three loop variables \texttt{
     }
 \end{lstlisting}
 
-When compiling with \texttt{gcc}, we get the following results:
+\noindent The code for producing these permutations can be found in \texttt{dgemm\_basic-permutations.c}, where you can change \texttt{\#define PERMUTATION} at the top to be 0, 1, 2, 3, 4, or 5 depending on which permutation you want to run.
+
+\noindent When compiling with \texttt{gcc}, we get the following results:
 
 \begin{center}
     \includegraphics[scale=0.5]{benchmarking/permutations/gcc/timing.pdf}
@@ -135,25 +137,34 @@ Building on previous results, we decided to adopt the optimal \texttt{j-k-i} loo
     \sqrt{\frac{\text{\ttfamily L3\_SIZE}}{24}} = \text{\ttfamily BLOCK\_SIZE}
     $$
 
-    In code, we have probably made a mistake or fallacious assumption somewhere, or maybe even are just calling the wrong methods with the wrong parameters.  The plotted result below was with a \texttt{BLOCK\_SIZE = 991}, where we hardcoded in 15MB L3 cache to the equation above.  Perhaps this is somewhat reasonable, in the sense that it might make the most sense to take the result of the equation above and round up to the nearest highest power of 2 (which is 1024) since we are working with the cache. 
+    In code, we have probably made a mistake or fallacious assumption somewhere, or maybe even are just calling the wrong methods with the wrong parameters.  The plotted result below was with a \texttt{BLOCK\_SIZE = 991}, where we hardcoded in 15MB L3 cache to the equation above.  Perhaps this is somewhat reasonable, in the sense that it might make the most sense to take the result of the equation above and round up to the nearest highest power of 2 (which is 1024) since we are working with the cache.
+
+    \noindent The code that was originally purposed for this was in \texttt{dgemm\_basic-permutations.c}.  However, inside of the top of the method \texttt{square\_dgemm} at the bottom of the file you can see the corresponding \texttt{sysconf} calls that are attempting to acquire the right information.  It seems that the calculation we seek to compute for number of per-matrix-block bytes is invalid.  We tried computing having 2 full blocks plus one page (4096 bytes on the cluster), but that produces equally disatisfying results.  The computation in that code is assuming that we need to fit all three matrix blocks in cache at the same time, which is likely not the case.
 \end{enumerate}
 
-\noindent See the plot on the next page:
-\newpage
+\noindent The corresponding plot:
 \begin{center}
     \includegraphics[scale=0.5]{benchmarking/blocked/timing.pdf}
 \end{center}
 
-\section{Next Stages} % (fold)
+\noindent The plot coloring reset at the bottom for \texttt{blocked\_perm-programmatic}, this is the blue line that degrades \emph{much} faster after a matrix dimension of 1024, for clarity.
 
-We have been playing around with transposing things in memory, but generally think that we are not supposed to venture here -- in order to perform such a task with the provided parameters we have to do something like:
+\section{Next Stages}
+
+\noindent As a final comparison of some of the methods described above, you can see from the benchmarks that our algorithm is really nothing to be proud of at this point:
+
+\begin{center}
+    \includegraphics[scale=0.5]{benchmarking/comparison/timing.pdf}
+\end{center}
+
+\noindent We have been playing around with transposing things in memory, but generally think that we are not supposed to venture here -- in order to perform such a task with the provided parameters we have to do something like:
 
 \begin{lstlisting}
     double* bad_idea = (double *)(&(*A));
     naive_transpose(M, bad_idea);
 \end{lstlisting}
 
-\noindent We also found that the transposed results really only start having an effect on large matrices since we are looking at an $O(n^2)$ operation in the naive case in order to transpose $A$, and then have to transpose it back.  Asymptotically speaking, as the matrix multiply is $O(n^3)$ we will begin to see better results.\\
+\noindent We also found that the transposed results (also located in \texttt{dgemm\_blocked-ours.c}) really only start having an effect on large matrices since we are looking at an $O(n^2)$ operation in the naive case in order to transpose $A$, and then have to transpose it back.  Asymptotically speaking, as the matrix multiply is $O(n^3)$ we will begin to see better results.\\
 
 \noindent We plan to try new methods such as better copy optimization, compliler flags and annotations, and also want to explore the cache-oblivious variants of this project if possible.
 
