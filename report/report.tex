@@ -146,7 +146,14 @@ optimized loop that can take advantage of vectorization.
 
 Tuning this implementation is still ongoing.  Currently a good sub-matrix size seems
 to be $96 \times 96$, but this barely outperforms the naive unblocked method with 
-optimized loop order.  
+optimized loop order (see Figure~\ref{fig:block96})
+
+\begin{figure}
+    \centering
+    \includegraphics[width=6.0in]{../timings/timing block96.pdf}
+    \caption{Block Size 96 comparison}
+    \label{fig:block96}
+\end{figure}
 
 \section{Future Work}
 
