@@ -100,15 +100,23 @@ The current block multiplication in the innermost loop does not have unit stride
 \subsubsection{Approach}
 In the basic version of dgemm, we see drops near matrix sizes that are a multiple of 2. This is caused by conflict misses due to associative caches. To prevent this, we attempted a copy optimization over the basic dgemm implementation.
 \subsubsection{Results}
-
-There is a clear improvement in performance and the conflict misses are converted to gains in performance as seen in Figure \ref{basic_copy_opt}. Copy optimization is clearly a step in the right direction. 
-
-
+There is a clear improvement in performance and the conflict misses are converted to gains in performance as seen in Figure \ref{basic_copy_opt}. Copy optimization is clearly a step in the right direction.
 \begin{figure}[H]
     \includegraphics[width=0.9\textwidth]{timing_basic_vs_copy_opt.pdf}
     \caption{Basic DGEMM vs DGEMM with Copy Optimization}
     \label{basic_copy_opt}
 \end{figure} 
+\subsection{More Flag Optimization on Copy Optimization}
+\subsubsection{Approach}
+We use -03 and -02 optimizers when compile the copy optimization code.
+\subsubsection{result}
+-02 optimizer is performing better than -03 especially when the size of the matrix grows larger.
+\begin{figure}[H]
+    \includegraphics[width=0.9\textwidth]{timing_flag0203_copy.pdf}
+    \caption{-03 vx -02 on Copy Optimization}
+    \label{0203}
+\end{figure}
+ 
 
 \subsection{Restrict Keyword}
 
