@@ -14,7 +14,8 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #define L1_BLOCK_SIZE ((int) 40)
 #endif
 
-// #include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
 /*
   A is M-by-K
   B is K-by-N
@@ -28,11 +29,12 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     int i, j, k;
     for (i = 0; i < M; ++i) {
         for (j = 0; j < N; ++j) {
-            double cij = C[j*lda+i];
+            register double cij = C[j*lda+i];
             for (k = 0; k < K; ++k) {
-                cij += A[k*lda+i] * B[j*lda+k];
-                // if(i == 0 && j == 0){
-                //     printf("C(0,0) += A(%d,%d) * B(%d,%d) = %.3f %.3f\n", i, k, k, j, A[k*lda+i], B[j*lda+k]);
+                cij += A[k + lda*i] * B[j*lda+k];
+                // if(k + lda*i >= M){
+                //     printf("A[%d]\n", k + lda*i);
+                    //printf("C(0,0) += A(%d,%d) * B(%d,%d) = %.3f %.3f\n", i, k, j, k, A[k*lda+i], B[j*lda+k]);
                 // }
             }
             C[j*lda+i] = cij;
@@ -65,7 +67,7 @@ void do_block_L2(const int lda,
                 const int k = bk * L1_BLOCK_SIZE + kk;
                 const int K = (k+L1_BLOCK_SIZE > lda? lda-k : L1_BLOCK_SIZE);
                 basic_dgemm(lda, M, N, K,
-                            A + i + k*lda, B + k + j*lda, C + i + j*lda);
+                            A + i*lda + k, B + k + lda*j, C + i + j*lda);
             }
         }
     }
@@ -99,9 +101,17 @@ void do_block_L3(const int lda,
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
-    __assume_aligned(A, 16);
-    __assume_aligned(B, 16);
-    __assume_aligned(C, 16);
+    // __assume_aligned(A, 16);
+    // __assume_aligned(B, 16);
+    // __assume_aligned(C, 16);
+
+    double* copyA = malloc(M*M*sizeof(double));
+    for(int copy_i = 0; copy_i < M; copy_i++) {
+        int row = M * copy_i;
+        for (int copy_j=0; copy_j < M; copy_j++) {
+            copyA[copy_j + row] = A[copy_j * M + copy_i];
+        }
+    }
 
     const int nL3blocks = M / L3_BLOCK_SIZE + (M%L3_BLOCK_SIZE? 1 : 0);
     int b3i, b3j, b3k;
@@ -112,8 +122,9 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
             const int j = b3j * L3_BLOCK_SIZE;
             for (b3k = 0; b3k < nL3blocks; ++b3k) {
                 const int k = b3k * L3_BLOCK_SIZE;
-                do_block_L3(M, A, B, C, i, j, k);
+                do_block_L3(M, copyA, B, C, i, j, k);
             }
         }
     }
+    free(copyA);
 }
