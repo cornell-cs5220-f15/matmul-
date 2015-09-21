@@ -39,16 +39,19 @@ extern void square_dgemm();
 #define MIN_RUNS 4
 /* #define MIN_SECS 1.0 */
 #define MIN_SECS 0.25
+// #define MIN_SECS 0
 
 /*
   Note the strange sizes...  You'll see some interesting effects
   around some of the powers-of-two.
 */
 const int test_sizes[] = {
-    31, 32, 96, 97, 127, 128, 129, 191, 192, 229,
+    31,
+
 #if defined(DEBUG_RUN)
-# define MAX_SIZE 229u
+# define MAX_SIZE 31u//229u
 #else
+    32, 96, 97, 127, 128, 129, 191, 192, 229,
     255, 256, 257, 319, 320, 321, 417, 479, 480, 511, 512, 639, 640,
     767, 768, 769, 1023, 1024, 1025, 1525, 1526, 1527
 # define MAX_SIZE 1527u
@@ -63,8 +66,9 @@ const int test_sizes[] = {
  */
 void matrix_init(double *A)
 {
-    for (int i = 0; i < MAX_SIZE*MAX_SIZE; ++i) 
+    for (int i = 0; i < MAX_SIZE*MAX_SIZE; ++i){
         A[i] = drand48();
+      }
 }
 
 
@@ -210,7 +214,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Usage: matmul [csv]\n");
         exit(2);
     }
-    
+
     FILE* fp;
     if (argc == 1) {
         const char* exename = argv[0];
@@ -222,14 +226,14 @@ int main(int argc, char** argv)
         strcat(fname, ".csv");
         fp = fopen(fname, "w");
         free(fname);
-    } else 
+    } else
         fp = fopen(argv[1], "w");
-    
+
     if (!fp) {
         fprintf(stderr, "Could not open '%s' for output\n", argv[1]);
         exit(3);
     }
-    
+
     double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
@@ -254,4 +258,3 @@ int main(int argc, char** argv)
     fclose(fp);
     return 0;
 }
-
