@@ -15,7 +15,6 @@ const char* dgemm_desc = "My awesome dgemm.";
   A is M-by-
   B is K-by-N
   C is M-by-N
-
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
 void basic_dgemm(const int lda, const int M, const int N, const int K,
