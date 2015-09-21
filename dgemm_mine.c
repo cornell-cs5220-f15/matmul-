@@ -12,7 +12,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 #define SUB_BLOCK_SIZE ((int) 8)
 #endif
 /*
-  A is M-by-K
+  A is M-by-
   B is K-by-N
   C is M-by-N
 
