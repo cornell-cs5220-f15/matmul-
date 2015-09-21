@@ -11,7 +11,6 @@ const char* dgemm_desc = "My awesome dgemm.";
 #ifndef SUB_BLOCK_SIZE
 #define SUB_BLOCK_SIZE ((int) 8)
 #endif
-
 /*
   A is M-by-K
   B is K-by-N
