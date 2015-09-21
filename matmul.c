@@ -16,6 +16,8 @@
 #include <math.h>
 #include <omp.h>
 
+#include <nmmintrin.h>
+
 #ifndef COMPILER
 #  define COMPILER "unknown"
 #endif
@@ -36,7 +38,7 @@ extern void square_dgemm();
 
   You may want to modify these to speed debugging...
 */
-#define MIN_RUNS 4
+#define MIN_RUNS 200 //4
 /* #define MIN_SECS 1.0 */
 #define MIN_SECS 0.25
 // #define MIN_SECS 0
@@ -46,10 +48,10 @@ extern void square_dgemm();
   around some of the powers-of-two.
 */
 const int test_sizes[] = {
-    8,
+    2,
 
 #if defined(DEBUG_RUN)
-# define MAX_SIZE 8u//229u
+# define MAX_SIZE 2u//229u
 #else
     31,32, 96, 97, 127, 128, 129, 191, 192, 229,
     255, 256, 257, 319, 320, 321, 417, 479, 480, 511, 512, 639, 640,

@@ -7,7 +7,7 @@ FC=gfortran-5
 LD=$(FC)
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O2 
+OPTFLAGS = -O0  
 CFLAGS = -std=gnu99 -DDEBUG_RUN
 FFLAGS =
 LDFLAGS = -fopenmp
