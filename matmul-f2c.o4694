@@ -1,4 +1,0 @@
-Compiler:	icc
-Options:	-O3
-Description:	Fortran dgemm.
-
