@@ -83,10 +83,10 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     c11 = _mm128_fmadd_ps(a1,b1,c11);
 
     // Store C
-    *((__m128*) (&C[0])) = c00;
-    *((__m128*) (&C[1])) = c10;
-    *((__m128*) (&C[2])) = c01;
-    *((__m128*) (&C[3])) = c11;
+    _mm_store_pd(C+0, c00);
+    _mm_store_pd(C+1, c10);
+    _mm_store_pd(C+2, c01);
+    _mm_store_pd(C+3, c11);
     // /*
     //  * Do block dot product.  Each iteration adds the result of a two-by-two
     //  * matrix multiply into the accumulated 2-by-2 product matrix, which is
