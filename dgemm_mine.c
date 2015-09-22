@@ -79,8 +79,8 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     __m128d bs0 = swap_sse_doubles(b0);
     __m128d to0 = _mm_mul_pd(a0, bs0);
 
-    __m128d a1 = _mm_load_pd(A+2*k+2);
-    __m128d b1 = _mm_load_pd(B+2*k+2);
+    __m128d a1 = _mm_load_pd(A+2);
+    __m128d b1 = _mm_load_pd(B+2);
     __m128d td1 = _mm_mul_pd(a1, b1);
     __m128d bs1 = swap_sse_doubles(b1);
     __m128d to1 = _mm_mul_pd(a1, bs1);
