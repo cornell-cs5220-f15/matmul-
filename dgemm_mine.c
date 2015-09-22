@@ -82,18 +82,18 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // printf("b0 elements: %f\t%f\n", res[0], res[1]);
 
     __m128d td0 = _mm_mul_pd(a0, b0);
-    double* res = (double*)&td0;
+    res = (double*)&td0;
     printf("td0 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs0 = swap_sse_doubles(b0);
 
     __m128d to0 = _mm_mul_pd(a0, bs0);
 
     __m128d a1 = _mm_load_pd(A+2);
-    double* res = (double*)&a1;
+    res = (double*)&a1;
     printf("a1 elements: %f\t%f\n", res[0], res[1]);
     __m128d b1 = _mm_load_pd(B+2);
     __m128d td1 = _mm_mul_pd(a1, b1);
-    double* res = (double*)&td1;
+    res = (double*)&td1;
     printf("td1 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs1 = swap_sse_doubles(b1);
     __m128d to1 = _mm_mul_pd(a1, bs1);
