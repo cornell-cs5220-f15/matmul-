@@ -80,6 +80,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     __m128d b0 = _mm_load_pd(B);
     res = (double*)&b0;
     printf("b0 elements: %f\t%f\n", res[0], res[1]);
+
     __m128d td0 = _mm_mul_pd(a0, b0);
     __m128d bs0 = swap_sse_doubles(b0);
     __m128d to0 = _mm_mul_pd(a0, bs0);
@@ -165,7 +166,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 {
     // Preallocate a space for submatrices A, B and C
     // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-    double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
+    // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
+    double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
     // Assign blocks for kernals to perform fast computation.
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     int bi, bj, bk;
@@ -178,15 +180,21 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
         const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
         int it, kt;
+        // for (it = 0; it < M_sub; ++it){
+        //   for (kt = 0; kt < K; ++kt){
+        //     A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
+        //   }
+        // }
+        // Instead of transposing A, transpose B for AVX
         for (it = 0; it < M_sub; ++it){
           for (kt = 0; kt < K; ++kt){
-            A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
+            B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
           }
         }
-
         for (bj = 0; bj < n_blocks; ++bj){
           const int j = bj * BLOCK_SIZE;
-          do_block(M, A_transposed, B, C, i, j, k);
+          // do_block(M, A_transposed, B, C, i, j, k);
+          do_block(M, A, B_transposed, C, i, j, k); // For AVX
         }
 
       }
@@ -217,5 +225,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       }
       printf("\n");
     }
-    _mm_free(A_transposed);
+    // _mm_free(A_transposed);
+    _mm_free(B_transposed);
 }
