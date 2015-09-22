@@ -51,8 +51,8 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
 
     printf("~~~~~~~~~~~~~~Inside the loop B_transposed\n");
     int it, jt;
-    for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
+    for (it = 0; it < 2; ++it ){
+      for (jt = 0; jt < 2; ++jt){
         printf("%f\t", B[jt*M+it]);
       }
       printf("\n");
