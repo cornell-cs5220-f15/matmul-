@@ -1,22 +1,10 @@
-/* 
-*  Author: Junteng Jia
-*  
-*  This version of code is base on my partner's (Eric Gao) idea of rearranging array for data locality.
-*  I did two changes:
-*  
-*  1. I modified the code to make better use of vector register. 
-*  2. I aligned the memory for data fetch.
-*/
-
-
-
 const char* dgemm_desc = "My awesome dgemm.";
 
 #include <stdlib.h>
 #include <stdio.h>
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE 8 
+#define BLOCK_SIZE 16 
 #endif
 
 /* Copies the input matrix so that we optimize for cache hits.
@@ -33,7 +21,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 double* copy_optimize_rowmajor( const int num_blocks, const int M, const double *A )
 {
     int out_dim = num_blocks * BLOCK_SIZE;
-    double* out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ) , 64);
+    double* out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
     int i, j; // specific row, column for the matrix. < M
     int I, J; // specific row, column for the block < num_blocks
     int ii, jj; // specific row, column within the block. < BLOCK_SIZE
@@ -66,7 +54,7 @@ double* copy_optimize_rowmajor( const int num_blocks, const int M, const double 
 double* copy_optimize_colmajor( const int num_blocks, const int M, const double *A )
 {
     int out_dim = num_blocks * BLOCK_SIZE;
-    double* out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ) , 64);
+    double* out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
     int i, j; // specific row, column for the matrix. < M
     int I, J; // specific row, column for the block < num_blocks
     int ii, jj; // specific row, column within the block. < BLOCK_SIZE
@@ -223,8 +211,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
     // }
     // printf( "\n\n" );
     
-    _mm_free(A_copied);
-    _mm_free(B_copied);
-    _mm_free(C_copied);
+    free(A_copied);
+    free(B_copied);
+    free(C_copied);
 }
 
