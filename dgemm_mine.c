@@ -75,8 +75,11 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // Load the matrices
     __m128d a0 = _mm_load_pd(A);
     double* res = (double*)&a0;
-    printf("diagonal elements: %f\t%f\n", res[0], res[1]);
+    printf("a0 elements: %f\t%f\n", res[0], res[1]);
+
     __m128d b0 = _mm_load_pd(B);
+    res = (double*)&b0;
+    printf("b0 elements: %f\t%f\n", res[0], res[1]);
     __m128d td0 = _mm_mul_pd(a0, b0);
     __m128d bs0 = swap_sse_doubles(b0);
     __m128d to0 = _mm_mul_pd(a0, bs0);
