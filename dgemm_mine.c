@@ -88,6 +88,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // Write back sum
     _mm_store_pd(C+0, cd);
     _mm_store_pd(C+2, co);
+    printf("I'mhereerererererer");
 }
 
 void do_block(const int lda,
@@ -99,7 +100,7 @@ void do_block(const int lda,
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
 
-    // basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
+    //basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
     mine_dgemm(A,B,C);
 }
 
@@ -135,9 +136,17 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
 
     int it, jt;
+    printf("Matrix A\n");
     for (it = 0; it < M; ++it ){
       for (jt = 0; jt < M; ++jt){
-        printf("%f\t", &C[jt*M+it]);
+        printf("%f\t", A[jt*M+it]);
+      }
+      printf("\n");
+    }
+    printf("Matrix C\n");
+     for (it = 0; it < M; ++it ){
+      for (jt = 0; jt < M; ++jt){
+        printf("%f\t", C[jt*M+it]);
       }
       printf("\n");
     }

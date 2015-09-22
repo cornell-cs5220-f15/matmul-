@@ -1,0 +1,7 @@
+Matrix multiply failed.
+C(0,0) should be 0.00380218, was 0
+Error of 0.00380218, acceptable limit 5.06553e-18
+Compiler:	icc
+Options:	-O3
+Description:	My awesome dgemm.
+

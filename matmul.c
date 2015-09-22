@@ -36,10 +36,10 @@ extern void square_dgemm();
 
   You may want to modify these to speed debugging...
 */
-#define MIN_RUNS 4
+#define MIN_RUNS 1//4
 /* #define MIN_SECS 1.0 */
-#define MIN_SECS 0.25
-// #define MIN_SECS 0
+// #define MIN_SECS 0.25
+#define MIN_SECS 0
 
 /*
   Note the strange sizes...  You'll see some interesting effects
