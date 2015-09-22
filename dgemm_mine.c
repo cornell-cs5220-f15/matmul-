@@ -49,7 +49,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // It always assumes an input of A = 2 * P, B = P * 2
     // Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
 
-    int P = 6;
+    int P = 2;
     // This is really implicit in using the aligned ops...
     __assume_aligned(A, 16);
     __assume_aligned(B, 16);
@@ -99,7 +99,8 @@ void do_block(const int lda,
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
 
-    basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
+    // basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
+    mine_dgemm(A,B,C);
 }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
