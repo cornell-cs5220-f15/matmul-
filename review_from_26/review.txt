@@ -1,0 +1,11 @@
+Review on group reports for matmul:
+
+Group 27 
+The testing of block sizing for calculated cache sizes, the copy method to restructure the matrices, and the index orders, were well done and clearly summarized. 
+
+However, there was no overall comparison of the different matrix methods (the group routine compared to BLAS, for example). Additionally, it would be good to include mentions of other flags tested and reasons for flags used rather than just the default and fairly basic -O3 and -Ofast.
+
+Group 29 
+The loop reordering and included graphs, and the additional insight into AVX commands were great. 
+
+Further insight into flags, and testing out matrix copying, is advised. There was also no obvious calculation for the block sizing methods, or reasoning based on cache sizes - the block sized graphs seemed to be created with randomly chosen sizes.
