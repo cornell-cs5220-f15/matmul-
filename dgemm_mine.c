@@ -101,7 +101,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     __m128d a1 = _mm_load_pd(A+2);
     res = (double*)&a1;
     printf("a1 elements: %f\t%f\n", res[0], res[1]);
-    __m128d b1 = _mm_load_pd(B+2);
+    __m128d b1 = _mm_load_pd(B+BLOCK_SIZE);
     res = (double*)&b1;
     printf("b1 elements: %f\t%f\n", res[0], res[1]);
     __m128d td1 = _mm_mul_pd(a1, b1);
