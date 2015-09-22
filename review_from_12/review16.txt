@@ -1,0 +1,18 @@
+Review of Group 16 by Group 12
+
+1. What you think they did well (and why)
+
+They tried different flags and found which configuration was the best for their code. They also tried different loop orders, and found that the best option was j,k,i. They also transposed the matrix, and they claimed that this increased the performance of their method. Moreover, they used block size of 32 because this allows the blocks fit in the cache.  
+
+2. What you think they could improve on (and why)
+
+They didn’t explain what they were plotting in some plots. For example, in the plot of the loop ordering section, they didn’t say what code are running. (basic or blocked…). Are they also including the flags?
+Moreover, some plots are hard to understand because there is no explanation. 
+
+They could try copy optimization to improve performance because this reduces conflict misses.
+
+
+
+
+
+
