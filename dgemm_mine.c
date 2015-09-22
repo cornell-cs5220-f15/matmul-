@@ -49,46 +49,74 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // It always assumes an input of A = 2 * P, B = P * 2
     // Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
 
-    int P = 2;
+    // int P = 2;
+
     // This is really implicit in using the aligned ops...
     __assume_aligned(A, 16);
     __assume_aligned(B, 16);
     __assume_aligned(C, 16);
 
-    // Load diagonal and off-diagonals
-    __m128d cd = _mm_load_pd(C+0);
-    __m128d co = _mm_load_pd(C+2);
+    // Load first and second columns of C
+    __m128d c00 = _mm_load_pd(C+0);
+    __m128d c10 = _mm_load_pd(C+1);
+    __m128d c01 = _mm_load_pd(C+2);
+    __m128d c11 = _mm_load_pd(C+4);
+
+    // // Load diagonal and off-diagonals
+    // __m128d cd = _mm_load_pd(C+0);
+    // __m128d co = _mm_load_pd(C+2);
 
     /*
-     * Do block dot product.  Each iteration adds the result of a two-by-two
-     * matrix multiply into the accumulated 2-by-2 product matrix, which is
-     * stored in the registers cd (diagonal part) and co (off-diagonal part).
-     */
-    for (int k = 0; k < P; k += 2) {
+    Assuming 2*2 case, and we do traditional, naive three loop multiplication.
+    Except in this case we don't need any loop because it's small.
+    */
+    // Load the matrices
+    __m128d a0 = _mm_load_pd(A);
+    __m128d a1 = _mm_load_pd(A+2);
+    __m128d b0 = _mm_load_pd(B);
+    __m128d b1 = _mm_load_pd(B+2);
 
-        __m128d a0 = _mm_load_pd(A+2*k+0);
-        __m128d b0 = _mm_load_pd(B+2*k+0);
-        __m128d td0 = _mm_mul_pd(a0, b0);
-        __m128d bs0 = swap_sse_doubles(b0);
-        __m128d to0 = _mm_mul_pd(a0, bs0);
+    // Update elements of C
+    c00 = _mm128_fmadd_ps(a0,b0,c00);
+    c10 = _mm128_fmadd_ps(a1,b0,c10);
+    c01 = _mm128_fmadd_ps(a0,b1,c01);
+    c11 = _mm128_fmadd_ps(a1,b1,c11);
 
-        __m128d a1 = _mm_load_pd(A+2*k+2);
-        __m128d b1 = _mm_load_pd(B+2*k+2);
-        __m128d td1 = _mm_mul_pd(a1, b1);
-        __m128d bs1 = swap_sse_doubles(b1);
-        __m128d to1 = _mm_mul_pd(a1, bs1);
-
-        __m128d td_sum = _mm_add_pd(td0, td1);
-        __m128d to_sum = _mm_add_pd(to0, to1);
-
-        cd = _mm_add_pd(cd, td_sum);
-        co = _mm_add_pd(co, to_sum);
-    }
-
-    // Write back sum
-    _mm_store_pd(C+0, cd);
-    _mm_store_pd(C+2, co);
-    printf("I'mhereerererererer");
+    // Store C
+    *((__m256*) (&C[0])) += c00;
+    *((__m256*) (&C[1])) += c10;
+    *((__m256*) (&C[2])) += c01;
+    *((__m256*) (&C[3])) += c11;
+    // /*
+    //  * Do block dot product.  Each iteration adds the result of a two-by-two
+    //  * matrix multiply into the accumulated 2-by-2 product matrix, which is
+    //  * stored in the registers cd (diagonal part) and co (off-diagonal part).
+    //  */
+    // for (int k = 0; k < P; k += 2) {
+    //
+    //     __m128d a0 = _mm_load_pd(A+2*k+0);
+    //     __m128d b0 = _mm_load_pd(B+2*k+0);
+    //     __m128d td0 = _mm_mul_pd(a0, b0);
+    //     __m128d bs0 = swap_sse_doubles(b0);
+    //     __m128d to0 = _mm_mul_pd(a0, bs0);
+    //
+    //     __m128d a1 = _mm_load_pd(A+2*k+2);
+    //     __m128d b1 = _mm_load_pd(B+2*k+2);
+    //     __m128d td1 = _mm_mul_pd(a1, b1);
+    //     __m128d bs1 = swap_sse_doubles(b1);
+    //     __m128d to1 = _mm_mul_pd(a1, bs1);
+    //
+    //     __m128d td_sum = _mm_add_pd(td0, td1);
+    //     __m128d to_sum = _mm_add_pd(to0, to1);
+    //
+    //     cd = _mm_add_pd(cd, td_sum);
+    //     co = _mm_add_pd(co, to_sum);
+    // }
+    //
+    // // Write back sum
+    // _mm_store_pd(C+0, cd);
+    // _mm_store_pd(C+2, co);
+    // printf("I'mhereerererererer");
 }
 
 void do_block(const int lda,
@@ -136,6 +164,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
 
     int it, jt;
+
     printf("Matrix A\n");
     for (it = 0; it < M; ++it ){
       for (jt = 0; jt < M; ++jt){
@@ -143,6 +172,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       }
       printf("\n");
     }
+
     printf("Matrix C\n");
      for (it = 0; it < M; ++it ){
       for (jt = 0; jt < M; ++jt){
