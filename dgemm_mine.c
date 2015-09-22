@@ -49,6 +49,15 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // It always assumes an input of A = 2 * P, B = P * 2
     // Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
 
+    printf("~~~~~~~~~~~~~~Inside the loop B_transposed\n");
+    for (it = 0; it < M; ++it ){
+      for (jt = 0; jt < M; ++jt){
+        printf("%f\t", B[jt*M+it]);
+      }
+      printf("\n");
+    }
+
+
     double C_swap = C[2];
     C[2] = C[1];
     C[1] = C_swap;
@@ -201,6 +210,14 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         }
         for (bj = 0; bj < n_blocks; ++bj){
           const int j = bj * BLOCK_SIZE;
+          printf("Matrix B_transposed\n");
+          for (it = 0; it < M; ++it ){
+            for (jt = 0; jt < M; ++jt){
+              printf("%f\t", B_transposed[jt*M+it]);
+            }
+            printf("\n");
+          }
+
           // do_block(M, A_transposed, B, C, i, j, k);
           do_block(M, A, B_transposed, C, i, j, k); // For AVX
         }
