@@ -77,10 +77,10 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     __m128d b1 = _mm_load_pd(B+2);
 
     // Update elements of C
-    __m128d c00 = _mm_mul_pd(a0,b0);
-    __m128d c10 = _mm_mul_pd(a1,b0);
-    __m128d c01 = _mm_mul_pd(a0,b1);
-    __m128d c11 = _mm_mul_pd(a1,b1);
+    __m64d c00 = _mm_mul_pd(a0,b0);
+    __m64d c10 = _mm_mul_pd(a1,b0);
+    __m64d c01 = _mm_mul_pd(a0,b1);
+    __m64d c11 = _mm_mul_pd(a1,b1);
 
     // Store C
     _mm_store_pd(C+0, c00);
