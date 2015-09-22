@@ -19,7 +19,6 @@ const char* dgemm_desc = "My awesome dgemm.";
 
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
-
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B,
                  double* restrict C)//, const double restrict *C_original)
@@ -52,7 +51,8 @@ void do_block(const int lda,
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
     // Preallocate a space for submatrices A, B and C
-    double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     // Assign blocks for kernals to perform fast computation.
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     int bi, bj, bk;
