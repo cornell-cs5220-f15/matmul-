@@ -57,10 +57,10 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     __assume_aligned(C, 16);
 
     // Load first and second columns of C
-    __m128d c00 = _mm_load_pd(C+0);
-    __m128d c10 = _mm_load_pd(C+1);
-    __m128d c01 = _mm_load_pd(C+2);
-    __m128d c11 = _mm_load_pd(C+4);
+    // __m128d c00 = _mm_load_pd(C+0);
+    // __m128d c10 = _mm_load_pd(C+1);
+    // __m128d c01 = _mm_load_pd(C+2);
+    // __m128d c11 = _mm_load_pd(C+4);
 
     // // Load diagonal and off-diagonals
     // __m128d cd = _mm_load_pd(C+0);
@@ -77,10 +77,10 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     __m128d b1 = _mm_load_pd(B+2);
 
     // Update elements of C
-    c00 = _mm128_fmadd_ps(a0,b0,c00);
-    c10 = _mm128_fmadd_ps(a1,b0,c10);
-    c01 = _mm128_fmadd_ps(a0,b1,c01);
-    c11 = _mm128_fmadd_ps(a1,b1,c11);
+    __m128d c00 = _mm_mul_pd(a0,b0);
+    __m128d c10 = _mm_mul_pd(a1,b0);
+    __m128d c01 = _mm_mul_pd(a0,b1);
+    __m128d c11 = _mm_mul_pd(a1,b1);
 
     // Store C
     _mm_store_pd(C+0, c00);
