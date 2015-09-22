@@ -78,16 +78,23 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     printf("a0 elements: %f\t%f\n", res[0], res[1]);
 
     __m128d b0 = _mm_load_pd(B);
-    res = (double*)&b0;
-    printf("b0 elements: %f\t%f\n", res[0], res[1]);
+    // res = (double*)&b0;
+    // printf("b0 elements: %f\t%f\n", res[0], res[1]);
 
     __m128d td0 = _mm_mul_pd(a0, b0);
+    double* res = (double*)&td0;
+    printf("td0 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs0 = swap_sse_doubles(b0);
+
     __m128d to0 = _mm_mul_pd(a0, bs0);
 
     __m128d a1 = _mm_load_pd(A+2);
+    double* res = (double*)&a1;
+    printf("a1 elements: %f\t%f\n", res[0], res[1]);
     __m128d b1 = _mm_load_pd(B+2);
     __m128d td1 = _mm_mul_pd(a1, b1);
+    double* res = (double*)&td1;
+    printf("td1 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs1 = swap_sse_doubles(b1);
     __m128d to1 = _mm_mul_pd(a1, bs1);
 
@@ -102,12 +109,11 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     res = (double*)&co;
     printf("off-diag elements: %f\t%f\n", res[0], res[1]);
 
-    // Update elements of C
-    __m128d c00 = _mm_mul_pd(a0,b0);
-    __m128d c10 = _mm_mul_pd(a1,b0);
-    __m128d c01 = _mm_mul_pd(a0,b1);
-    __m128d c11 = _mm_mul_pd(a1,b1);
-
+    // // Update elements of C
+    // __m128d c00 = _mm_mul_pd(a0,b0);
+    // __m128d c10 = _mm_mul_pd(a1,b0);
+    // __m128d c01 = _mm_mul_pd(a0,b1);
+    // __m128d c11 = _mm_mul_pd(a1,b1);
 
     _mm_store_pd(C+0, cd);
     _mm_store_pd(C+2, co);
