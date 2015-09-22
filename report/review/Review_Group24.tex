@@ -1,0 +1,147 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+
+% Packages we need
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{mathtools}
+\usepackage{amsthm}
+\usepackage{float}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{color} %red, green, blue, yellow, cyan, magenta, black, white
+
+% Header packages
+\usepackage{fancyhdr}
+\fancyhf{}
+\pagestyle{fancy}
+
+% Formatting document
+\setcounter{secnumdepth}{0}
+\setlength{\parindent}{0in}
+\setlength{\parskip}{0.5em}
+
+% MATLAB code
+\definecolor{mygreen}{RGB}{28,172,0} % color values Red, Green, Blue
+\definecolor{mylilas}{RGB}{170,55,241}
+
+% Commands
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+\newcommand{\ws}{\text{ }}
+\newcommand{\e}[1]{\times 10^{#1}}
+
+% Header
+\lhead{\textsc{CS 5220 -- Project 1}} % TODO: enter title here
+\rhead{\textsc{Junteng Jia -- jj585\\Eric Gao -- emg222}} % Authors
+\setlength{\headheight}{0.5in}
+\cfoot{\thepage}
+
+% Title
+\title{CS 5220 -- Peer review -- Group 24} %TODO: enter title here
+\author{
+  \begin{tabular}{l c l}
+    Junteng Jia & -- & jj585 \\
+    Eric Gao & -- & emg222
+  \end{tabular}\\
+  \rule{\linewidth}{0.4pt}
+}
+\date{}
+
+
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+\definecolor{lightgray}{rgb}{0.97, 0.97, 0.97}
+
+\lstset{
+	% General design
+	backgroundcolor=\color{lightgray},
+	basicstyle={\small\ttfamily},   
+	frame=l,
+	% Code design
+	identifierstyle=\color{black},
+	keywordstyle=\color{blue}\bfseries,
+	ndkeywordstyle=\color{greenCode}\bfseries,
+	stringstyle=\color{ocherCode}\ttfamily,
+	commentstyle=\color{darkgray}\ttfamily,
+	% Code
+	language={C++},
+	tabsize=2,
+	showtabs=false,
+	showspaces=false,
+	showstringspaces=false,
+	extendedchars=true,
+	breaklines=true,
+	captionpos=b,
+	% line-numbers
+	xleftmargin={0.75cm},
+	numbers=left,
+	stepnumber=1,
+	firstnumber=1,
+	numberfirstline=true,
+}
+
+
+
+
+
+\begin{document}
+    \thispagestyle{empty}
+    \maketitle
+
+	\section*{Common}
+		There are a few optimizations we did in common:
+		\begin{enumerate}
+			\item \textbf{Block Multiplication}: It is a common technique everyone used.They split the matrices into 128 * 128 blocks while we split the matrices into several blocks. We chose the blocks to be size 32, which means that each block takes up 8KB ($32^2 * 8$).
+			\item \textbf{Copy Optimization}: Their code allocate a piece of memory every time they call the function "DO\_BLOCK" to make sure the piece of memory in the block is continuous. While we copied and rearrange matrix A, B and C at the begining once, so we don't need to allocate a piece of memory every time we call "DO\_BLOCK" function, we just pass the pointer pointing at the begining of that block.
+			\item \textbf{Rearrange i, j, k}: They did a few experiemnt to decide which order to use with i, j, k, while we analysis base on computer architecture without much test.
+		\end{enumerate}
+
+
+
+    \section*{Worth Learning}
+	    Group 24 did some optimizations we need to implement:
+        \begin{enumerate}
+        	\item \textbf{Parameter Optimization}: They tested against all possible permutations of orders. They tested against different block sizes, which can help them find the best code suitable for the arhcitecture of totient clusters.
+        	\item \textbf{Compiler Optimization}: The used the icc flag \texttt{+OPTFLAGS = -O3 -fast -xCORE-AVX2 -unroll-aggressive -fp-model fast}, which would probably help us speed up our own code.
+        \end{enumerate}
+        
+        
+       
+    \section*{Suggestion}
+	    I do have some ideas that our group used and I believe would help them speed up their code:
+	    \begin{enumerate}
+			\item \textbf{Data Alignment}: They can try to use \texttt{\_mm\_malloc(size, alignment)} instead of \texttt{malloc(size)} to allocate a piece of memory in heap that is convinent for cache to get.
+			\item \textbf{Vectorization}: Although they had went through all possible permutations of i, j, k to get the best performance, there are a certain point where they can not get Vectorization due to data reliance. For example:
+			
+			\begin{lstlisting}
+	void basic_dgemm_copied(const int M, const int N, const int K, const double *restrict A, const double *restrict B, double *restrict C)
+	{
+		int i, j, k;
+		for (k = 0; k < K; ++k) {
+			for (j = 0; j < N; ++j) {
+				for (i = 0; i < M; ++i) {
+					double cij = C[j*M+i];
+					cij += A[k*M+i] * B[j*K+k];
+					C[j*M+i] = cij;
+				}
+			}
+		}
+	}
+			\end{lstlisting}
+			
+			In line 8, this operation can not be vectorized because updating cij relies on previous cij. This problem can be fixed by updating several element in C matrix at the same time.
+			
+	    \end{enumerate}
+    
+    \section*{Others}
+    
+    There are a few things that I believe could be implemented that neither of our group has done:
+	    \begin{enumerate}
+	    	\item \textbf{Further Blocking}: I believe we can use blocking in different level to suit into different level of cache.
+	    	\item \textbf{Roofline Analysis}: We can use Roofline analysis to figure out what should we do next.
+	    \end{enumerate}
+
+
+\end{document}
