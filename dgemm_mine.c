@@ -74,6 +74,8 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     */
     // Load the matrices
     __m128d a0 = _mm_load_pd(A);
+    double* res = (double*)&a0;
+    printf("diagonal elements: %f\t%f\n", res[0], res[1]);
     __m128d b0 = _mm_load_pd(B);
     __m128d td0 = _mm_mul_pd(a0, b0);
     __m128d bs0 = swap_sse_doubles(b0);
@@ -91,6 +93,10 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     cd = _mm_add_pd(cd, td_sum);
     co = _mm_add_pd(co, to_sum);
 
+    res = (double*)&cd;
+    printf("diagonal elements: %f\t%f\n", res[0], res[1]);
+    res = (double*)&co;
+    printf("off-diag elements: %f\t%f\n", res[0], res[1]);
 
     // Update elements of C
     __m128d c00 = _mm_mul_pd(a0,b0);
