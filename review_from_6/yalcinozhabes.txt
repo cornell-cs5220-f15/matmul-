@@ -1,0 +1,25 @@
+# What Went Well #
+- I like that you every time you present an optimization, you present a chart
+  showing its impact. I think this is really great!
+
+- Your report is short, but I don't think that's a bad thing. I enjoy that the
+  report isn't too verbose.
+
+# Room for Improvement #
+- Your copy optimization section is rather terse and doesn't explain in detail
+  what copy optimizations you performed. From what I gather, you're copying A
+  to be in row-major order. It would be nice if your report included why
+  copying A to be in row-major order improves performance. Moreover, I think
+  there are more opportunities for copy optimization to help. For example, you
+  could play with copying the entirety of A at once or copying A block by block
+  throughout the matrix multiplication. Moreover, by copying blocks of B into
+  contiguous memory, you might be able to get improved cache performance even
+  though you're leaving it in column-major order.
+
+- Perhaps experiment with nested/hierarchical blocking.
+
+- It would have been nice to see which compiler flags you used.
+
+# Anything Else #
+- I saw in your code that you use the `restrict` compiler annotation. It would
+  have been nice to see a section in your report on this.

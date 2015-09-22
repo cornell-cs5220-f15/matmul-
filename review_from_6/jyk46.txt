@@ -1,0 +1,26 @@
+# What Went Well #
+- In your compiler flags section, you mention that you object dumped the binary
+  to make sure that the compiler was actually doing what you wanted it to do.
+  That's really awesome!
+
+- Your section on SIMD is honestly the most beast thing I've ever read.
+
+# Room for Improvement #
+- You tried using the `-xAVX` flag. This website [1] will advise you to use the
+  `-xCORE-AVX2` flag instead.
+
+- You claim in you SIMD section that "it is widely recognized that manually
+  inserting vector intrinsics is the preferred method of generating vector
+  instructions." I would add a citation to support this claim. Otherwise, it is
+  unjustified.
+
+- It would have been nice to see a performance plot for the composition of all
+  your optimizations. That is, it would have been nice to see the performance
+  of a kernel with compiler flags, good loop ordering, and beast vector
+  instruction stuff.
+
+# Anything Else #
+- Your report is great. You should push your tex source to your repo. We'd love
+  to check it out!
+
+[1]: https://software.intel.com/en-us/articles/performance-tools-for-software-developers-intel-compiler-options-for-sse-generation-and-processor-specific-optimizations
