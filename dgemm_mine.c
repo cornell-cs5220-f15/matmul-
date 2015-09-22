@@ -133,5 +133,13 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 
       }
     }
+
+    int it, jt;
+    for (it = 0; it < M; ++it ){
+      for (jt = 0; jt < M; ++jt){
+        printf("%f\t", &C[jt*M+it]);
+      }
+      printf("\n");
+    }
     _mm_free(A_transposed);
 }
