@@ -50,6 +50,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
 
     printf("~~~~~~~~~~~~~~Inside the loop B_transposed\n");
+    int it, jt;
     for (it = 0; it < M; ++it ){
       for (jt = 0; jt < M; ++jt){
         printf("%f\t", B[jt*M+it]);
