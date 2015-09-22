@@ -207,6 +207,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         for (it = 0; it < M_sub; ++it){
           for (kt = 0; kt < K; ++kt){
             B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
+            printf("\nNumber%d\n", i + k*M + it + kt*M]);
           }
         }
         for (bj = 0; bj < n_blocks; ++bj){
