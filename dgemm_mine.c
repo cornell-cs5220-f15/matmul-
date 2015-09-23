@@ -133,7 +133,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     C_swap = C[2];
     C[2] = C[1];
     C[1] = C_swap;
-    Store C
+    // Store C
 
     // /*
     //  * Do block dot product.  Each iteration adds the result of a two-by-two
