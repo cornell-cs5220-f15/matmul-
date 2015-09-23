@@ -59,9 +59,11 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     }
 
 
-    double C_swap = C[2];
-    C[2] = C[1];
-    C[1] = C_swap;
+    double C_swap = C[1];
+    C[1] = C[3];
+    C[3] = C_swap;
+
+    Right now, it will be 14, 32
 
     // This is really implicit in using the aligned ops...
     __assume_aligned(A, 16);
@@ -126,12 +128,12 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // __m128d c10 = _mm_mul_pd(a1,b0);
     // __m128d c01 = _mm_mul_pd(a0,b1);
     // __m128d c11 = _mm_mul_pd(a1,b1);
-
+    __m128d co_s = swap_sse_doubles(co);
     _mm_store_pd(C+0, cd);
-    _mm_store_pd(C+2, co);
+    _mm_store_pd(C+2, co_s);
 
-    C_swap = C[2];
-    C[2] = C[1];
+    C_swap = C[3];
+    C[1] = C[3];
     C[1] = C_swap;
     // Store C
 
