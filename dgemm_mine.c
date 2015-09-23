@@ -221,7 +221,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           //     printf("%f\t", B_transposed[jt*BLOCK_SIZE+it]);
           //   }
           //   printf("\n");
-          }
+          // }
 
           // do_block(M, A_transposed, B, C, i, j, k);
           do_block(M, A, B_transposed, C, i, j, k); // For AVX
