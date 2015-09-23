@@ -63,7 +63,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     C[1] = C[3];
     C[3] = C_swap;
 
-    Right now, it will be 14, 32
+    // Right now, it will be 14, 32
 
     // This is really implicit in using the aligned ops...
     __assume_aligned(A, 16);
