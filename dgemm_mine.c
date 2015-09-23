@@ -53,7 +53,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     int it, jt;
     for (it = 0; it < 2; ++it ){
       for (jt = 0; jt < 2; ++jt){
-        printf("%f\t", B[jt*2+it]);
+        printf("%f\t", B[jt*BLOCK_SIZE+it]);
       }
       printf("\n");
     }
@@ -130,10 +130,10 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     _mm_store_pd(C+0, cd);
     _mm_store_pd(C+2, co);
 
-    // C_swap = C[2];
-    // C[2] = C[1];
-    // C[1] = C_swap;
-    // Store C
+    C_swap = C[2];
+    C[2] = C[1];
+    C[1] = C_swap;
+    Store C
 
     // /*
     //  * Do block dot product.  Each iteration adds the result of a two-by-two
@@ -216,7 +216,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           printf("Matrix B_transposed\n");
           for (it = 0; it < M; ++it ){
             for (jt = 0; jt < M; ++jt){
-              printf("%f\t", B_transposed[jt*M+it]);
+              printf("%f\t", B_transposed[jt*BLOCK_SIZE+it]);
             }
             printf("\n");
           }
