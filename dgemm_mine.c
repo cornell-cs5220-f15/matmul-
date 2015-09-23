@@ -128,13 +128,13 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // __m128d c10 = _mm_mul_pd(a1,b0);
     // __m128d c01 = _mm_mul_pd(a0,b1);
     // __m128d c11 = _mm_mul_pd(a1,b1);
-    __m128d co_s = swap_sse_doubles(co);
+    // __m128d co_s = swap_sse_doubles(co);
     _mm_store_pd(C+0, cd);
     _mm_store_pd(C+2, co_s);
 
-    C_swap = C[3];
-    C[3] = C[2];
-    C[2] = C_swap;
+    // C_swap = C[3];
+    // C[3] = C[2];
+    // C[2] = C_swap;
     // Store C
 
     // /*
