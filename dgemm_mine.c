@@ -49,14 +49,14 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // It always assumes an input of A = 2 * P, B = P * 2
     // Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
 
-    printf("~~~~~~~~~~~~~~Inside the loop B_transposed\n");
-    int it, jt;
-    for (it = 0; it < 2; ++it ){
-      for (jt = 0; jt < 2; ++jt){
-        printf("%f\t", B[jt*BLOCK_SIZE+it]);
-      }
-      printf("\n");
-    }
+    // printf("~~~~~~~~~~~~~~Inside the loop B_transposed\n");
+    // int it, jt;
+    // for (it = 0; it < 2; ++it ){
+    //   for (jt = 0; jt < 2; ++jt){
+    //     printf("%f\t", B[jt*BLOCK_SIZE+it]);
+    //   }
+    //   printf("\n");
+    // }
 
 
     double C_swap = C[1];
@@ -87,28 +87,28 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // Load the matrices
     __m128d a0 = _mm_load_pd(A);
     double* res = (double*)&a0;
-    printf("a0 elements: %f\t%f\n", res[0], res[1]);
+    // printf("a0 elements: %f\t%f\n", res[0], res[1]);
 
     __m128d b0 = _mm_load_pd(B);
     res = (double*)&b0;
-    printf("b0 elements: %f\t%f\n", res[0], res[1]);
+    // printf("b0 elements: %f\t%f\n", res[0], res[1]);
 
     __m128d td0 = _mm_mul_pd(a0, b0);
     res = (double*)&td0;
-    printf("td0 elements: %f\t%f\n", res[0], res[1]);
+    // printf("td0 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs0 = swap_sse_doubles(b0);
 
     __m128d to0 = _mm_mul_pd(a0, bs0);
 
     __m128d a1 = _mm_load_pd(A+2);
     res = (double*)&a1;
-    printf("a1 elements: %f\t%f\n", res[0], res[1]);
+    // printf("a1 elements: %f\t%f\n", res[0], res[1]);
     __m128d b1 = _mm_load_pd(B+BLOCK_SIZE);
     res = (double*)&b1;
-    printf("b1 elements: %f\t%f\n", res[0], res[1]);
+    // printf("b1 elements: %f\t%f\n", res[0], res[1]);
     __m128d td1 = _mm_mul_pd(a1, b1);
     res = (double*)&td1;
-    printf("td1 elements: %f\t%f\n", res[0], res[1]);
+    // printf("td1 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs1 = swap_sse_doubles(b1);
     __m128d to1 = _mm_mul_pd(a1, bs1);
 
@@ -119,9 +119,9 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     co = _mm_add_pd(co, to_sum);
 
     res = (double*)&cd;
-    printf("diagonal elements: %f\t%f\n", res[0], res[1]);
+    // printf("diagonal elements: %f\t%f\n", res[0], res[1]);
     res = (double*)&co;
-    printf("off-diag elements: %f\t%f\n", res[0], res[1]);
+    // printf("off-diag elements: %f\t%f\n", res[0], res[1]);
 
     // // Update elements of C
     // __m128d c00 = _mm_mul_pd(a0,b0);
@@ -209,18 +209,18 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         for (it = 0; it < M_sub; ++it){
           for (kt = 0; kt < K; ++kt){
             B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-            printf("\nNumber%d\n", i + k*M + it + kt*M);
+            // printf("\nNumber%d\n", i + k*M + it + kt*M);
           }
         }
         for (bj = 0; bj < n_blocks; ++bj){
           const int j = bj * BLOCK_SIZE;
-          int it, jt;
-          printf("Matrix B_transposed\n");
-          for (it = 0; it < M; ++it ){
-            for (jt = 0; jt < M; ++jt){
-              printf("%f\t", B_transposed[jt*BLOCK_SIZE+it]);
-            }
-            printf("\n");
+          // int it, jt;
+          // printf("Matrix B_transposed\n");
+          // for (it = 0; it < M; ++it ){
+          //   for (jt = 0; jt < M; ++jt){
+          //     printf("%f\t", B_transposed[jt*BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
           }
 
           // do_block(M, A_transposed, B, C, i, j, k);
@@ -230,31 +230,31 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       }
     }
 
-    int it, jt;
-
-    printf("Matrix A\n");
-    for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", A[jt*M+it]);
-      }
-      printf("\n");
-    }
-
-    printf("Matrix B\n");
-    for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", B[jt*M+it]);
-      }
-      printf("\n");
-    }
-
-    printf("Matrix C\n");
-     for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", C[jt*M+it]);
-      }
-      printf("\n");
-    }
+    // int it, jt;
+    //
+    // printf("Matrix A\n");
+    // for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", A[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    //
+    // printf("Matrix B\n");
+    // for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", B[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    //
+    // printf("Matrix C\n");
+    //  for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", C[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
     // _mm_free(A_transposed);
     _mm_free(B_transposed);
 }
