@@ -130,7 +130,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // __m128d c11 = _mm_mul_pd(a1,b1);
     // __m128d co_s = swap_sse_doubles(co);
     _mm_store_pd(C+0, cd);
-    _mm_store_pd(C+2, co_s);
+    _mm_store_pd(C+2, co);
 
     // C_swap = C[3];
     // C[3] = C[2];
