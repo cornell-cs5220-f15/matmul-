@@ -150,9 +150,9 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     const int Matrix_size = 4;
 
     // Should be 32 here
-    __assume_aligned(A, 16);
-    __assume_aligned(B, 16);
-    __assume_aligned(C, 16);
+    __assume_aligned(A, 32);
+    __assume_aligned(B, 32);
+    __assume_aligned(C, 32);
 
     // Load matrix A
     __m256d a0 = _mm256_load_pd(A + Matrix_size * 0);
@@ -172,17 +172,17 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     int i;
     for (i = 0; i < Matrix_size; i++) {
       bij = _mm256_set1_pd(*(B+i));
-      c0 = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
+      c0  = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
       bij = _mm256_set1_pd(*(B+i+1));
-      c1 = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
+      c1  = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
       bij = _mm256_set1_pd(*(B+i+2));
-      c2 = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
+      c2  = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
       bij = _mm256_set1_pd(*(B+i+3));
-      c3 = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
+      c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
 
-    // double * res = (double*)&c1;
-    // printf("td1 elements: %f\t%f\n", res[0], res[1]);
+    double * res = (double*)&c1;
+    printf("td1 elements: %f\t%f\n", res[0], res[1]);
     // Store matrix C
     _mm256_store_pd(C + Matrix_size * 0, c0);
     _mm256_store_pd(C + Matrix_size * 1, c1);
