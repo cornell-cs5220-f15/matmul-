@@ -179,10 +179,13 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
 
+    double* res = (double*)&a0;
+    printf("%lf %lf %lf %lf\n", res[0], res[1], res[2], res[3]);
     // double * res = (double*)&c1;
     // printf("td1 elements: %f\t%f\n", res[0], res[1]);
 
-    printf("what is going on here????????\n");
+    // printf("what is going on here????????\n");
+
     // // Store matrix C
     // _mm256_storeu_pd(C + Matrix_size * 0, c0);
     // _mm256_storeu_pd(C + Matrix_size * 1, c1);
