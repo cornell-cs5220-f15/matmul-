@@ -149,6 +149,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
 
     const int Matrix_size = 4;
 
+    // Should be 32 here
     __assume_aligned(A, 16);
     __assume_aligned(B, 16);
     __assume_aligned(C, 16);
@@ -180,8 +181,8 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c3 = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
 
-    double * res = (double*)&c1;
-    printf("td1 elements: %f\t%f\n", res[0], res[1]);
+    // double * res = (double*)&c1;
+    // printf("td1 elements: %f\t%f\n", res[0], res[1]);
     // Store matrix C
     _mm256_store_pd(C + Matrix_size * 0, c0);
     _mm256_store_pd(C + Matrix_size * 1, c1);
@@ -200,8 +201,8 @@ void do_block(const int lda,
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
 
     //basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
-    // mine_dgemm(A,B,C);
-    mine_fma_dgemm(A,B,C);
+    mine_dgemm(A,B,C);
+    // mine_fma_dgemm(A,B,C);
 }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
