@@ -145,10 +145,8 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     // The size can be changed later for better performance, but 4*4 will be a good choice for prototyping
     // The matrices are all assumed to be stored in column major
 
-    // A command that I got from S14 code. Helps compiler optimize (?not too sure)
-
     const int Matrix_size = 4;
-
+    // A command that I got from S14 code. Helps compiler optimize (?not too sure)
     // Should be 32 here
     __assume_aligned(A, 32);
     __assume_aligned(B, 32);
@@ -181,14 +179,14 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
 
-    double * res = (double*)&c1;
-    printf("td1 elements: %f\t%f\n", res[0], res[1]);
+    // double * res = (double*)&c1;
+    // printf("td1 elements: %f\t%f\n", res[0], res[1]);
+
     // Store matrix C
     _mm256_store_pd(C + Matrix_size * 0, c0);
     _mm256_store_pd(C + Matrix_size * 1, c1);
     _mm256_store_pd(C + Matrix_size * 2, c2);
     _mm256_store_pd(C + Matrix_size * 3, c3);
-    printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n\n\n\n\n\n");
 }
 
 
@@ -212,7 +210,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
     // double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
-
 
     // Assign blocks for kernals to perform fast computation.
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
@@ -262,29 +259,30 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 
     int it, jt;
 
-    printf("Matrix A\n");
-    for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", A[jt*M+it]);
-      }
-      printf("\n");
-    }
-
-    printf("Matrix B\n");
-    for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", B[jt*M+it]);
-      }
-      printf("\n");
-    }
-
-    printf("Matrix C\n");
-     for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", C[jt*M+it]);
-      }
-      printf("\n");
-    }
+    // printf("Matrix A\n");
+    // for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", A[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    //
+    // printf("Matrix B\n");
+    // for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", B[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    //
+    // printf("Matrix C\n");
+    //  for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", C[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    
     // _mm_free(A_transposed);
     // _mm_free(B_transposed);
 }
