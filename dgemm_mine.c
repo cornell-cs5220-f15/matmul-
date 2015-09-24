@@ -137,37 +137,57 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     C[1] = C_swap;
     // Store C
 
-    // /*
-    //  * Do block dot product.  Each iteration adds the result of a two-by-two
-    //  * matrix multiply into the accumulated 2-by-2 product matrix, which is
-    //  * stored in the registers cd (diagonal part) and co (off-diagonal part).
-    //  */
-    // for (int k = 0; k < P; k += 2) {
-    //
-    //     __m128d a0 = _mm_load_pd(A+2*k+0);
-    //     __m128d b0 = _mm_load_pd(B+2*k+0);
-    //     __m128d td0 = _mm_mul_pd(a0, b0);
-    //     __m128d bs0 = swap_sse_doubles(b0);
-    //     __m128d to0 = _mm_mul_pd(a0, bs0);
-    //
-    //     __m128d a1 = _mm_load_pd(A+2*k+2);
-    //     __m128d b1 = _mm_load_pd(B+2*k+2);
-    //     __m128d td1 = _mm_mul_pd(a1, b1);
-    //     __m128d bs1 = swap_sse_doubles(b1);
-    //     __m128d to1 = _mm_mul_pd(a1, bs1);
-    //
-    //     __m128d td_sum = _mm_add_pd(td0, td1);
-    //     __m128d to_sum = _mm_add_pd(to0, to1);
-    //
-    //     cd = _mm_add_pd(cd, td_sum);
-    //     co = _mm_add_pd(co, to_sum);
-    // }
-    //
-    // // Write back sum
-    // _mm_store_pd(C+0, cd);
-    // _mm_store_pd(C+2, co);
-    // printf("I'mhereerererererer");
+
 }
+
+void mine_fma_dgemm( const double* restrict A, const double* restrict B,
+                 double* restrict C){
+    // My kernal function that utilizes the architecture of totient node.
+    // It uses the 256 bits register size which accomodate 4 doubles
+    // Also, it tries to use FMA to maximize the computational efficiency.
+
+    // To do this, it assumes an input of A = 4*4 and B = 4*4 with output C = 4*4
+    // The size can be changed later for better performance, but 4*4 will be a good choice for prototyping
+    // The matrices are all assumed to be stored in column major
+
+    // A command that I got from S14 code. Helps compiler optimize (?not too sure)
+
+    const int Matrix_size = 4;
+
+    __assume_aligned(A, 16);
+    __assume_aligned(B, 16);
+    __assume_aligned(C, 16);
+
+    // Load matrix A
+    __m256d a0 = _mm_load_pd(A + Matrix_size * 0);
+    __m256d a1 = _mm_load_pd(A + Matrix_size * 1);
+    __m256d a2 = _mm_load_pd(A + Matrix_size * 2);
+    __m256d a3 = _mm_load_pd(A + Matrix_size * 3);
+
+    // Load matrix C
+    __m256d c0 = _mm_load_pd(C + Matrix_size * 0);
+    __m256d c1 = _mm_load_pd(C + Matrix_size * 1);
+    __m256d c2 = _mm_load_pd(C + Matrix_size * 2);
+    __m256d c3 = _mm_load_pd(C + Matrix_size * 3);
+
+    // Preallocate one vector for entries of b
+    __m256d bij;
+    // Core routine to update C using FMA
+    int i;
+    for (i = 0; i < Matrix_size * Matrix_size; i++) {
+      bij = _mm256_set1_pd(B+i);
+      c0 = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
+      c1 = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
+      c2 = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
+      c3 = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
+    }
+    // Store matrix C
+    _mm_store_pd(C + Matrix_size * 0, c0);
+    _mm_store_pd(C + Matrix_size * 1, c1);
+    _mm_store_pd(C + Matrix_size * 2, c2);
+    _mm_store_pd(C + Matrix_size * 3, c3);
+}
+
 
 void do_block(const int lda,
               const double* restrict A, const double* restrict B, double* restrict C,
@@ -205,13 +225,16 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         //     A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
         //   }
         // }
-        // Instead of transposing A, transpose B for AVX
-        for (it = 0; it < M_sub; ++it){
-          for (kt = 0; kt < K; ++kt){
-            B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-            // printf("\nNumber%d\n", i + k*M + it + kt*M);
-          }
-        }
+
+        // // Instead of transposing A, transpose B for AVX 2*2
+        // for (it = 0; it < M_sub; ++it){
+        //   for (kt = 0; kt < K; ++kt){
+        //     B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
+        //     // printf("\nNumber%d\n", i + k*M + it + kt*M);
+        //   }
+        // }
+
+        // Don't transpose anything for AVX 4*4
         for (bj = 0; bj < n_blocks; ++bj){
           const int j = bj * BLOCK_SIZE;
           // int it, jt;
@@ -224,7 +247,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           // }
 
           // do_block(M, A_transposed, B, C, i, j, k);
-          do_block(M, A, B_transposed, C, i, j, k); // For AVX
+          // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
+          do_block(M, A, B, C, i, j, k); // For AVX
         }
 
       }
