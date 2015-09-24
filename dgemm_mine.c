@@ -71,12 +71,6 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     __assume_aligned(B, 16);
     __assume_aligned(C, 16);
 
-    // Load first and second columns of C
-    // __m128d c00 = _mm_load_pd(C+0);
-    // __m128d c10 = _mm_load_pd(C+1);
-    // __m128d c01 = _mm_load_pd(C+2);
-    // __m128d c11 = _mm_load_pd(C+4);
-
     // Load diagonal and off-diagonals
     __m128d cd = _mm_load_pd(C+0);
     __m128d co = _mm_load_pd(C+2);
@@ -87,28 +81,28 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     */
     // Load the matrices
     __m128d a0 = _mm_load_pd(A);
-    double* res = (double*)&a0;
+    // double* res = (double*)&a0;
     // printf("a0 elements: %f\t%f\n", res[0], res[1]);
 
     __m128d b0 = _mm_load_pd(B);
-    res = (double*)&b0;
+    // res = (double*)&b0;
     // printf("b0 elements: %f\t%f\n", res[0], res[1]);
 
     __m128d td0 = _mm_mul_pd(a0, b0);
-    res = (double*)&td0;
+    // res = (double*)&td0;
     // printf("td0 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs0 = swap_sse_doubles(b0);
 
     __m128d to0 = _mm_mul_pd(a0, bs0);
 
     __m128d a1 = _mm_load_pd(A+2);
-    res = (double*)&a1;
+    // res = (double*)&a1;
     // printf("a1 elements: %f\t%f\n", res[0], res[1]);
     __m128d b1 = _mm_load_pd(B+BLOCK_SIZE);
-    res = (double*)&b1;
+    // res = (double*)&b1;
     // printf("b1 elements: %f\t%f\n", res[0], res[1]);
     __m128d td1 = _mm_mul_pd(a1, b1);
-    res = (double*)&td1;
+    // res = (double*)&td1;
     // printf("td1 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs1 = swap_sse_doubles(b1);
     __m128d to1 = _mm_mul_pd(a1, bs1);
@@ -119,9 +113,9 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     cd = _mm_add_pd(cd, td_sum);
     co = _mm_add_pd(co, to_sum);
 
-    res = (double*)&cd;
+    // res = (double*)&cd;
     // printf("diagonal elements: %f\t%f\n", res[0], res[1]);
-    res = (double*)&co;
+    // res = (double*)&co;
     // printf("off-diag elements: %f\t%f\n", res[0], res[1]);
 
     // // Update elements of C
@@ -175,7 +169,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __m256d bij;
     // Core routine to update C using FMA
     int i;
-    for (i = 0; i < Matrix_size * Matrix_size; i++) {
+    for (i = 0; i < Matrix_size; i++) {
       bij = _mm256_set1_pd(*(B+i));
       c0 = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
       bij = _mm256_set1_pd(*(B+i+1));
@@ -206,8 +200,8 @@ void do_block(const int lda,
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
 
     //basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
-    mine_dgemm(A,B,C);
-    // mine_fma_dgemm(A,B,C);
+    // mine_dgemm(A,B,C);
+    mine_fma_dgemm(A,B,C);
 }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
@@ -215,7 +209,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     // Preallocate a space for submatrices A, B and C
     // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
-    double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
+    // double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
 
 
     // Assign blocks for kernals to perform fast computation.
@@ -237,12 +231,12 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         // }
 
         // Instead of transposing A, transpose B for AVX 2*2
-        for (it = 0; it < M_sub; ++it){
-          for (kt = 0; kt < K; ++kt){
-            B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-            // printf("\nNumber%d\n", i + k*M + it + kt*M);
-          }
-        }
+        // for (it = 0; it < M_sub; ++it){
+        //   for (kt = 0; kt < K; ++kt){
+        //     B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
+        //     // printf("\nNumber%d\n", i + k*M + it + kt*M);
+        //   }
+        // }
 
         // Don't transpose anything for AVX 4*4
         for (bj = 0; bj < n_blocks; ++bj){
@@ -290,5 +284,5 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       printf("\n");
     }
     // _mm_free(A_transposed);
-    _mm_free(B_transposed);
+    // _mm_free(B_transposed);
 }
