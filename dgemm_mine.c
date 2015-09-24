@@ -148,9 +148,9 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     const int Matrix_size = 4;
     // A command that I got from S14 code. Helps compiler optimize (?not too sure)
     // Should be 32 here
-    __assume_aligned(A, 32);
-    __assume_aligned(B, 32);
-    __assume_aligned(C, 32);
+    __assume_aligned(A, 16);
+    __assume_aligned(B, 16);
+    __assume_aligned(C, 16);
 
     // Load matrix A
     __m256d a0 = _mm256_load_pd(A + Matrix_size * 0);
