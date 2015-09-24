@@ -188,6 +188,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     _mm256_store_pd(C + Matrix_size * 1, c1);
     _mm256_store_pd(C + Matrix_size * 2, c2);
     _mm256_store_pd(C + Matrix_size * 3, c3);
+    printf("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n\n\n\n\n\n");
 }
 
 
