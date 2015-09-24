@@ -1,6 +1,7 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
-#include <nmmintrin.h>
+// #include <nmmintrin.h>
+#include <immintrin.h>
 
 // Block size that is used to fit submatrices into L1 cache
 #ifndef BLOCK_SIZE
@@ -175,7 +176,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     // Core routine to update C using FMA
     int i;
     for (i = 0; i < Matrix_size * Matrix_size; i++) {
-      bij = _mm256_set1_pd(B+i);
+      bij = _mm256_set1_pd(&(B+i));
       c0 = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
       c1 = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
       c2 = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
