@@ -199,9 +199,9 @@ void do_block(const int lda,
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
 
-    //basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
+    // basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
     // mine_dgemm(A,B,C);
-    // mine_fma_dgemm(A,B,C);
+    mine_fma_dgemm(A,B,C);
 }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
