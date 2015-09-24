@@ -160,16 +160,16 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __assume_aligned(C, 16);
 
     // Load matrix A
-    __m256d a0 = _mm_load_pd(A + Matrix_size * 0);
-    __m256d a1 = _mm_load_pd(A + Matrix_size * 1);
-    __m256d a2 = _mm_load_pd(A + Matrix_size * 2);
-    __m256d a3 = _mm_load_pd(A + Matrix_size * 3);
+    __m256d a0 = _mm256_load_pd(A + Matrix_size * 0);
+    __m256d a1 = _mm256_load_pd(A + Matrix_size * 1);
+    __m256d a2 = _mm256_load_pd(A + Matrix_size * 2);
+    __m256d a3 = _mm256_load_pd(A + Matrix_size * 3);
 
     // Load matrix C
-    __m256d c0 = _mm_load_pd(C + Matrix_size * 0);
-    __m256d c1 = _mm_load_pd(C + Matrix_size * 1);
-    __m256d c2 = _mm_load_pd(C + Matrix_size * 2);
-    __m256d c3 = _mm_load_pd(C + Matrix_size * 3);
+    __m256d c0 = _mm256_load_pd(C + Matrix_size * 0);
+    __m256d c1 = _mm256_load_pd(C + Matrix_size * 1);
+    __m256d c2 = _mm256_load_pd(C + Matrix_size * 2);
+    __m256d c3 = _mm256_load_pd(C + Matrix_size * 3);
 
     // Preallocate one vector for entries of b
     __m256d bij;
@@ -183,10 +183,10 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c3 = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
     // Store matrix C
-    _mm_store_pd(C + Matrix_size * 0, c0);
-    _mm_store_pd(C + Matrix_size * 1, c1);
-    _mm_store_pd(C + Matrix_size * 2, c2);
-    _mm_store_pd(C + Matrix_size * 3, c3);
+    _mm256_store_pd(C + Matrix_size * 0, c0);
+    _mm256_store_pd(C + Matrix_size * 1, c1);
+    _mm256_store_pd(C + Matrix_size * 2, c2);
+    _mm256_store_pd(C + Matrix_size * 3, c3);
 }
 
 
