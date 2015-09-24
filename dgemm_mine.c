@@ -189,9 +189,9 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
 
     // // Store matrix C
     _mm256_storeu_pd(C + Matrix_size * 0, c0);
-    // _mm256_storeu_pd(C + Matrix_size * 1, c1);
-    // _mm256_storeu_pd(C + Matrix_size * 2, c2);
-    // _mm256_storeu_pd(C + Matrix_size * 3, c3);
+    _mm256_storeu_pd(C + Matrix_size * 1, c1);
+    _mm256_storeu_pd(C + Matrix_size * 2, c2);
+    _mm256_storeu_pd(C + Matrix_size * 3, c3);
 }
 
 
