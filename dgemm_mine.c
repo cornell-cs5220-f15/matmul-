@@ -201,7 +201,7 @@ void do_block(const int lda,
 
     //basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
     // mine_dgemm(A,B,C);
-    mine_fma_dgemm(A,B,C);
+    // mine_fma_dgemm(A,B,C);
 }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
@@ -222,6 +222,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         // Transpose A. This part needs to be rewritten for clarity and performance
         const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
         const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
+
         int it, kt;
         // for (it = 0; it < M_sub; ++it){
         //   for (kt = 0; kt < K; ++kt){
@@ -258,31 +259,30 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
 
     int it, jt;
+    printf("Matrix A\n");
+    for (it = 0; it < M; ++it ){
+      for (jt = 0; jt < M; ++jt){
+        printf("%f\t", A[jt*M+it]);
+      }
+      printf("\n");
+    }
 
-    // printf("Matrix A\n");
-    // for (it = 0; it < M; ++it ){
-    //   for (jt = 0; jt < M; ++jt){
-    //     printf("%f\t", A[jt*M+it]);
-    //   }
-    //   printf("\n");
-    // }
-    //
-    // printf("Matrix B\n");
-    // for (it = 0; it < M; ++it ){
-    //   for (jt = 0; jt < M; ++jt){
-    //     printf("%f\t", B[jt*M+it]);
-    //   }
-    //   printf("\n");
-    // }
-    //
-    // printf("Matrix C\n");
-    //  for (it = 0; it < M; ++it ){
-    //   for (jt = 0; jt < M; ++jt){
-    //     printf("%f\t", C[jt*M+it]);
-    //   }
-    //   printf("\n");
-    // }
-    
+    printf("Matrix B\n");
+    for (it = 0; it < M; ++it ){
+      for (jt = 0; jt < M; ++jt){
+        printf("%f\t", B[jt*M+it]);
+      }
+      printf("\n");
+    }
+
+    printf("Matrix C\n");
+     for (it = 0; it < M; ++it ){
+      for (jt = 0; jt < M; ++jt){
+        printf("%f\t", C[jt*M+it]);
+      }
+      printf("\n");
+    }
+
     // _mm_free(A_transposed);
     // _mm_free(B_transposed);
 }
