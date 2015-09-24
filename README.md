@@ -149,7 +149,12 @@ also provide the file name as an argument, i.e.
 
     ./matmul-blocked timing-blocked.csv
 
-The Makefile has targets for running the timer on the instructional nodes
+These commands run benchmarks on the *local machine*. If you're logged into Totient, this will usually be the *head node*. 
+To run benchmarks on a *compute node*, which will give completely different results, you want to use make commands (listed below). 
+Make sure to keep things consistent i.e. don't compare a head node benchmark with a computer node benchmark. 
+While testing on the head node is perfectly fine, your submitted benchmarks should be from a compute node, as I want to keep benchmarks consistent among the class.  
+
+The Makefile has targets for running the timer on the compute nodes
 on totient using the `job-*.pbs` scripts.  For example,
 
     make timing-blocked.csv
@@ -207,3 +212,11 @@ will compare the contents of `timing-basic.csv`, `timing-blocked.csv`,
 and `timing-blas.csv`.  Note that you need to be using the Anaconda
 module if you are going to explicitly run the Python version, since the
 script uses Pandas (which the system Python lacks).
+
+
+## Optimization Tips and Tricks
+
+Please refer to these [notes](http://www.cs.cornell.edu/~bindel/class/cs5220-f11/notes/serial-tuning.pdf) to get started. The notes discuss blocking, buffering, SSE instructions, and auto-tuning, among other optimizations.
+The [Roofline Paper] (http://www.eecs.berkeley.edu/Pubs/TechRpts/2008/EECS-2008-134.pdf) discussed in class on 9/08/2015 is also worth looking at, although you might have to do a bit of extra reading. 
+The previous Project instructions for this assignment can be found [here] (https://bitbucket.org/dbindel/cs5220-s14/wiki/HW1). 
+Assume for the time being that the final submission instructions for this assignment have not changed. 
