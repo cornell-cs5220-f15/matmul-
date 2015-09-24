@@ -23,7 +23,7 @@ const char* dgemm_desc = "My awesome matmul.";
   L3*L2 is the number of submatrix that will fit in L3
 
 */
-void row_to_block(const int M, const int nblock, const double *A, double *newA)
+void row_to_block(const int M, const int nblock, const double *restrict A, double *restrict newA)
 {
 	// converts to block indexing and pads the new matrix with zeros so that it is divisble by L1_BS
 	int bi,bj,i,j;	
@@ -44,7 +44,14 @@ void row_to_block(const int M, const int nblock, const double *A, double *newA)
 	}
 }
 
-void block_to_row(const int M, const int nblock, double *A, const double *newA)
+
+
+
+
+
+
+
+void block_to_row(const int M, const int nblock, double *restrict A, const double *restrict newA)
 {
 	int bi, bj,i,j;	
 	for(bi=0; bi < nblock; ++bi){
@@ -63,27 +70,66 @@ void block_to_row(const int M, const int nblock, double *A, const double *newA)
 		}
 	}
 }	
+void row_to_block_transpose(const int M, const int nblock, const double *restrict A, double *restrict newA)
+{
+	// converts to block indexing and pads the new matrix with zeros so that it is divisble by L1_BS
+	int bi,bj,i,j;	
+	for(bi=0; bi < nblock; ++bi){
+		for(bj=0; bj < nblock; ++bj){
+			for(i=0; i < L1_BS; ++i){
+				for(j=0; j < L1_BS; ++j){
+					if ((bj*L1_BS+j) >= M || bi*L1_BS+i >= M){ 
+						// we can optimize this to delete this "if". this is doing the padding 
+						newA[((bj*nblock+bi)*L1_BS*L1_BS+ j*L1_BS+i)]=0;
+					}
+					else{
+						newA[(bj*nblock+bi)*L1_BS*L1_BS+ j*L1_BS+i]=A[(j+bj*L1_BS)*M+bi*L1_BS+i]; 
+					}				
+				}
+			}
+		}
+	}
+}
+
+
+
+
+
 
 void do_block(const int M, const int nblock,
-              const double *A, const double *B, double *C,
+              const double * restrict A, const double * restrict B, double * restrict C,
               const int bi, const int bj, const int bk)
 {
-	int i, j, k;
+	int i, j, k, BA_A, BA_B, sub_BA_A, sub_BA_B, BA_C, sub_BA_C;
     __assume_aligned(A, 64);
-	__assume_aligned(B, 64);
+    __assume_aligned(B, 64);
     __assume_aligned(C, 64);
 
-    __assume(bi%16==0);
-	__assume(bj%16==0);
-    __assume(bk%16==0);
-
+	// BA stands for block adress 
+    BA_A=(bk*nblock+bi)*L1_BS*L1_BS;
+    BA_B=(bj*nblock+bk)*L1_BS*L1_BS;
+    BA_C=(bj*nblock+bi)*L1_BS*L1_BS;
     for (i = 0; i < L1_BS; ++i) {
-        for (j = 0; j < L1_BS; ++j) {
-            double cij = C[((bj*nblock+bi)*L1_BS*L1_BS+ i*L1_BS+j)];
+	// finds sub_BA, tells compiler its aligned
+	sub_BA_A=BA_A+L1_BS*i;
+	__assume(sub_BA_A%8==0);	
+	//same for C                
+    	sub_BA_C=BA_C+L1_BS*i;
+        __assume(sub_BA_C%8==0);
+
+	for (j = 0; j < L1_BS; ++j){
+	    sub_BA_B=BA_B+L1_BS*j;
+            __assume(sub_BA_B%8==0);
+
+	    double cij = C[sub_BA_C+j];
+	
             for (k = 0; k < L1_BS; ++k) {
-                cij += A[((bk*nblock+bi))*L1_BS*L1_BS+L1_BS*i+k] * B[((bj*nblock)+bk)*L1_BS*L1_BS+L1_BS*k+j];
-            }
-            C[((bj*nblock+bi)*L1_BS*L1_BS+ i*L1_BS+j)]= cij;
+		// new kernel using block to row transpose	
+                cij += A[sub_BA_A+k] * B[sub_BA_B+k];
+       		//without transpose: 
+       		//cij += A[((bk*nblock+bi))*L1_BS*L1_BS+L1_BS*i+k] * B[((bj*nblock)+bk)*L1_BS*L1_BS+L1_BS*k+j];
+		}
+	 C[sub_BA_C+j]= cij;
         }
     }
 }
@@ -115,27 +161,26 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 	L2nblock=pad_size/(L2_BS*L1_BS);}
 
 	else{L2nblock=pad_size/(L2_BS*L1_BS)+1;}
-
 		
-	// use something like double bA[size] __attribute__((aligned(64))); instead?
-	double bA[pad_size*pad_size*] __attribute__((aligned(64))); 
-	double bB[pad_size*pad_size*] __attribute__((aligned(64))); 
-	double bC[pad_size*pad_size*] __attribute__((aligned(64))); 
-	
-	
-	
-	/*double *restrict bA= (double*) malloc(pad_size*pad_size*sizeof(double));
-	double *restrict bB= (double*) malloc(pad_size*pad_size*sizeof(double));
-	double *restrict bC= (double*) malloc(pad_size*pad_size*sizeof(double));
+	 //use something like double bA[size] __attribute__((aligned(64))); instead?
+	/*
+	double bA[pad_size*pad_size] __attribute__((aligned(64))); 
+	double bB[pad_size*pad_size] __attribute__((aligned(64))); 
+	double bC[pad_size*pad_size] __attribute__((aligned(64))); 
 	*/
+	
+	
+	double *restrict bA= (double*) _mm_malloc(pad_size*pad_size*sizeof(double),64);
+	double *restrict bB= (double*) _mm_malloc(pad_size*pad_size*sizeof(double),64);
+	double *restrict bC= (double*) _mm_malloc(pad_size*pad_size*sizeof(double),64);
+	
 	
 	
 	
 	// change indexing
 	row_to_block(M,nblock, A, bA);
-	row_to_block(M,nblock, B, bB);
+	row_to_block_transpose(M,nblock, B, bB);
 	row_to_block(M,nblock, C, bC);
-	
 
 	for (L2bk=0; L2bk < L2nblock; ++L2bk){  
 	for (L2bj=0; L2bj < L2nblock; ++L2bj){
