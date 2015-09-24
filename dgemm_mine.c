@@ -180,7 +180,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     }
 
     double* res = (double*)&a0;
-    printf("%lf %lf %lf %lf\n", res[0], res[1], res[2], res[3]);
+    // printf("%lf %lf %lf %lf\n", res[0], res[1], res[2], res[3]);
     // double * res = (double*)&c1;
     // printf("td1 elements: %f\t%f\n", res[0], res[1]);
 
