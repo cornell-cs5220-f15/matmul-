@@ -169,13 +169,13 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     // Core routine to update C using FMA
     int i;
     for (i = 0; i < Matrix_size; i++) {
-      bij = _mm256_set1_pd((B+i));
+      bij = _mm256_set1_pd(*(B+i*Matrix_size));
       c0  = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
-      bij = _mm256_set1_pd((B+i+1));
+      bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
       c1  = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
-      bij = _mm256_set1_pd((B+i+2));
+      bij = _mm256_set1_pd(*(B+i*Matrix_size+2));
       c2  = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
-      bij = _mm256_set1_pd((B+i+3));
+      bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
       c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
 
