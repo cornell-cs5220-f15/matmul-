@@ -69,6 +69,14 @@ void do_block(const int M, const int nblock,
               const int bi, const int bj, const int bk)
 {
 	int i, j, k;
+    __assume_aligned(A, 64);
+	__assume_aligned(B, 64);
+    __assume_aligned(C, 64);
+
+    __assume(bi%16==0);
+	__assume(bj%16==0);
+    __assume(bk%16==0);
+
     for (i = 0; i < L1_BS; ++i) {
         for (j = 0; j < L1_BS; ++j) {
             double cij = C[((bj*nblock+bi)*L1_BS*L1_BS+ i*L1_BS+j)];
@@ -109,11 +117,20 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 	else{L2nblock=pad_size/(L2_BS*L1_BS)+1;}
 
 		
-
-	double *restrict bA= (double*) malloc(pad_size*pad_size*sizeof(double));
+	// use something like double bA[size] __attribute__((aligned(64))); instead?
+	double bA[pad_size*pad_size*] __attribute__((aligned(64))); 
+	double bB[pad_size*pad_size*] __attribute__((aligned(64))); 
+	double bC[pad_size*pad_size*] __attribute__((aligned(64))); 
+	
+	
+	
+	/*double *restrict bA= (double*) malloc(pad_size*pad_size*sizeof(double));
 	double *restrict bB= (double*) malloc(pad_size*pad_size*sizeof(double));
 	double *restrict bC= (double*) malloc(pad_size*pad_size*sizeof(double));
-
+	*/
+	
+	
+	
 	// change indexing
 	row_to_block(M,nblock, A, bA);
 	row_to_block(M,nblock, B, bB);
