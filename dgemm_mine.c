@@ -178,8 +178,11 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     for (i = 0; i < Matrix_size * Matrix_size; i++) {
       bij = _mm256_set1_pd(*(B+i));
       c0 = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
+      bij = _mm256_set1_pd(*(B+i+1));
       c1 = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
+      bij = _mm256_set1_pd(*(B+i+2));
       c2 = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
+      bij = _mm256_set1_pd(*(B+i+3));
       c3 = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
     // Store matrix C
@@ -210,7 +213,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
     // double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
 
-    
+
     // Assign blocks for kernals to perform fast computation.
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     int bi, bj, bk;
