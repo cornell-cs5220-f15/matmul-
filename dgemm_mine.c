@@ -206,8 +206,8 @@ void do_block(const int lda,
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
 
     //basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
-    // mine_dgemm(A,B,C);
-    mine_fma_dgemm(A,B,C);
+    mine_dgemm(A,B,C);
+    // mine_fma_dgemm(A,B,C);
 }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
@@ -215,7 +215,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     // Preallocate a space for submatrices A, B and C
     // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
-    // double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
+    double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
 
 
     // Assign blocks for kernals to perform fast computation.
@@ -236,13 +236,13 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         //   }
         // }
 
-        // // Instead of transposing A, transpose B for AVX 2*2
-        // for (it = 0; it < M_sub; ++it){
-        //   for (kt = 0; kt < K; ++kt){
-        //     B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-        //     // printf("\nNumber%d\n", i + k*M + it + kt*M);
-        //   }
-        // }
+        // Instead of transposing A, transpose B for AVX 2*2
+        for (it = 0; it < M_sub; ++it){
+          for (kt = 0; kt < K; ++kt){
+            B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
+            // printf("\nNumber%d\n", i + k*M + it + kt*M);
+          }
+        }
 
         // Don't transpose anything for AVX 4*4
         for (bj = 0; bj < n_blocks; ++bj){
@@ -290,5 +290,5 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       printf("\n");
     }
     // _mm_free(A_transposed);
-    // _mm_free(B_transposed);
+    _mm_free(B_transposed);
 }

@@ -46,7 +46,7 @@ extern void square_dgemm();
   around some of the powers-of-two.
 */
 const int test_sizes[] = {
-    4,
+    2,
 
 #if defined(DEBUG_RUN)
 # define MAX_SIZE 4u//229u
