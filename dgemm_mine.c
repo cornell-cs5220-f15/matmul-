@@ -229,7 +229,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         //   }
         // }
 
-        Instead of transposing A, transpose B for AVX 2*2
+        // Instead of transposing A, transpose B for AVX 2*2
         for (it = 0; it < M_sub; ++it){
           for (kt = 0; kt < K; ++kt){
             B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
