@@ -205,7 +205,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 
       }
     }
-    // 
+
+    /* Print out all the matrices for debugging */
     // int it, jt;
     // printf("Matrix A\n");
     // for (it = 0; it < M; ++it ){
@@ -230,7 +231,9 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //   }
     //   printf("\n");
     // }
+    /* Debugging Session Done*/
 
+    // Free memory for basic kernal and AVX kernal.
     // _mm_free(A_transposed);
     // _mm_free(B_transposed);
 }
