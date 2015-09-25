@@ -183,7 +183,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __m128d cf1;
     __m128d cf2;
     double* cc1, cc2;
-    _mm256_storeu2_m128d(cc1, cc2, c0);
+    _mm256_storeu2_m128d(C, C, c0);
     // _mm_store_pd(C, cf1);
 }
 
