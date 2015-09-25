@@ -135,8 +135,8 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     scatter_vec(C, a1);
     int it, jt;
     printf("============Matrix C inside the loop ============\n");
-     for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
+     for (it = 0; it < 4; ++it ){
+      for (jt = 0; jt < 4; ++jt){
         printf("%f\t", C[jt*M+it]);
       }
       printf("\n");
