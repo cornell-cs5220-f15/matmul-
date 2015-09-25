@@ -178,7 +178,12 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
       c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
-    _mm256_storeu_pd ((double *) C, a1);
+    // _mm256_storeu_pd ((double *) C, a1);
+
+    __m128d cf1;
+    __m128d cf2;
+    _mm256_storeu2_m128d(cf1, cf2, c0)
+    _mm_store_pd(C, cf1);
 }
 
 
