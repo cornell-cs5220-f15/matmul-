@@ -79,31 +79,16 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     Assuming 2*2 case, and we do traditional, naive three loop multiplication.
     Except in this case we don't need any loop because it's small.
     */
-    // Load the matrices
+
     __m128d a0 = _mm_load_pd(A);
-    // double* res = (double*)&a0;
-    // printf("a0 elements: %f\t%f\n", res[0], res[1]);
-
     __m128d b0 = _mm_load_pd(B);
-    // res = (double*)&b0;
-    // printf("b0 elements: %f\t%f\n", res[0], res[1]);
-
     __m128d td0 = _mm_mul_pd(a0, b0);
-    // res = (double*)&td0;
-    // printf("td0 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs0 = swap_sse_doubles(b0);
-
     __m128d to0 = _mm_mul_pd(a0, bs0);
 
     __m128d a1 = _mm_load_pd(A+2);
-    // res = (double*)&a1;
-    // printf("a1 elements: %f\t%f\n", res[0], res[1]);
     __m128d b1 = _mm_load_pd(B+BLOCK_SIZE);
-    // res = (double*)&b1;
-    // printf("b1 elements: %f\t%f\n", res[0], res[1]);
     __m128d td1 = _mm_mul_pd(a1, b1);
-    // res = (double*)&td1;
-    // printf("td1 elements: %f\t%f\n", res[0], res[1]);
     __m128d bs1 = swap_sse_doubles(b1);
     __m128d to1 = _mm_mul_pd(a1, bs1);
 
@@ -113,26 +98,12 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     cd = _mm_add_pd(cd, td_sum);
     co = _mm_add_pd(co, to_sum);
 
-    // res = (double*)&cd;
-    // printf("diagonal elements: %f\t%f\n", res[0], res[1]);
-    // res = (double*)&co;
-    // printf("off-diag elements: %f\t%f\n", res[0], res[1]);
-
-    // // Update elements of C
-    // __m128d c00 = _mm_mul_pd(a0,b0);
-    // __m128d c10 = _mm_mul_pd(a1,b0);
-    // __m128d c01 = _mm_mul_pd(a0,b1);
-    // __m128d c11 = _mm_mul_pd(a1,b1);
-    // __m128d co_s = swap_sse_doubles(co);
     _mm_store_pd(C+0, cd);
     _mm_store_pd(C+2, co);
 
     C_swap = C[3];
     C[3] = C[1];
     C[1] = C_swap;
-    // Store C
-
-
 }
 
 void mine_fma_dgemm( const double* restrict A, const double* restrict B,
@@ -146,6 +117,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     // The matrices are all assumed to be stored in column major
 
     const int Matrix_size = 4;
+
     // A command that I got from S14 code. Helps compiler optimize (?not too sure)
     // Should be 32 here
     __assume_aligned(A, 32);
@@ -233,7 +205,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         for (it = 0; it < M_sub; ++it){
           for (kt = 0; kt < K; ++kt){
             B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-            // printf("\nNumber%d\n", i + k*M + it + kt*M);
           }
         }
 
@@ -250,8 +221,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           // }
 
           // do_block(M, A_transposed, B, C, i, j, k);
-          // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
-          do_block(M, A, B, C, i, j, k); // For AVX
+          do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
+          // do_block(M, A, B, C, i, j, k); // For AVX 4*4
         }
 
       }
