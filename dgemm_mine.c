@@ -127,49 +127,60 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __assume_aligned(C, 32);
 
     // Load matrix A
-    __m256d a0 = _mm256_load_pd(A + Matrix_size * 0);
-    __m256d a1 = _mm256_load_pd(A + Matrix_size * 1);
-    __m256d a2 = _mm256_load_pd(A + Matrix_size * 2);
-    __m256d a3 = _mm256_load_pd(A + Matrix_size * 3);
+    // Here the load function is loadu, which doesn't require alignment of the meory
+    __m256d a0 = _mm256_loadu_pd((A + Matrix_size * 0));
+    __m256d a1 = _mm256_loadu_pd((A + Matrix_size * 1));
+    __m256d a2 = _mm256_loadu_pd((A + Matrix_size * 2));
+    __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
 
-    // scatter_vec(C, a1);
-    // int it, jt;
-    //
-    // printf("============Matrix C inside the loop ============\n");
-    //  for (it = 0; it < 4; ++it ){
-    //   for (jt = 0; jt < 4; ++jt){
-    //     printf("%f\t", C[jt*4+it]);
-    //   }
-    //   printf("\n");
-    // }
+    __m256 bij;
+    int i, j;
+    for (i = 0; i < Matrix_size; i++){
+      // Load one column of C, C(:,i)
+      __m256d c = _mm256_loadu_pd((C + Matrix_size*i));
 
-
-    // Load matrix C
-    __m256d c0 = _mm256_load_pd(C + Matrix_size * 0);
-    __m256d c1 = _mm256_load_pd(C + Matrix_size * 1);
-    __m256d c2 = _mm256_load_pd(C + Matrix_size * 2);
-    __m256d c3 = _mm256_load_pd(C + Matrix_size * 3);
-
-    // Preallocate one vector for entries of b
-    __m256d bij;
-    // Core routine to update C using FMA
-    int i;
-    for (i = 0; i < Matrix_size; i++) {
-      bij = _mm256_set1_pd(*(B+i*Matrix_size));
-      c0  = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
+      // Perform FMA on A*B(:,i)
+      bij = _mm256_set1_pd(*(B+i*Matrix_size+0));
+      c = _mm256_fmadd_pd(a0, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
-      c1  = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
+      c = _mm256_fmadd_pd(a1, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+2));
-      c2  = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
+      c = _mm256_fmadd_pd(a2, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
-      c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
+      c = _mm256_fmadd_pd(a3, bij, c);
+
+      // Store C(:,i)
+      _mm256_storeu_pd((C+i*Matrix_size),c);
     }
 
+
+
+    // // Load matrix C
+    // __m256d c0 = _mm256_load_pd(C + Matrix_size * 0);
+    // __m256d c1 = _mm256_load_pd(C + Matrix_size * 1);
+    // __m256d c2 = _mm256_load_pd(C + Matrix_size * 2);
+    // __m256d c3 = _mm256_load_pd(C + Matrix_size * 3);
+    //
+    // // Preallocate one vector for entries of b
+    // __m256d bij;
+    // // Core routine to update C using FMA
+    // int i;
+    // for (i = 0; i < Matrix_size; i++) {
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size));
+    //   c0  = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
+    //   c1  = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+2));
+    //   c2  = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
+    //   c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
+    // }
+
     // _mm256_storeu_pd ((double *) C, a1);
-    scatter_vec(C, c0);
-    scatter_vec(C+4, c1);
-    scatter_vec(C+8, c2);
-    scatter_vec(C+12, c3);
+    // scatter_vec(C, c0);
+    // scatter_vec(C+4, c1);
+    // scatter_vec(C+8, c2);
+    // scatter_vec(C+12, c3);
 }
 
 
