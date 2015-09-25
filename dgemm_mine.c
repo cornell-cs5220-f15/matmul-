@@ -169,7 +169,7 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   }
 }
 void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
-        const double* restrict Matrix, double* restrict subMatrix){
+        double* restrict Matrix, const double* restrict subMatrix){
     int m, n;
     const int M = (i+sub_size > mat_size? mat_size-i : sub_size);
     const int N = (j+sub_size > mat_size? mat_size-j : sub_size);
