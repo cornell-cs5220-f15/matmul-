@@ -136,7 +136,7 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
 }
 
 void mine_fma_dgemm( const double* restrict A, const double* restrict B,
-                 double* restrict C){
+                 double* C){
     // My kernal function that utilizes the architecture of totient node.
     // It uses the 256 bits register size which accomodate 4 doubles
     // Also, it tries to use FMA to maximize the computational efficiency.
@@ -178,12 +178,13 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
       c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
-    // _mm256_storeu_pd ((double *) C, a1);
 
-    __m128d cf1;
-    __m128d cf2;
-    double* cc1, cc2;
-    _mm256_storeu2_m128d(C, C, c0);
+    _mm256_storeu_pd ((double *) C, a1);
+
+    // __m128d cf1;
+    // __m128d cf2;
+    // double* cc1, cc2;
+    // _mm256_storeu2_m128d(C, C, c0);
     // _mm_store_pd(C, cf1);
 }
 
