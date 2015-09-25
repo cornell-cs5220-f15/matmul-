@@ -9,8 +9,8 @@ const char* dgemm_desc = "My awesome dgemm.";
 #endif
 
 // Block size that is used to fit submatrices into register
-#ifndef SUB_BLOCK_SIZE
-#define SUB_BLOCK_SIZE ((int) 8)
+#ifndef INNER_BLOCK_SIZE
+#define INNER_BLOCK_SIZE ((int) 4)
 #endif
 
 #ifdef USE_SHUFPD
@@ -19,19 +19,14 @@ const char* dgemm_desc = "My awesome dgemm.";
 #  define swap_sse_doubles(a) (__m128d) _mm_shuffle_epi32((__m128i) a, 0x4e)
 #endif
 
-/*
-  A is M-by-K
-  B is K-by-N
-  C is M-by-N
 
-  lda is the leading dimension of the matrix (the M of square_dgemm).
-*/
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B,
-                 double* restrict C)//, const double restrict *C_original)
+                 double* restrict C)
 {
-
-    // New kernal function for A stored in row-major.
+  /* For the new kernal function, A must be stored in row-major
+    lda is the leading dimension of the matrix (the M of square_dgemm).
+    A is M-by-K, B is K-by-N and C is M-by-N */
     int i, j, k;
     for(j = 0; j < N; ++j){
       for(i = 0; i < M; ++i){
@@ -46,9 +41,11 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 
 void mine_dgemm( const double* restrict A, const double* restrict B,
                  double* restrict C){
-    // My kernal function that uses AVX for optimal performance
-    // It always assumes an input of A = 2 * P, B = P * 2
-    // Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
+    /*  My kernal function that uses AVX for optimal performance
+        It always assumes an input of A = 2 * P, B = P * 2
+        Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
+        B should be stored in its row form.
+    */
 
     double C_swap = C[1];
     C[1] = C[3];
@@ -96,30 +93,29 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
 
 void mine_fma_dgemm( const double* restrict A, const double* restrict B,
                  double* restrict C){
-    // My kernal function that utilizes the architecture of totient node.
-    // It uses the 256 bits register size which accomodate 4 doubles
-    // Also, it tries to use FMA to maximize the computational efficiency.
-
-    // To do this, it assumes an input of A = 4*4 and B = 4*4 with output C = 4*4
-    // The size can be changed later for better performance, but 4*4 will be a good choice for prototyping
-    // The matrices are all assumed to be stored in column major
+    /*
+    My kernal function that utilizes the architecture of totient node.
+    It uses the 256 bits register size which accomodate 4 doubles
+    Also, it uses FMA to maximize the computational efficiency.
+    To do this, it assumes an input of A = 4*4 and B = 4*4 with output C = 4*4
+    The size can be changed later for better performance, but 4*4 will be a good choice for prototyping
+    The matrices are all assumed to be stored in column major
+     */
 
     const int Matrix_size = 4;
 
-    // A command that I got from S14 code. Helps compiler optimize (?not too sure)
-    // Should be 32 here
+    // A command that I got from S14 code. Helps compiler optimize
     __assume_aligned(A, 32);
     __assume_aligned(B, 32);
     __assume_aligned(C, 32);
 
-    // Load matrix A
-    // Here the load function is loadu, which doesn't require alignment of the meory
+    // Load matrix A. The load function is loadu, which doesn't require alignment of the meory
     __m256d a0 = _mm256_loadu_pd((A + Matrix_size * 0));
     __m256d a1 = _mm256_loadu_pd((A + Matrix_size * 1));
     __m256d a2 = _mm256_loadu_pd((A + Matrix_size * 2));
     __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
 
-    __m256 bij;
+    __m256d bij;
     int i, j;
     for (i = 0; i < Matrix_size; i++){
       // Load one column of C, C(:,i)
@@ -153,87 +149,117 @@ void do_block(const int lda,
     mine_fma_dgemm(A,B,C);
 }
 
+void matrix_copy (const int mat_size, const int sub_size, const int i, const int j,
+        const double* restrict Matrix, double* restrict subMatrix){
+  // Get a copy of submatrix
+  const int M = (i+sub_size > mat_size? mat_size-i : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
+  const int N = (j+sub_size > mat_size? mat_size-j : sub_size);
+  // Make a copy
+  int m, n;
+  for (m = 0; m < M; m++){
+    for (n = 0; n < N; n++){
+      subMatrix[m*sub_size + n] = Matrix[(i+m)*sub_size + (j+n)];
+    }
+  }
+  // Populate the submatrix with 0 to enforce regular pattern in the computation.
+  for (m = 0; m < (sub_size - M); m++){
+    for (n = 0; n < (sub_size - N); n++){
+      subMatrix[m*sub_size + n] = 0.0;
+    }
+  }
+}
+void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
+        const double* restrict Matrix, double* restrict subMatrix){
+    int m, n;
+    const int M = (i+sub_size > mat_size? mat_size-i : sub_size);
+    const int N = (j+sub_size > mat_size? mat_size-j : sub_size);
+    for (m = 0; m < M; m++){
+      for (n = 0; n < N; n++){
+         Matrix[(i+m)*sub_size + (j+n)] = subMatrix[m*sub_size + n];
+      }
+    }
+}
+
+
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
-    // Preallocate a space for submatrices A, B and C
+    // // Preallocate a space for submatrices A, B and C
     // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
     // double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
 
+    // Preallocate spaces for outer matrices A, B and C;
+    double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    // Preallocate spaces for inner matrices A, B and C;
+    double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+    double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+    double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+
     // Assign blocks for kernals to perform fast computation.
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
+    const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
     int bi, bj, bk;
-    for (bi = 0; bi < n_blocks; ++bi){
-      const int i = bi * BLOCK_SIZE;
-      for (bk = 0; bk < n_blocks; ++bk){
-        const int k = bk * BLOCK_SIZE;
-
-        // Transpose A. This part needs to be rewritten for clarity and performance
-        const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
-        const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
-
-        // int it, kt;
-        // for (it = 0; it < M_sub; ++it){
-        //   for (kt = 0; kt < K; ++kt){
-        //     A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
-        //   }
-        // }
-
-        // Instead of transposing A, transpose B for AVX 2*2
-        // for (it = 0; it < M_sub; ++it){
-        //   for (kt = 0; kt < K; ++kt){
-        //     B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-        //   }
-        // }
-
-        // Don't transpose anything for AVX 4*4
-        for (bj = 0; bj < n_blocks; ++bj){
-          const int j = bj * BLOCK_SIZE;
-          // int it, jt;
-          // printf("Matrix B_transposed\n");
-          // for (it = 0; it < M; ++it ){
-          //   for (jt = 0; jt < M; ++jt){
-          //     printf("%f\t", B_transposed[jt*BLOCK_SIZE+it]);
-          //   }
-          //   printf("\n");
-          // }
-
-          // do_block(M, A_transposed, B, C, i, j, k);
-          // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
-          do_block(M, A, B, C, i, j, k); // For AVX 4*4
+    int sbi, sbj, sbk;
+    for (bi = 0; bi < n_blocks; bi++){
+      for (bj = 0; bj < n_blocks; bj++){
+        matrix_copy (M, BLOCK_SIZE, bi, bj, C, C_outer);
+        for (bk = 0; bk < n_blocks; bk++){
+          matrix_copy (M, BLOCK_SIZE, bi, bk, A, A_outer);
+          matrix_copy (M, BLOCK_SIZE, bk, bj, B, B_outer);
+          // Compute the block multiplication by passing submatrices to kernal function
+          for (sbi = 0; sbi < n_inner_blocks; sbi++){
+            for (sbj = 0; sbj < n_inner_blocks; sbj++){
+              matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+              for (sbk = 0; sbk < n_inner_blocks; sbk++){
+                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
+                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
+                mine_fma_dgemm(A_inner, B_inner, C_inner);
+              }
+              matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+            }
+          }
         }
-
       }
     }
-
-    /* Print out all the matrices for debugging */
-    // int it, jt;
-    // printf("Matrix A\n");
-    // for (it = 0; it < M; ++it ){
-    //   for (jt = 0; jt < M; ++jt){
-    //     printf("%f\t", A[jt*M+it]);
-    //   }
-    //   printf("\n");
-    // }
+    // int bi, bj, bk;
+    // for (bi = 0; bi < n_blocks; ++bi){
+    //   const int i = bi * BLOCK_SIZE;
+    //   for (bk = 0; bk < n_blocks; ++bk){
+    //     const int k = bk * BLOCK_SIZE;
+    //     for (bj = 0; bj < n_blocks; ++bj){
+    //       const int j = bj * BLOCK_SIZE;
+    //       // do_block(M, A_transposed, B, C, i, j, k);
+    //       // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
+    //       do_block(M, A, B, C, i, j, k); // For AVX 4*4
+    //     }
+    //     // // Transpose A.
+    //     // const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
+    //     // const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
+    //     // int it, kt;
     //
-    // printf("Matrix B\n");
-    // for (it = 0; it < M; ++it ){
-    //   for (jt = 0; jt < M; ++jt){
-    //     printf("%f\t", B[jt*M+it]);
-    //   }
-    //   printf("\n");
-    // }
+    //     // for (it = 0; it < M_sub; ++it){
+    //     //   for (kt = 0; kt < K; ++kt)
+    //     //     A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
+    //     // }
     //
-    // printf("Matrix C\n");
-    //  for (it = 0; it < M; ++it ){
-    //   for (jt = 0; jt < M; ++jt){
-    //     printf("%f\t", C[jt*M+it]);
+    //     // // Instead of transposing A, transpose B for AVX 2*2
+    //     // for (it = 0; it < M_sub; ++it){
+    //     //   for (kt = 0; kt < K; ++kt)
+    //     //     B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
+    //     // }
+    //
+    //     // // Don't transpose anything for AVX 4*4
+    //     // for (bj = 0; bj < n_blocks; ++bj){
+    //     //   const int j = bj * BLOCK_SIZE;
+    //     //   // do_block(M, A_transposed, B, C, i, j, k);
+    //     //   // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
+    //     //   do_block(M, A, B, C, i, j, k); // For AVX 4*4
+    //     // }
     //   }
-    //   printf("\n");
     // }
-    /* Debugging Session Done*/
-
-    // Free memory for basic kernal and AVX kernal.
+    // // Free memory for basic kernal and AVX kernal.
     // _mm_free(A_transposed);
     // _mm_free(B_transposed);
 }
