@@ -154,10 +154,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     }
 
     // _mm256_storeu_pd ((double *) C, a1);
-    scatter_vec(C, c0);
-    scatter_vec(C+4, c1);
-    scatter_vec(C+8, c2);
-    scatter_vec(C+12, c3);
+    scatter_vec(C, bij);
 }
 
 
