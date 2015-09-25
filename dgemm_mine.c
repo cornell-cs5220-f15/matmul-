@@ -94,20 +94,6 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     C[1] = C_swap;
 }
 
-void scatter_vec(double* addr, __m256d data) {
-  // Extract lower 128b from SIMD register and store each double to
-  // appropriate memory location.
-  __m128d lower_data = _mm256_extractf128_pd(data, 0);
-  _mm_storel_pd(addr+0, lower_data);
-  _mm_storeh_pd(addr+1, lower_data);
-
-  // Extract higher 128b from SIMD register and store each double to
-  // appropriate memory location.
-  __m128d higher_data = _mm256_extractf128_pd(data, 1);
-  _mm_storel_pd(addr+2, higher_data);
-  _mm_storeh_pd(addr+3, higher_data);
-}
-
 void mine_fma_dgemm( const double* restrict A, const double* restrict B,
                  double* restrict C){
     // My kernal function that utilizes the architecture of totient node.
@@ -138,7 +124,6 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     for (i = 0; i < Matrix_size; i++){
       // Load one column of C, C(:,i)
       __m256d c = _mm256_loadu_pd((C + Matrix_size*i));
-
       // Perform FMA on A*B(:,i)
       bij = _mm256_set1_pd(*(B+i*Matrix_size+0));
       c = _mm256_fmadd_pd(a0, bij, c);
@@ -148,39 +133,9 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c = _mm256_fmadd_pd(a2, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
       c = _mm256_fmadd_pd(a3, bij, c);
-
       // Store C(:,i)
       _mm256_storeu_pd((C+i*Matrix_size),c);
     }
-
-
-
-    // // Load matrix C
-    // __m256d c0 = _mm256_load_pd(C + Matrix_size * 0);
-    // __m256d c1 = _mm256_load_pd(C + Matrix_size * 1);
-    // __m256d c2 = _mm256_load_pd(C + Matrix_size * 2);
-    // __m256d c3 = _mm256_load_pd(C + Matrix_size * 3);
-    //
-    // // Preallocate one vector for entries of b
-    // __m256d bij;
-    // // Core routine to update C using FMA
-    // int i;
-    // for (i = 0; i < Matrix_size; i++) {
-    //   bij = _mm256_set1_pd(*(B+i*Matrix_size));
-    //   c0  = _mm256_fmadd_pd(a0, bij, c0); // C = A * B + C;
-    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
-    //   c1  = _mm256_fmadd_pd(a1, bij, c1); // C = A * B + C;
-    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+2));
-    //   c2  = _mm256_fmadd_pd(a2, bij, c2); // C = A * B + C;
-    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
-    //   c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
-    // }
-
-    // _mm256_storeu_pd ((double *) C, a1);
-    // scatter_vec(C, c0);
-    // scatter_vec(C+4, c1);
-    // scatter_vec(C+8, c2);
-    // scatter_vec(C+12, c3);
 }
 
 
@@ -250,31 +205,31 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 
       }
     }
-
-    int it, jt;
-    printf("Matrix A\n");
-    for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", A[jt*M+it]);
-      }
-      printf("\n");
-    }
-
-    printf("Matrix B\n");
-    for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", B[jt*M+it]);
-      }
-      printf("\n");
-    }
-
-    printf("Matrix C\n");
-     for (it = 0; it < M; ++it ){
-      for (jt = 0; jt < M; ++jt){
-        printf("%f\t", C[jt*M+it]);
-      }
-      printf("\n");
-    }
+    // 
+    // int it, jt;
+    // printf("Matrix A\n");
+    // for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", A[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    //
+    // printf("Matrix B\n");
+    // for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", B[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    //
+    // printf("Matrix C\n");
+    //  for (it = 0; it < M; ++it ){
+    //   for (jt = 0; jt < M; ++jt){
+    //     printf("%f\t", C[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
 
     // _mm_free(A_transposed);
     // _mm_free(B_transposed);
