@@ -132,6 +132,16 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __m256d a2 = _mm256_load_pd(A + Matrix_size * 2);
     __m256d a3 = _mm256_load_pd(A + Matrix_size * 3);
 
+    scatter_vec(C, a1);
+    printf("============Matrix C inside the loop ============\n");
+     for (it = 0; it < M; ++it ){
+      for (jt = 0; jt < M; ++jt){
+        printf("%f\t", C[jt*M+it]);
+      }
+      printf("\n");
+    }
+
+
     // Load matrix C
     __m256d c0 = _mm256_load_pd(C + Matrix_size * 0);
     __m256d c1 = _mm256_load_pd(C + Matrix_size * 1);
