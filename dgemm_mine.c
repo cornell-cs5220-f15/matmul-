@@ -137,7 +137,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     printf("============Matrix C inside the loop ============\n");
      for (it = 0; it < 4; ++it ){
       for (jt = 0; jt < 4; ++jt){
-        printf("%f\t", C[jt*M+it]);
+        printf("%f\t", C[jt*4+it]);
       }
       printf("\n");
     }
