@@ -50,21 +50,9 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     // It always assumes an input of A = 2 * P, B = P * 2
     // Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
 
-    // printf("~~~~~~~~~~~~~~Inside the loop B_transposed\n");
-    // int it, jt;
-    // for (it = 0; it < 2; ++it ){
-    //   for (jt = 0; jt < 2; ++jt){
-    //     printf("%f\t", B[jt*BLOCK_SIZE+it]);
-    //   }
-    //   printf("\n");
-    // }
-
-
     double C_swap = C[1];
     C[1] = C[3];
     C[3] = C_swap;
-
-    // Right now, it will be 14, 32
 
     // This is really implicit in using the aligned ops...
     __assume_aligned(A, 16);
@@ -106,8 +94,22 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     C[1] = C_swap;
 }
 
+void scatter_vec(double* addr, __m256d data) {
+  // Extract lower 128b from SIMD register and store each double to
+  // appropriate memory location.
+  __m128d lower_data = _mm256_extractf128_pd(data, 0);
+  _mm_storel_pd(addr+0, lower_data);
+  _mm_storeh_pd(addr+1, lower_data);
+
+  // Extract higher 128b from SIMD register and store each double to
+  // appropriate memory location.
+  __m128d higher_data = _mm256_extractf128_pd(data, 1);
+  _mm_storel_pd(addr+2, higher_data);
+  _mm_storeh_pd(addr+3, higher_data);
+}
+
 void mine_fma_dgemm( const double* restrict A, const double* restrict B,
-                 double* C){
+                 double* restrict C){
     // My kernal function that utilizes the architecture of totient node.
     // It uses the 256 bits register size which accomodate 4 doubles
     // Also, it tries to use FMA to maximize the computational efficiency.
@@ -151,13 +153,8 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c3  = _mm256_fmadd_pd(a3, bij, c3); // C = A * B + C;
     }
 
-    _mm256_storeu_pd ((double *) C, a1);
-
-    // __m128d cf1;
-    // __m128d cf2;
-    // double* cc1, cc2;
-    // _mm256_storeu2_m128d(C, C, c0);
-    // _mm_store_pd(C, cf1);
+    // _mm256_storeu_pd ((double *) C, a1);
+    scatter_vec(C, a0);
 }
 
 
@@ -180,7 +177,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     // Preallocate a space for submatrices A, B and C
     // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
-    double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
+    // double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
 
     // Assign blocks for kernals to perform fast computation.
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
@@ -194,7 +191,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
         const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
 
-        int it, kt;
+        // int it, kt;
         // for (it = 0; it < M_sub; ++it){
         //   for (kt = 0; kt < K; ++kt){
         //     A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
@@ -202,11 +199,11 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         // }
 
         // Instead of transposing A, transpose B for AVX 2*2
-        for (it = 0; it < M_sub; ++it){
-          for (kt = 0; kt < K; ++kt){
-            B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-          }
-        }
+        // for (it = 0; it < M_sub; ++it){
+        //   for (kt = 0; kt < K; ++kt){
+        //     B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
+        //   }
+        // }
 
         // Don't transpose anything for AVX 4*4
         for (bj = 0; bj < n_blocks; ++bj){
@@ -221,8 +218,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           // }
 
           // do_block(M, A_transposed, B, C, i, j, k);
-          do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
-          // do_block(M, A, B, C, i, j, k); // For AVX 4*4
+          // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
+          do_block(M, A, B, C, i, j, k); // For AVX 4*4
         }
 
       }
@@ -254,5 +251,5 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
 
     // _mm_free(A_transposed);
-    _mm_free(B_transposed);
+    // _mm_free(B_transposed);
 }
