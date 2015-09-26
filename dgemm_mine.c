@@ -226,21 +226,21 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
 
     int it, jt;
-    printf("Matrix A is:")
+    printf("Matrix A is:");
     for(it = 0; it < M; it ++){
       for(jt = 0; jt < M; jt ++){
         printf("%lf \t", A[it*M+jt]);
       }
       printf("\n");
     }
-    printf("Matrix B is:")
+    printf("Matrix B is:");
     for(it = 0; it < M; it ++){
       for(jt = 0; jt < M; jt ++){
         printf("%lf \t", B[it*M+jt]);
       }
       printf("\n");
     }
-    printf("Matrix C is:")
+    printf("Matrix C is:");
     for(it = 0; it < M; it ++){
       for(jt = 0; jt < M; jt ++){
         printf("%lf \t", C[it*M+jt]);
