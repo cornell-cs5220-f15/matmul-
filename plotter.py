@@ -26,7 +26,7 @@ def main(runs):
     "Show plot of timing runs (non-interactive)"
     make_plot(runs)
     lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.savefig('timings/timing-overall.pdf', bbox_extra_artists=(lgd,), bbox_inches='tight')
+    plt.savefig('timings/timing-final.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 if __name__ == "__main__":
     main(sys.argv[1:])

@@ -1,14 +1,14 @@
 #include <stdlib.h>
 #include <immintrin.h>
 
-const char* dgemm_desc = "256 copy optimized blocks with transposition, restrict keyword and xCORE-AVX2 flag";
+const char* dgemm_desc = "64 copy optimized blocks with transposition, restrict keyword, -restrict, -no-prec-div and -xCORE-AVX2 flags";
 
 #ifndef BLOCK2_SIZE
 #define BLOCK2_SIZE ((int) 128)
 #endif
 
 #ifndef BLOCK3_SIZE
-#define BLOCK3_SIZE ((int) 256)
+#define BLOCK3_SIZE ((int) 64)
 #endif
 
 double temp[4] __attribute__((aligned(64)));
@@ -27,9 +27,9 @@ void inner_kernel(const int lda,
     int i, j, k;
     __assume_aligned(bufA, 64);
     __assume_aligned(bufB, 64);
-    for (j = 0; j < N; ++j) {
-        for (k = 0; k < K; ++k) {
-            // double cij = C[j*lda+i];
+    for (i = 0; i < M; ++i) {
+        for (j = 0; j < N; ++j) {
+            double cij = C[j*lda+i];
             // __m256d ymm2 = _mm256_setzero_pd();
 
             // for (k = 0; k < K/4*4; k+=4) {
@@ -50,10 +50,10 @@ void inner_kernel(const int lda,
             // _mm256_store_pd(temp, ymm2);
             // cij += temp[0] + temp[1] + temp[2] + temp[3];
 
-            for (i = 0; i < M; ++i) {
-                C[j*lda+i] += bufA[i*BLOCK3_SIZE+k] * bufB[j*BLOCK3_SIZE+k];
+            for (k = 0; k < K; ++k) {
+                cij += bufA[i*BLOCK3_SIZE+k] * bufB[j*BLOCK3_SIZE+k];
             }
-            // C[j*lda+i] = cij;
+            C[j*lda+i] = cij;
         }
     }
 }
