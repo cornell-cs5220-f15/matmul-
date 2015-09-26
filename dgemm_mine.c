@@ -165,12 +165,14 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   for (m = 0; m < M; m++){
     for (n = N; n < sub_size; n++){
       subMatrix[m*sub_size + n] = 0.0;
+      printf("Type A\n");
     }
   }
 
   for (m = M; m < sub_size; m++){
     for (n = 0; n < sub_size; n++){
       subMatrix[m*sub_size + n] = 0.0;
+      printf("TYpe B\n");
     }
   }
 }
