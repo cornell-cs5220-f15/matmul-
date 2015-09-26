@@ -197,33 +197,68 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
 
-    // Assign blocks for kernals to perform fast computation.
-    const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
+    // Testing code
     const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
-    int bi, bj, bk;
     int sbi, sbj, sbk;
-    for (bi = 0; bi < n_blocks; bi++){
-      for (bj = 0; bj < n_blocks; bj++){
-        matrix_copy (M, BLOCK_SIZE, bi, bj, C, C_outer);
-        for (bk = 0; bk < n_blocks; bk++){
-          matrix_copy (M, BLOCK_SIZE, bi, bk, A, A_outer);
-          matrix_copy (M, BLOCK_SIZE, bk, bj, B, B_outer);
-          // Compute the block multiplication by passing submatrices to kernal function
-          for (sbi = 0; sbi < n_inner_blocks; sbi++){
-            for (sbj = 0; sbj < n_inner_blocks; sbj++){
-              matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
-              for (sbk = 0; sbk < n_inner_blocks; sbk++){
-                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
-                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
-                mine_fma_dgemm(A_inner, B_inner, C_inner);
-              }
-              matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+    for (sbi = 0; sbi < n_inner_blocks; sbi++){
+      for (sbj = 0; sbj < n_inner_blocks; sbj++){
+        matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
+        for (sbk = 0; sbk < n_inner_blocks; sbk++){
+          matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
+          matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
+          printf("Matrix A_inner is:");
+          for(it = 0; it < M; it ++){
+            for(jt = 0; jt < M; jt ++){
+              printf("%lf \t", A_innter[it*M+jt]);
             }
+            printf("\n");
           }
+          mine_fma_dgemm(A_inner, B_inner, C_inner);
         }
-        matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
+        printf("Matrix C before update is:");
+        for(it = 0; it < M; it ++){
+          for(jt = 0; jt < M; jt ++){
+            printf("%lf \t", C[it*M+jt]);
+          }
+          printf("\n");
+        }
+        matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
+        printf("Matrix C after update is:");
+        for(it = 0; it < M; it ++){
+          for(jt = 0; jt < M; jt ++){
+            printf("%lf \t", C[it*M+jt]);
+          }
+          printf("\n");
+        }
       }
     }
+    // // Assign blocks for kernals to perform fast computation.
+    // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
+    // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
+    // int bi, bj, bk;
+    // int sbi, sbj, sbk;
+    // for (bi = 0; bi < n_blocks; bi++){
+    //   for (bj = 0; bj < n_blocks; bj++){
+    //     matrix_copy (M, BLOCK_SIZE, bi, bj, C, C_outer);
+    //     for (bk = 0; bk < n_blocks; bk++){
+    //       matrix_copy (M, BLOCK_SIZE, bi, bk, A, A_outer);
+    //       matrix_copy (M, BLOCK_SIZE, bk, bj, B, B_outer);
+    //       // Compute the block multiplication by passing submatrices to kernal function
+    //       for (sbi = 0; sbi < n_inner_blocks; sbi++){
+    //         for (sbj = 0; sbj < n_inner_blocks; sbj++){
+    //           matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+    //           for (sbk = 0; sbk < n_inner_blocks; sbk++){
+    //             matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
+    //             matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
+    //             mine_fma_dgemm(A_inner, B_inner, C_inner);
+    //           }
+    //           matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+    //         }
+    //       }
+    //     }
+    //     matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
+    //   }
+    // }
 
     int it, jt;
     printf("Matrix A is:");
