@@ -209,9 +209,9 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           mine_fma_dgemm(A_inner, B_inner, C_inner);
           int it, jt;
           printf("Super Inside, Matrix C_inner is:\n");
-          for(it = 0; it < M; it ++){
-            for(jt = 0; jt < M; jt ++){
-              printf("%lf \t", C_inner[it*M+jt]);
+          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+              printf("%lf \t", C_inner[it*INNER_BLOCK_SIZE+jt]);
             }
             printf("\n");
           }
@@ -228,6 +228,21 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       }
     }
     int it, jt;
+    printf("Outside , Matrix A is: \n");
+    for(it = 0; it < M; it ++){
+      for(jt = 0; jt < M; jt ++){
+        printf("%lf \t", A[it*M+jt]);
+      }
+      printf("\n");
+    }
+    printf("Outside , Matrix B is: \n");
+    for(it = 0; it < M; it ++){
+      for(jt = 0; jt < M; jt ++){
+        printf("%lf \t", B[it*M+jt]);
+      }
+      printf("\n");
+    }
+
     printf("Outside , Matrix C is: \n");
     for(it = 0; it < M; it ++){
       for(jt = 0; jt < M; jt ++){
