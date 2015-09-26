@@ -221,6 +221,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
             }
           }
         }
+        matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
       }
     }
     // int bi, bj, bk;
