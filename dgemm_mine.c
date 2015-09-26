@@ -224,6 +224,29 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
       }
     }
+
+    int it, jt;
+    printf("Matrix A is:")
+    for(it = 0; it < M; it ++){
+      for(jt = 0; jt < M; jt ++){
+        printf("%lf \t", A[it*M+jt]);
+      }
+      printf("\n");
+    }
+    printf("Matrix B is:")
+    for(it = 0; it < M; it ++){
+      for(jt = 0; jt < M; jt ++){
+        printf("%lf \t", B[it*M+jt]);
+      }
+      printf("\n");
+    }
+    printf("Matrix C is:")
+    for(it = 0; it < M; it ++){
+      for(jt = 0; jt < M; jt ++){
+        printf("%lf \t", C[it*M+jt]);
+      }
+      printf("\n");
+    }
     // int bi, bj, bk;
     // for (bi = 0; bi < n_blocks; ++bi){
     //   const int i = bi * BLOCK_SIZE;
