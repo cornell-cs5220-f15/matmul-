@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <immintrin.h>
 
-const char* dgemm_desc = "Simple blocked dgemm.";
+const char* dgemm_desc = "256 copy optimized blocks with transposition, restrict keyword and xCORE-AVX2 flag";
 
 #ifndef BLOCK2_SIZE
 #define BLOCK2_SIZE ((int) 128)
@@ -117,8 +117,8 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
         }
     }
 
-    // _mm_free(bufA);
-    // _mm_free(bufB);
+    _mm_free(bufA);
+    _mm_free(bufB);
 }
 
 

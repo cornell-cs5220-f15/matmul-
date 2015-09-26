@@ -1,6 +1,6 @@
 # Versions to build
 BUILDS=mine basic blocked f2c blas mkl blocked_transpose multiblock
-CSVS=restrict_keyword_and_flag-xCORE-AVX2_flag copy256-align64-transpose-flags copy64-align64-transpose-flags basic blocked mkl f2c
+CSVS=copy256-align64-transpose-flags copy64-align64-transpose-flags basic blocked f2c mkl blas
 
 # C and Fortran compilers
 CC=icc
