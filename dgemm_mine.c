@@ -166,14 +166,12 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   for (m = 0; m < M; m++){
     for (n = N; n < sub_size; n++){
       subMatrix[m*sub_size + n] = 0.0;
-      printf("Type A\n");
     }
   }
 
   for (m = M; m < sub_size; m++){
     for (n = 0; n < sub_size; n++){
       subMatrix[m*sub_size + n] = 0.0;
-      printf("TYpe B\n");
     }
   }
 }
@@ -216,28 +214,30 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
           matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
-          int it, jt;
-          printf("Super Inside, Matrix A_inner is:\n");
-          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf \t", A_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
-          printf("Super Inside, Matrix B_inner is:\n");
-          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf \t", B_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
-          printf("Super Inside, Matrix C_inner is:\n");
-          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
+
+          // int it, jt;
+          // printf("Super Inside, Matrix A_inner is:\n");
+          // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+          //     printf("%lf \t", A_inner[jt*INNER_BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
+          // }
+          // printf("Super Inside, Matrix B_inner is:\n");
+          // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+          //     printf("%lf \t", B_inner[jt*INNER_BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
+          // }
+          // printf("Super Inside, Matrix C_inner is:\n");
+          // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+          //     printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
+          // }
+
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         // int it, jt;
