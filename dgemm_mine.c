@@ -204,6 +204,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
         matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         for (sbk = 0; sbk < n_inner_blocks; sbk++){
+          int it, jt;
           matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
           matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
           printf("Matrix A_inner is:");
