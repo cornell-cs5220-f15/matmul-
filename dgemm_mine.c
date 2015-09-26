@@ -119,8 +119,8 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     int i, j;
     for (i = 0; i < Matrix_size; i++){
       // Load one column of C, C(:,i)
-      // __m256d c = _mm256_loadu_pd((C + Matrix_size*i));
-      __m256d c = _mm256_set1_pd(0.0); // No need to copy the original for this one
+      __m256d c = _mm256_loadu_pd((C + Matrix_size*i));
+      // __m256d c = _mm256_set1_pd(0.0); // No need to copy the original for this one
       // Perform FMA on A*B(:,i)
       bij = _mm256_set1_pd(*(B+i*Matrix_size+0));
       c = _mm256_fmadd_pd(a0, bij, c);
@@ -241,8 +241,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         int it, jt;
         printf("Inside, Matrix C_inner is:\n");
-        for(it = 0; it < M; it ++){
-          for(jt = 0; jt < M; jt ++){
+        for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
             printf("%lf \t", C_inner[it*INNER_BLOCK_SIZE+jt]);
           }
           printf("\n");
