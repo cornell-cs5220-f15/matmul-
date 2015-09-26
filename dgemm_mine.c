@@ -178,11 +178,11 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
 void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
         double* restrict Matrix, const double* restrict subMatrix){
     int m, n;
-    const int M = (i+sub_size > mat_size? mat_size-i : sub_size);
-    const int N = (j+sub_size > mat_size? mat_size-j : sub_size);
+    const int M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
+    const int N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
-         Matrix[(i*sub_size+m)*mat_size + (j+n)] = subMatrix[m*sub_size + n];
+         Matrix[(i*sub_size+m)*mat_size + (j*sub_size+n)] = subMatrix[m*sub_size + n];
       }
     }
 }
@@ -243,14 +243,14 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         printf("Inside, Matrix C_inner is:\n");
         for(it = 0; it < INNER_BLOCK_SIZE; it ++){
           for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-            printf("%lf \t", C_inner[it*INNER_BLOCK_SIZE+jt]);
+            printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
           }
           printf("\n");
         }
         printf("Inside, Matrix C is:\n");
         for(it = 0; it < M; it ++){
           for(jt = 0; jt < M; jt ++){
-            printf("%lf \t", C[it*M+jt]);
+            printf("%lf \t", C[jt*M+it]);
           }
           printf("\n");
         }
