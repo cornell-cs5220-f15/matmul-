@@ -181,7 +181,7 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
     const int N = (j+sub_size > mat_size? mat_size-j : sub_size);
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
-         Matrix[(i+m)*sub_size + (j+n)] = subMatrix[m*sub_size + n];
+         Matrix[(i+m)*mat_size + (j+n)] = subMatrix[m*sub_size + n];
       }
     }
 }
@@ -208,10 +208,10 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     int sbi, sbj, sbk;
     for (sbi = 0; sbi < n_inner_blocks; sbi++){
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
-        matrix_copy (M, INNER_BLOCK_SIZE, sbi*INNER_BLOCK_SIZE, sbj*INNER_BLOCK_SIZE, C, C_inner);
+        matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         for (sbk = 0; sbk < n_inner_blocks; sbk++){
-          matrix_copy (M, INNER_BLOCK_SIZE, sbk*INNER_BLOCK_SIZE, sbi*INNER_BLOCK_SIZE, A, A_inner);
-          matrix_copy (M, INNER_BLOCK_SIZE, sbj*INNER_BLOCK_SIZE, sbk*INNER_BLOCK_SIZE, B, B_inner);
+          matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
+          matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
           int it, jt;
           printf("Super Inside, Matrix A_inner is:\n");
@@ -236,7 +236,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
             printf("\n");
           }
         }
-        matrix_update (M, INNER_BLOCK_SIZE, sbi*INNER_BLOCK_SIZE, sbj*INNER_BLOCK_SIZE, C, C_inner);
+        matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         // int it, jt;
         // printf("Inside, Matrix C_inner is:\n");
         // for(it = 0; it < M; it ++){
