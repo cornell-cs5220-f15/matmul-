@@ -204,7 +204,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
         matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         for (sbk = 0; sbk < n_inner_blocks; sbk++){
-          int it, jt;
+          // int it, jt;
           matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
           matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
           // printf("Matrix A_inner is:");
@@ -263,28 +263,30 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //   }
     // }
 
-    int it, jt;
-    printf("Matrix A is:");
-    for(it = 0; it < M; it ++){
-      for(jt = 0; jt < M; jt ++){
-        printf("%lf \t", A[it*M+jt]);
-      }
-      printf("\n");
-    }
-    printf("Matrix B is:");
-    for(it = 0; it < M; it ++){
-      for(jt = 0; jt < M; jt ++){
-        printf("%lf \t", B[it*M+jt]);
-      }
-      printf("\n");
-    }
-    printf("Matrix C is:");
-    for(it = 0; it < M; it ++){
-      for(jt = 0; jt < M; jt ++){
-        printf("%lf \t", C[it*M+jt]);
-      }
-      printf("\n");
-    }
+    // int it, jt;
+    // printf("Matrix A is:");
+    // for(it = 0; it < M; it ++){
+    //   for(jt = 0; jt < M; jt ++){
+    //     printf("%lf \t", A[it*M+jt]);
+    //   }
+    //   printf("\n");
+    // }
+    // printf("Matrix B is:");
+    // for(it = 0; it < M; it ++){
+    //   for(jt = 0; jt < M; jt ++){
+    //     printf("%lf \t", B[it*M+jt]);
+    //   }
+    //   printf("\n");
+    // }
+    // printf("Matrix C is:");
+    // for(it = 0; it < M; it ++){
+    //   for(jt = 0; jt < M; jt ++){
+    //     printf("%lf \t", C[it*M+jt]);
+    //   }
+    //   printf("\n");
+    // }
+
+    
     // int bi, bj, bk;
     // for (bi = 0; bi < n_blocks; ++bi){
     //   const int i = bi * BLOCK_SIZE;
