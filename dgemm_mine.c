@@ -198,7 +198,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
 
     // Testing code
-    const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
+    const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
     int sbi, sbj, sbk;
     for (sbi = 0; sbi < n_inner_blocks; sbi++){
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
