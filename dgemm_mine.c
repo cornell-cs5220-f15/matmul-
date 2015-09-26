@@ -164,7 +164,7 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   // Populate the submatrix with 0 to enforce regular pattern in the computation.
   for (m = 0; m < (sub_size - M); m++){
     for (n = 0; n < (sub_size - N); n++){
-      subMatrix[m*sub_size + n] = 0.0;
+      subMatrix[(M+m)*sub_size + (N+n)] = 0.0;
     }
   }
 }
