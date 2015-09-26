@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 def make_plot(runs):
     "Plot results of timing trials"
     for arg in runs:
-        df = pd.read_csv("timing-{0}.csv".format(arg))
+        df = pd.read_csv("timings/timing-{0}.csv".format(arg))
         plt.plot(df['size'], df['mflop']/1e3, label=arg)
     plt.xlabel('Dimension')
     plt.ylabel('Gflop/s')
@@ -26,7 +26,7 @@ def main(runs):
     "Show plot of timing runs (non-interactive)"
     make_plot(runs)
     lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-    plt.savefig('timing.pdf', bbox_extra_artists=(lgd,), bbox_inches='tight')
+    plt.savefig('timings/timing-overall.png', bbox_extra_artists=(lgd,), bbox_inches='tight')
 
 if __name__ == "__main__":
     main(sys.argv[1:])
