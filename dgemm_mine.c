@@ -158,7 +158,7 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   int m, n;
   for (m = 0; m < M; m++){
     for (n = 0; n < N; n++){
-      subMatrix[m*sub_size + n] = Matrix[(i*sub_size+m)*mat_size + (j+n)];
+      subMatrix[m*sub_size + n] = Matrix[(i*sub_size+m)*mat_size + (j*sub_size+n)];
     }
   }
   // Populate the submatrix with 0 to enforce regular pattern in the computation.
