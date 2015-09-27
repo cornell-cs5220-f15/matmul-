@@ -212,7 +212,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     int sbi, sbj, sbk;
     for (sbi = 0; sbi < n_inner_blocks; sbi++){
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
-        matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbi C, C_inner);
+        matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbi, C, C_inner);
         for (sbk = 0; sbk < n_inner_blocks; sbk++){
           matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
           matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
