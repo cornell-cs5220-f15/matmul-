@@ -281,7 +281,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //     printf("%lf \t", C[jt*M+it]);
     //   }
     //   printf("\n");
-    }
+    // }
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
