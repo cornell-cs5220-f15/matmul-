@@ -10,6 +10,9 @@ timing.pdf
 indexing_test
 transpose_test
 copy_test
+dump_diff.txt
+dump_our.txt
+dump_ref.txt
 
 ################################################################################
 # C
