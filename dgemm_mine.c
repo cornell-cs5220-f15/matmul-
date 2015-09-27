@@ -217,7 +217,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
           matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
-          printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
+          // printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
 
           // printf("Super Inside, Matrix C_inner is:\n");
           // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
