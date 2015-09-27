@@ -184,7 +184,7 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
         printf("\n m is %d, n is %d\n", m, n);
-         Matrix[(i*sub_size+m)*mat_size + (j*sub_size+n)] = subMatrix[m*sub_size + n];
+         Matrix[(j*sub_size+m)*mat_size + (i*sub_size+n)] = subMatrix[m*sub_size + n];
       }
     }
 }
