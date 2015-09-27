@@ -3,6 +3,35 @@
 // #define ALIGN __attribute__ ((aligned (32)))
 
 /**
+ * Converts a 4x4 matrix from row-major to column-major
+ * @method row_to_col_4x4
+ * @param  A              A 4x4 matrix in row-major
+ * @param  A_transpose    A 4x4 matrix in column-major
+ */
+void row_to_col_4x4(const double * restrict A, double *A_transpose)
+{
+  __assume_aligned(A, 32);
+  __assume_aligned(A_transpose, 32);
+
+  A_transpose[0] = A[0];
+  A_transpose[1] = A[4];
+  A_transpose[2] = A[8];
+  A_transpose[3] = A[12];
+  A_transpose[4] = A[1];
+  A_transpose[5] = A[5];
+  A_transpose[6] = A[9];
+  A_transpose[7] = A[13];
+  A_transpose[8] = A[2];
+  A_transpose[9] = A[6];
+  A_transpose[10] = A[10];
+  A_transpose[11] = A[14];
+  A_transpose[12] = A[3];
+  A_transpose[13] = A[7];
+  A_transpose[14] = A[11];
+  A_transpose[15] = A[15];
+}
+
+/**
  * [dgemm_4x4 description]
  * @method dgemm_4x4
  * @param  A         4 x 4 matrix in row-order
