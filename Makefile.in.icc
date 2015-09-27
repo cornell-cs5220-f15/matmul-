@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=transpose_ijk transpose_ikj transpose_jik transpose_jki transpose_kij transpose_kji
+BUILDS=mine blocked
 
 # C and Fortran compilers
 CC=icc

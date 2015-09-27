@@ -3,12 +3,12 @@
 // #define ALIGN __attribute__ ((aligned (32)))
 
 /**
- * Converts a 4x4 matrix from row-major to column-major
+ * Transposes the major ordering of a 4x4 matrix
  * @method row_to_col_4x4
- * @param  A              A 4x4 matrix in row-major
- * @param  A_transpose    A 4x4 matrix in column-major
+ * @param  A              A 4x4 matrix in {row|column}-major
+ * @param  A_transpose    A 4x4 matrix in {column|row}-major
  */
-void row_to_col_4x4(const double * restrict A, double *A_transpose)
+inline void transpose_4x4(const double * restrict A, double *A_transpose)
 {
   __assume_aligned(A, 32);
   __assume_aligned(A_transpose, 32);
@@ -34,7 +34,7 @@ void row_to_col_4x4(const double * restrict A, double *A_transpose)
 /**
  * [dgemm_4x4 description]
  * @method dgemm_4x4
- * @param  A         4 x 4 matrix in row-order
+ * @param  A         4 x 4 matrix in column-order
  * @param  B         4 x 4 matrix in column-order
  * @param  C         4 x 4 matrix in column-order
  */
@@ -43,6 +43,10 @@ inline void dgemm_4x4(const double * restrict A, const double * restrict B, doub
   __assume_aligned(A, 32);
   __assume_aligned(B, 32);
   __assume_aligned(C, 32);
+
+  // Convert A to row-major
+  // double * A_transpose = _mm_malloc(16*sizeof(double), 32);
+  // transpose_4x4(A, A_transpose);
 
   // Extract all rows from A
   __m256d row1 = _mm256_load_pd(A);
@@ -101,4 +105,9 @@ inline void dgemm_4x4(const double * restrict A, const double * restrict B, doub
   _mm_store_pd(C+4, result_col_2);
   _mm_store_pd(C+8, result_col_3);
   _mm_store_pd(C+12, result_col_4);
+}
+
+inline void dgemm_8x8(const double * restrict A, const double * restrict B, double * restrict C)
+{
+
 }
