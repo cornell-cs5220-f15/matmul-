@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl copyopt compiler annotated
+BUILDS=mine basic blocked f2c blas mkl copyopt compiler annotated mjw
 
 # C and Fortran compilers
 CC=icc
