@@ -178,8 +178,8 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
 void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
         double* restrict Matrix, const double* restrict subMatrix){
     int m, n;
-    const int M = ((j+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
-    const int N = ((i+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
+    const int M = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
+    const int N = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
     printf("\n M is %d, N is %d\n", M, N);
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
