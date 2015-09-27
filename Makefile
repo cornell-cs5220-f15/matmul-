@@ -37,8 +37,14 @@ matmul-compiler: $(OBJS) dgemm_compiler.o
 
 # ---
 # Rules to build the tests
+
+tests: indexing_test transpose_test
+
 indexing_test: indexing_test.c indexing.o
-	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+transpose_test: transpose_test.c transpose.o indexing.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 # --
 # Rules to build object files

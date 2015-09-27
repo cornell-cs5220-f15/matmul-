@@ -8,6 +8,7 @@ timing.pdf
 *.optrpt
 *.dyn
 indexing_test
+transpose_test
 
 ################################################################################
 # C
