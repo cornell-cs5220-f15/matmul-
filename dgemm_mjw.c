@@ -1,5 +1,6 @@
 #include <stdlib.h>
 
+#include "copy.h"
 #include "indexing.h"
 #include "transpose.h"
 
@@ -20,12 +21,13 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double *A, const double *B, double *C) {
     int i, j, k;
     double *A_ = cm_transpose(A, lda, lda, M, K);
+    double *B_ = cm_copy(B, lda, lda, K, N);
 
     for (i = 0; i < M; ++i) {
         for (j = 0; j < N; ++j) {
             double cij = C[cm(lda, lda, i, j)];
             for (k = 0; k < K; ++k) {
-                cij += A_[rm(M, K, i, k)] * B[cm(lda, lda, k, j)];
+                cij += A_[rm(M, K, i, k)] * B_[cm(K, N, k, j)];
             }
             C[cm(lda, lda, i, j)] = cij;
         }
@@ -41,7 +43,6 @@ void do_block(const int lda,
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
     basic_dgemm(lda, M, N, K,
-                // A + i + k*lda, B + k + j*lda, C + i + j*lda);
                 &A[cm(lda, lda, i, k)], &B[cm(lda, lda, k, j)], &C[cm(lda, lda, i, j)]);
 }
 
@@ -59,4 +60,3 @@ void square_dgemm(const int M, const double *A, const double *B, double *C) {
         }
     }
 }
-

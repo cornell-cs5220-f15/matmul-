@@ -17,7 +17,7 @@ CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm
-OBJS = matmul.o indexing.o transpose.o
+OBJS = matmul.o indexing.o transpose.o copy.o
 
 # Libraries and include files for BLAS
 LIBBLAS=-lopenblas

@@ -38,12 +38,15 @@ matmul-compiler: $(OBJS) dgemm_compiler.o
 # ---
 # Rules to build the tests
 
-tests: indexing_test transpose_test
+tests: indexing_test transpose_test copy_test
 
 indexing_test: indexing_test.c indexing.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 transpose_test: transpose_test.c transpose.o indexing.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+copy_test: copy_test.c copy.o indexing.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 # --

@@ -9,6 +9,7 @@ timing.pdf
 *.dyn
 indexing_test
 transpose_test
+copy_test
 
 ################################################################################
 # C
