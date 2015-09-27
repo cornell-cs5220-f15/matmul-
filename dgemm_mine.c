@@ -180,9 +180,10 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
     int m, n;
     const int M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
     const int N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
-    printf("\n M is %d, N is %d", M, N);
+    printf("\n M is %d, N is %d\n", M, N);
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
+        printf("\n m is %d, n is %d\n", M, N);
          Matrix[(i*sub_size+m)*mat_size + (j*sub_size+n)] = subMatrix[m*sub_size + n];
       }
     }
