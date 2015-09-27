@@ -36,20 +36,20 @@ extern void square_dgemm();
 
   You may want to modify these to speed debugging...
 */
-#define MIN_RUNS 4
+#define MIN_RUNS 1//4
 /* #define MIN_SECS 1.0 */
-#define MIN_SECS 0.25
-// #define MIN_SECS 0
+// #define MIN_SECS 0.25
+#define MIN_SECS 0
 
 /*
   Note the strange sizes...  You'll see some interesting effects
   around some of the powers-of-two.
 */
 const int test_sizes[] = {
-    4,
+    5,
 
-#if defined(DEBUG_RUN)
-# define MAX_SIZE 4u//229u
+#if defined(DEBUUN)
+# define MAX_SIZE 5u//229u
 #else
     31, 32, 96, 97, 127, 128, 129, 191, 192, 229,
     255, 256, 257, 319, 320, 321, 417, 479, 480, 511, 512, 639, 640,
