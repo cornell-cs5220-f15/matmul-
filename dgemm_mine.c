@@ -234,9 +234,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           //   printf("\n");
           // }
 
-          // printf("%lf", C_inner[INNER_BLOCK_SIZE]);
-          C_inner[INNER_BLOCK_SIZE] = C_inner[INNER_BLOCK_SIZE];
-          
+          printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
+
           // printf("Super Inside, Matrix C_inner is:\n");
           // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
           //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
