@@ -155,7 +155,7 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   // Get a copy of submatrix
   const int M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
   const int N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
-  printf("\n For copy, M is %d, N is %d\n", M, N);
+  // printf("\n For copy, M is %d, N is %d\n", M, N);
   // Make a copy
   int m, n;
   for (m = 0; m < M; m++){
@@ -181,10 +181,10 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
     int m, n;
     const int M = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
     const int N = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
-    printf("\n M is %d, N is %d\n", M, N);
+    // printf("\n M is %d, N is %d\n", M, N);
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
-        printf("\n m is %d, n is %d\n", m, n);
+        // printf("\n m is %d, n is %d\n", m, n);
          Matrix[(j*sub_size+m)*mat_size + (i*sub_size+n)] = subMatrix[m*sub_size + n];
       }
     }
@@ -225,7 +225,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           //     printf("%lf \t", A_inner[jt*INNER_BLOCK_SIZE+it]);
           //   }
           //   printf("\n");
-          }
+          // }
           // printf("Super Inside, Matrix B_inner is:\n");
           // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
           //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
