@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas
+BUILDS=mine basic blocked f2c blas mjw
 
 # C and Fortran compilers
 CC=gcc
@@ -17,7 +17,7 @@ CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm
-OBJS = matmul.o
+OBJS = matmul.o indexing.o
 
 # Libraries and include files for BLAS
 LIBBLAS=-lopenblas

@@ -35,6 +35,11 @@ matmul-veclib: $(OBJS) dgemm_veclib.o
 matmul-compiler: $(OBJS) dgemm_compiler.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
+# ---
+# Rules to build the tests
+indexing_test: indexing_test.c indexing.o
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+
 # --
 # Rules to build object files
 
