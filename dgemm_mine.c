@@ -205,7 +205,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     // Preallocate spaces for inner matrices A, B and C;
     double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
-    double* C_inner = (double*) malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double));
+    double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double));
 
     // Testing code
     const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
@@ -357,5 +357,5 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     _mm_free(C_outer);
     _mm_free(A_inner);
     _mm_free(B_inner);
-    free(C_inner);
+    _mm_free(C_inner);
 }
