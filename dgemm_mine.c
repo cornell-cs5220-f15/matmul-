@@ -153,8 +153,8 @@ void do_block(const int lda,
 void matrix_copy (const int mat_size, const int sub_size, const int i, const int j,
         const double* restrict Matrix, double* restrict subMatrix){
   // Get a copy of submatrix
-  const int N = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
-  const int M = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
+  const int M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
+  const int N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
   // Make a copy
   int m, n;
   for (m = 0; m < M; m++){
@@ -178,13 +178,13 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
 void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
         double* restrict Matrix, const double* restrict subMatrix){
     int m, n;
-    const int N = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
     const int M = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
+    const int N = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
     printf("\n M is %d, N is %d\n", M, N);
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
         printf("\n m is %d, n is %d\n", m, n);
-         Matrix[(i*sub_size+m)*mat_size + (j*sub_size+n)] = subMatrix[m*sub_size + n];
+         Matrix[(j*sub_size+m)*mat_size + (i*sub_size+n)] = subMatrix[m*sub_size + n];
       }
     }
 }
