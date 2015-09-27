@@ -218,7 +218,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
           //
-          int it, jt;
+          // int it, jt;
           // printf("Super Inside, Matrix A_inner is:\n");
           // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
           //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
@@ -233,13 +233,15 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           //   }
           //   printf("\n");
           // }
-          printf("Super Inside, Matrix C_inner is:\n");
-          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
+          printf("%lf \t", C_inner[INNER_BLOCK_SIZE]);
+          
+          // printf("Super Inside, Matrix C_inner is:\n");
+          // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+          //     printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
+          // }
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         // int it, jt;
