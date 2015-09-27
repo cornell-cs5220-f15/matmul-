@@ -153,6 +153,7 @@ void do_block(const int lda,
 void matrix_copy (const int mat_size, const int sub_size, const int i, const int j,
         const double* restrict Matrix, double* restrict subMatrix){
   // Get a copy of submatrix
+  printf("\n For copy, M is %d, N is %d\n", M, N);
   const int M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
   const int N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
   // Make a copy
