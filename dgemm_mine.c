@@ -217,70 +217,70 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
           matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
-
-          int it, jt;
-          printf("Super Inside, Matrix A_inner is:\n");
-          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf \t", A_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
+          //
+          // int it, jt;
+          // printf("Super Inside, Matrix A_inner is:\n");
+          // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+          //     printf("%lf \t", A_inner[jt*INNER_BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
           }
-          printf("Super Inside, Matrix B_inner is:\n");
-          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf \t", B_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
-          printf("Super Inside, Matrix C_inner is:\n");
-          for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-            for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
+          // printf("Super Inside, Matrix B_inner is:\n");
+          // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+          //     printf("%lf \t", B_inner[jt*INNER_BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
+          // }
+          // printf("Super Inside, Matrix C_inner is:\n");
+          // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+          //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+          //     printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
+          // }
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
-        int it, jt;
-        printf("Inside, Matrix C_inner is:\n");
-        for(it = 0; it < INNER_BLOCK_SIZE; it ++){
-          for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-            printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-          }
-          printf("\n");
-        }
-        printf("Inside, Matrix C is:\n");
-        for(it = 0; it < M; it ++){
-          for(jt = 0; jt < M; jt ++){
-            printf("%lf \t", C[jt*M+it]);
-          }
-          printf("\n");
-        }
+        // int it, jt;
+        // printf("Inside, Matrix C_inner is:\n");
+        // for(it = 0; it < INNER_BLOCK_SIZE; it ++){
+        //   for(jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
+        //     printf("%lf \t", C_inner[jt*INNER_BLOCK_SIZE+it]);
+        //   }
+        //   printf("\n");
+        // }
+        // printf("Inside, Matrix C is:\n");
+        // for(it = 0; it < M; it ++){
+        //   for(jt = 0; jt < M; jt ++){
+        //     printf("%lf \t", C[jt*M+it]);
+        //   }
+        //   printf("\n");
+        // }
       }
     }
-    int it, jt;
-    printf("Outside , Matrix A is: \n");
-    for(it = 0; it < M; it ++){
-      for(jt = 0; jt < M; jt ++){
-        printf("%lf \t", A[jt*M+it]);
-      }
-      printf("\n");
-    }
-    printf("Outside , Matrix B is: \n");
-    for(it = 0; it < M; it ++){
-      for(jt = 0; jt < M; jt ++){
-        printf("%lf \t", B[jt*M+it]);
-      }
-      printf("\n");
-    }
-
-    printf("Outside , Matrix C is: \n");
-    for(it = 0; it < M; it ++){
-      for(jt = 0; jt < M; jt ++){
-        printf("%lf \t", C[jt*M+it]);
-      }
-      printf("\n");
+    // int it, jt;
+    // printf("Outside , Matrix A is: \n");
+    // for(it = 0; it < M; it ++){
+    //   for(jt = 0; jt < M; jt ++){
+    //     printf("%lf \t", A[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    // printf("Outside , Matrix B is: \n");
+    // for(it = 0; it < M; it ++){
+    //   for(jt = 0; jt < M; jt ++){
+    //     printf("%lf \t", B[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    //
+    // printf("Outside , Matrix C is: \n");
+    // for(it = 0; it < M; it ++){
+    //   for(jt = 0; jt < M; jt ++){
+    //     printf("%lf \t", C[jt*M+it]);
+    //   }
+    //   printf("\n");
     }
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
