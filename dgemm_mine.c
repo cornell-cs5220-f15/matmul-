@@ -176,6 +176,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //   printf("\n");
 
     // functional avx2 script
+    const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
     int sbi, sbj, sbk;
     for (sbi = 0; sbi < n_inner_blocks; sbi++){
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
