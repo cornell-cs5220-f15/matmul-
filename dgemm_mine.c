@@ -177,19 +177,19 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //   printf("\n");
 
     // functional avx2 script
-    const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
-    int sbi, sbj, sbk;
-    for (sbi = 0; sbi < n_inner_blocks; sbi++){
-      for (sbj = 0; sbj < n_inner_blocks; sbj++){
-        matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
-        for (sbk = 0; sbk < n_inner_blocks; sbk++){
-          matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
-          matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
-          mine_fma_dgemm(A_inner, B_inner, C_inner);
-        }
-        matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
-      }
-    }
+    // const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
+    // int sbi, sbj, sbk;
+    // for (sbi = 0; sbi < n_inner_blocks; sbi++){
+    //   for (sbj = 0; sbj < n_inner_blocks; sbj++){
+    //     matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
+    //     for (sbk = 0; sbk < n_inner_blocks; sbk++){
+    //       matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
+    //       matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
+    //       mine_fma_dgemm(A_inner, B_inner, C_inner);
+    //     }
+    //     matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
+    //   }
+    // }
 
     const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
     int sbi, sbj, sbk;
