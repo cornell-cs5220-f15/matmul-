@@ -213,6 +213,14 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
       }
     }
+    int it, jt;
+    printf("Matrix B is:\n");
+    for (it = 0; it < M; it++){
+      for (jt = 0; jt < M; jt ++){
+        printf("%lf\t", B[jt*M+it]);
+      }
+      printf("\n");
+    }
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
