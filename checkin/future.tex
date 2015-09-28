@@ -1,0 +1,36 @@
+\section{Future work}\label{sec:future}
+There are some further possible attempts at optimization that we would like to
+try, but have not yet managed to implement in this first stage of the
+assignment.
+
+\begin{itemize}
+  \item
+    We could more rigorously experiment with the block size to determine which
+    is fastest. We used ad-hoc manual tuning to arrive at our current block
+    size. Further auto-tuning and principled reasoning would likely yield the
+    optimal block size.
+
+  \item
+    We could change how we handle the parts of matrices that do not fit cleanly
+    into blocks. Currently those are handled in a naive way, but one
+    alternative would be to pad the matrix with zeros so that all (not almost
+    all) multiplication occurs in consistently sized blocks. If the
+    multiplication of blocks is sufficiently well optimized, then this could be
+    noticeably faster.
+
+  \item
+    We could add an additional layer of constant-sized blocking. There is a
+    possibility that the compiler can introduce more optimization if it knows
+    the exact size of a loop at compile time. We could divide our smaller
+    blocked multiplication into even smaller blocks of constant size.
+
+  \item
+    We could perform finer-grained and additional copy optimization. Currently,
+    when we multiply two column-major matrices $A$ and $B$, we transpose $A$.
+    Preferably, we would transpose blocks of $A$ rather than transposing it in
+    its entirety. Furthermore, there could also be benefits to copying blocks
+    of $B$ into contiguous memory regions.
+
+  \item
+    We could experiment with the \ttt{aligned} annotation.
+\end{itemize}

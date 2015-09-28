@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl copyopt compiler annotated
+BUILDS=block16 block32 block64 block128 block256 block512 
 
 # C and Fortran compilers
 CC=icc

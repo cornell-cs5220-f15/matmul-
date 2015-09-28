@@ -1,0 +1,14 @@
+\subsection{Vector Instructions}
+In addition to scalar instructions, most modern instruction set architectures
+also include vector instructions: instructions which operate on multiple
+data in a single cycle. These instructions provide data-level parallelism that
+can greatly increase the performance of code that exclusively uses scalar
+instructions.
+
+We tried to include explicit SSE instructions to operate on multiple doubles at
+once. This, however, was unsuccessful. We suspect the Intel compiler already
+did a good job of leveraging vector instructions since the performance only
+decreased when we tried to use methods from \ttt{xmmintrin.h}. Although we did
+end up getting this implementation to work, the added overhead and
+complications of using data types and operations from \ttt{xmmintrin.h} only
+resulted in slowing down our implementation.
