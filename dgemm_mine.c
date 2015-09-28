@@ -12,12 +12,12 @@ const char* dgemm_desc = "Our optimized dgemm.";
 /* Three 36x36 matrices will fit in the 32KB L1 cache.
  * This can be increased to 44 if we can find a way to not cache matrix C.*/
 #ifndef SMALL_BLOCK_SIZE
-#define SMALL_BLOCK_SIZE ((int) 52)
+#define SMALL_BLOCK_SIZE ((int) 64)
 #endif
 /* Three 103x103 matrices will fit in the 256KB L2 cache.
  * This can be increased to 126 if we can find a way to not cache matrix C.*/
 #ifndef LARGE_BLOCK_SIZE
-#define LARGE_BLOCK_SIZE ((int) 146)
+#define LARGE_BLOCK_SIZE ((int) 256)
 #endif
 
 #define MIN(x,y) (x > y ? y : x)
@@ -36,11 +36,11 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     int i, j, k;
     for (i = 0; i < M; ++i) {
         for (j = 0; j < N; ++j) {
-            double cij = C[j*lda+i];
+			double cij = C[j*lda+i];
             for (k = 0; k < K; ++k) {
                 cij += A[k+i*lda] * B[j*lda+k];
             }
-            C[j*lda+i] = cij;
+			C[j*lda+i] = cij;
         }
     }
 }

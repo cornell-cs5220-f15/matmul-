@@ -1,0 +1,23 @@
+Review of group reports for matmul:
+
+Group 27
+
+The testing of index orders was well done and clearly summarized. We'd like to note that the other group we reviewed did find jki to be the fastest ordering, so your finding that kji was slightly faster may have just been an anomaly. 
+
+The analysis of block sizing based on calculated cache sizes made sense, and it was nice to see that you found a noticeable performance drop when the block size exceeded the L2 cache. However, it was hard to see the performance difference by comparing the graphs, since they had different y-axes and very jagged line shapes. It would be better to put all three lines for different block sizes on the same graph. Also, our group found that two-level blocking in which the first level fits into the L1 cache had better performance than your single-level block of size 104, so you might want to try that out next. 
+
+The experiments with copy optimization were sensible, and it's reasonable to expect that they might not help if the performance was already good enough that copying overhead was noticeable. It's worth checking, however, whether your performance improves by changing the block size, because the goal of copy optimization is to ensure that each column of the block is loaded in one cache line - thus, it's important to find a block size that makes each column the size of a cache line. 
+
+We noticed that there was no overall comparison of the different matrix methods (the group routine compared to BLAS, for example). Additionally, it would be good to include mentions of other compiler flags tested and reasons for flags used rather than just the default and fairly basic -O3 and -Ofast.
+
+Group 29 
+
+The loop reordering test, especially the included graph, was clear and helpful. 
+
+The block size graph was a little hard to read with so many lines overlaid on the same graph (though it's better than putting them all on separate graphs). There was also no obvious calculation for the block sizes to use, or reasoning based on cache sizes - the block sizes tested seemed to be just powers of 2 +/-1.
+
+It was nice to see testing with AVX commands, and the results you got were great. However, the report text describing your experiments with AVX was confusing, so it's hard to figure out exactly what you did, or what could be improved. 
+
+The compiler flags section didn't make much sense because you tested compiler flags with the premade dgemm routines, not your own optimized version (with loop reordering, blocking, etc.). Still, it was nice to see evidence that the -xHost flag probably improves performance, while -unroll-aggressive does not.
+
+We advise testing copy optimization, with or without zero-padding, as this may help you to get aligned memory for your aligned AVX instructions.
