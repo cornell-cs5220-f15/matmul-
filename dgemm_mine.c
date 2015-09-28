@@ -22,7 +22,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B,
                  double* restrict C){
-  /* For the new kernal function, A must be stored in row-major
+  /* For the new kernel function, A must be stored in row-major
     lda is the leading dimension of the matrix (the M of square_dgemm).
     A is M-by-K, B is K-by-N and C is M-by-N */
     int i, j, k;
@@ -39,7 +39,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 void mine_fma_dgemm(const double* restrict A, const double* restrict B,
                  double* restrict C){
     /*
-    My kernal function that utilizes the architecture of totient node.
+    My kernel function that utilizes the architecture of totient node.
     It uses the 256 bits register size which accomodate 4 doubles
     Also, it uses FMA to maximize the computational efficiency.
     To do this, it assumes an input of A = 4*4 and B = 4*4 with output C = 4*4
@@ -81,8 +81,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
 
 void do_block(const int lda,
               const double* restrict A, const double* restrict B, double* restrict C,
-              const int i, const int j, const int k)
-{
+              const int i, const int j, const int k){
     // Determine the size of each sub-block
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
@@ -187,7 +186,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //     matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
     //   }
     // }
-    // // Assign blocks for kernals to perform fast computation.
+    // // Assign blocks for kernels to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
     // int bi, bj, bk;
@@ -198,7 +197,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //     for (bk = 0; bk < n_blocks; bk++){
     //       matrix_copy (M, BLOCK_SIZE, bi, bk, A, A_outer);
     //       matrix_copy (M, BLOCK_SIZE, bk, bj, B, B_outer);
-    //       // Compute the block multiplication by passing submatrices to kernal function
+    //       // Compute the block multiplication by passing submatrices to kernel function
     //       for (sbi = 0; sbi < n_inner_blocks; sbi++){
     //         for (sbj = 0; sbj < n_inner_blocks; sbj++){
     //           matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
@@ -220,22 +219,20 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       const int i = bi * BLOCK_SIZE;
       for (bk = 0; bk < n_blocks; ++bk){
         const int k = bk * BLOCK_SIZE;
-        for (bj = 0; bj < n_blocks; ++bj){
-          const int j = bj * BLOCK_SIZE;
+        // for (bj = 0; bj < n_blocks; ++bj){
+        //   const int j = bj * BLOCK_SIZE;
           // do_block(M, A_transposed, B, C, i, j, k);
           // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
-          do_block(M, A, B, C, i, j, k); // For AVX 4*4
-        }
+          // do_block(M, A, B, C, i, j, k); // For AVX 4*4
+        // }
         // Transpose A.
         const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
         const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
         int it, kt;
-
         for (it = 0; it < M_sub; ++it){
           for (kt = 0; kt < K; ++kt)
             A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
         }
-
         // // Instead of transposing A, transpose B for AVX 2*2
         // for (it = 0; it < M_sub; ++it){
         //   for (kt = 0; kt < K; ++kt)
@@ -251,7 +248,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         }
       }
     }
-    // Free memory for basic kernal and AVX kernal.
+    // Free memory for basic kernel and AVX kernel.
     _mm_free(A_transposed);
     // _mm_free(B_transposed);
     // _mm_free(A_outer);
@@ -267,7 +264,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 // Functiosn that are for testing and stuffs
 void mine_dgemm( const double* restrict A, const double* restrict B,
                  double* restrict C){
-    /*  My kernal function that uses AVX for optimal performance
+    /*  My kernel function that uses AVX for optimal performance
         It always assumes an input of A = 2 * P, B = P * 2
         Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
         B should be stored in its row form.
