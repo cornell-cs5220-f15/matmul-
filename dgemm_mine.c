@@ -89,7 +89,7 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   for (n = 0; n < sub_N; n++){
     printf("\n");
     for (m = 0; m < sub_M; m++){
-      subMatrix[n*sub_size + m] = Matrix[(i*sub_size+n)*mat_size + (j*sub_size+m)];
+      subMatrix[n*sub_size + m] = Matrix[(j*sub_size+n)*mat_size + (i*sub_size+m)];
       printf("(%d, %d)\n", m,n);
     }
   }
