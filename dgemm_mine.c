@@ -187,7 +187,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
 
-          
+
           int it, jt;
           printf("Matrix A_inner is:\n");
           for (it = 0; it < INNER_BLOCK_SIZE; it++){
@@ -217,6 +217,28 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       }
     }
 
+    int it, jt;
+    printf("Matrix A is:\n");
+    for (it = 0; it < M; it++){
+      for (jt = 0; jt < M; jt ++){
+        printf("%lf\t", A[jt*M+it]);
+      }
+      printf("\n");
+    }
+    printf("Matrix B is:\n");
+    for (it = 0; it < M; it++){
+      for (jt = 0; jt < M; jt ++){
+        printf("%lf\t", B[jt*M+it]);
+      }
+      printf("\n");
+    }
+    printf("Matrix C is:\n");
+    for (it = 0; it < M; it++){
+      for (jt = 0; jt < M; jt ++){
+        printf("%lf\t", C[jt*M+it]);
+      }
+      printf("\n");
+    }
 
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
