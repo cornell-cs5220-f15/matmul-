@@ -2,8 +2,9 @@
 
 #PBS -N matmul-group21
 #PBS -j oe
+#PBS -l nodes=1:ppn=24 job-foo.pbs 
 
 module load cs5220
 cd $PBS_O_WORKDIR
-./matmul-group21
+./matmul-group21_blocked
 

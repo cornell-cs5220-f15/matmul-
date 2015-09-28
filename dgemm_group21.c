@@ -16,13 +16,15 @@ void square_dgemm(const int M,
         }
     }
         
-    for (i = 0; i < M; ++i) {
-        for (j = 0; j < M; ++j) {
+    for (j = 0; j < M; ++j) {
+        for (i = 0; i < M; ++i) {
             double cij = C[j*M+i];
             for (k = 0; k < M; ++k)
                 cij += A_copy[i*M+k] * B[j*M+k];
             C[j*M+i] = cij;
         }
     }
+
+    free(A_copy);
 }
 
