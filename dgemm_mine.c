@@ -65,14 +65,16 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     for (i = 0; i < Matrix_size; i++){
       // Load one column of C, C(:,i)
       c = _mm256_loadu_pd((C + Matrix_size*i));
+
       bij = _mm256_set1_pd(*(B+i*Matrix_size+0)); // Perform FMA on A*B(:,i)
-      c = _mm256_fmaddu_pd(a0, bij, c);
+      c = _mm256_fmadd_pd(a0, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
-      c = _mm256_fmaddu_pd(a1, bij, c);
+      c = _mm256_fmadd_pd(a1, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+2));
-      c = _mm256_fmaddu_pd(a2, bij, c);
+      c = _mm256_fmadd_pd(a2, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
-      c = _mm256_fmaddu_pd(a3, bij, c);
+      c = _mm256_fmadd_pd(a3, bij, c);
+      
       _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
     }
 }
