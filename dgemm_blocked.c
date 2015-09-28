@@ -15,8 +15,8 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double *restrict A, const double *restrict B, double *restrict C)
 {
     int i, j, k;
-		for (k = 0; k < K; ++k) {
-			for (j = 0; j < N; ++j) { 
+		for (j = 0; j < N; ++j) { 
+            for (k = 0; k < K; ++k) {
 				/*for (i = 0; (i+3) < M; i+=4) {
 					C[j*lda+i] += A[k*lda+i] * B[j*lda+k];
 					C[j*lda+(i+1)] += A[k*lda+(i+1)] * B[j*lda+k];
@@ -48,10 +48,11 @@ void square_dgemm(const int M, const double *restrict A, const double *restrict 
 {
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
-	for (bk = 0; bk < n_blocks; ++bk) {
+
+	for (bj = 0; bj < n_blocks; ++bj) {
+	const int j = bj * BLOCK_SIZE;
+		for (bk = 0; bk < n_blocks; ++bk) {
 		const int k = bk * BLOCK_SIZE;
-		for (bj = 0; bj < n_blocks; ++bj) {
-			const int j = bj * BLOCK_SIZE;
 			for (bi = 0; bi < n_blocks; ++bi) {
 				const int i = bi * BLOCK_SIZE;
                 do_block(M, A, B, C, i, j, k);
