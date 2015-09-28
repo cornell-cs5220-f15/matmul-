@@ -13,11 +13,11 @@ const char* dgemm_desc = "My awesome dgemm.";
 #define INNER_BLOCK_SIZE ((int) 4)
 #endif
 
-// #ifdef USE_SHUFPD
-// #  define swap_sse_doubles(a) _mm_shuffle_pd(a, a, 1)
-// #else
-// #  define swap_sse_doubles(a) (__m128d) _mm_shuffle_epi32((__m128i) a, 0x4e)
-// #endif
+#ifdef USE_SHUFPD
+#  define swap_sse_doubles(a) _mm_shuffle_pd(a, a, 1)
+#else
+#  define swap_sse_doubles(a) (__m128d) _mm_shuffle_epi32((__m128i) a, 0x4e)
+#endif
 
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B,
@@ -154,6 +154,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           }
         }
         matrix_update  (M, BLOCK_SIZE, bi, bj, C, C_outer);
+      }
     }
 
 
