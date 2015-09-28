@@ -79,6 +79,20 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     }
 }
 
+void do_block(const int lda,
+              const double* restrict A, const double* restrict B, double* restrict C,
+              const int i, const int j, const int k)
+{
+    // Determine the size of each sub-block
+    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
+    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
+    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+
+    basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
+    // mine_dgemm(A,B,C);
+    // mine_fma_dgemm(A,B,C);
+}
+
 void matrix_copy (const int mat_size, const int sub_size, const int i, const int j,
         const double* restrict Matrix, double* restrict subMatrix){
   // Get a copy of submatrix
@@ -301,19 +315,4 @@ void mine_dgemm( const double* restrict A, const double* restrict B,
     C_swap = C[3];
     C[3] = C[1];
     C[1] = C_swap;
-}
-
-
-void do_block(const int lda,
-              const double* restrict A, const double* restrict B, double* restrict C,
-              const int i, const int j, const int k)
-{
-    // Determine the size of each sub-block
-    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
-    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
-    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-
-    basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
-    // mine_dgemm(A,B,C);
-    // mine_fma_dgemm(A,B,C);
 }
