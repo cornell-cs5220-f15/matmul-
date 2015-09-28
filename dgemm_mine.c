@@ -143,9 +143,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         for (bk = 0; bk < n_blocks; bk++){
           matrix_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
           matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
-
-          for (sbj = 0; sbj < n_inner_blocks; sbj++){
-            for (sbi = 0; sbi < n_inner_blocks; sbi++){
+          for (sbi = 0; sbi < n_inner_blocks; sbi++){
+            for (sbj = 0; sbj < n_inner_blocks; sbj++){
               matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
               for (sbk = 0; sbk < n_inner_blocks; sbk++){
                 matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
