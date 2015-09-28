@@ -46,10 +46,10 @@ extern void square_dgemm();
   around some of the powers-of-two.
 */
 const int test_sizes[] = {
-    20,
+    220,
 
 #if defined(DEBUG_RUN)
-# define MAX_SIZE 20u//229u
+# define MAX_SIZE 220u//229u
 #else
     31, 32, 96, 97, 127, 128, 129, 191, 192, 229,
     255, 256, 257, 319, 320, 321, 417, 479, 480, 511, 512, 639, 640,
