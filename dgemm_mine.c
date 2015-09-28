@@ -144,6 +144,7 @@ void do_block(const int lda,
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+
     // basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
     // mine_dgemm(A,B,C);
     mine_fma_dgemm(A,B,C);
@@ -215,7 +216,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
           matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
-          // printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
+          //printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
       }

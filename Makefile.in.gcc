@@ -8,7 +8,7 @@ LD=gcc
 
 # Compiler optimization flags.  You will definitely want to play with these!
 OPTFLAGS = -O3 
-CFLAGS = -std=gnu99 
+CFLAGS = -std=gnu99 -mavx
 FFLAGS =
 LDFLAGS = -fopenmp
 
