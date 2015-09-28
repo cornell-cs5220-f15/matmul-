@@ -174,7 +174,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         printf("%lf\t", C[jt*M+it]);
       }
       printf("\n");
-
+    }
     // functional avx2 script
     // int sbi, sbj, sbk;
     // for (sbi = 0; sbi < n_inner_blocks; sbi++){
