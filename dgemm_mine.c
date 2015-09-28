@@ -84,11 +84,6 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   // printf("\n For copy, M is %d, N is %d\n", M, N);
   // Make a copy
   int m, n;
-  // for (n = 0; n < N; n++){
-  //   for (m = 0; m < M; m++){
-  //     subMatrix[n*sub_size + m] = 0.0;
-  //   }
-  // }
   for (n = 0; n < N; n++){
     for (m = 0; m < M; m++){
       subMatrix[n*sub_size + m] = Matrix[(i*sub_size+n)*mat_size + (j*sub_size+m)];
@@ -96,11 +91,10 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   }
   // Populate the submatrix with 0 to enforce regular pattern in the computation.
   for (n = N; n < sub_size; n++){
-    for (m = 0; m < M; m++){
+    for (m = 0; m < sub_size; m++){
       subMatrix[n*sub_size + m] = 0.0;
     }
   }
-
   for (n = 0; n < N; n++){
     for (m = M; m < sub_size; m++){
       subMatrix[n*sub_size + m] = 0.0;
@@ -215,36 +209,10 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
             }
             printf("\n");
           }
-
-
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
       }
     }
-
-    int it, jt;
-    printf("Matrix A is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt ++){
-        printf("%lf\t", A[jt*M+it]);
-      }
-      printf("\n");
-    }
-    printf("Matrix B is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt ++){
-        printf("%lf\t", B[jt*M+it]);
-      }
-      printf("\n");
-    }
-    printf("Matrix C is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt ++){
-        printf("%lf\t", C[jt*M+it]);
-      }
-      printf("\n");
-    }
-
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
