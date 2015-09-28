@@ -355,6 +355,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     _mm_free(A_outer);
     _mm_free(B_outer);
     _mm_free(C_outer);
+    
     _mm_free(A_inner);
     _mm_free(B_inner);
     _mm_free(C_inner);
