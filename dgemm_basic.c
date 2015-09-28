@@ -7,10 +7,8 @@ void square_dgemm(const int M,
     for (i = 0; i < M; ++i) {
         for (j = 0; j < M; ++j) {
             double cij = C[j*M+i];
-            for (k = 0; k < M; ++k){
+            for (k = 0; k < M; ++k)
                 cij += A[k*M+i] * B[j*M+k];
-                printf("%f", cij);
-              }
             C[j*M+i] = cij;
         }
     }

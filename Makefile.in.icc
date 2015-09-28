@@ -7,7 +7,7 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3
+OPTFLAGS = -O0
 CFLAGS = -std=gnu99 -DDEBUG_RUN 
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main
