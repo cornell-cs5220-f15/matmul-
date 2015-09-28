@@ -96,7 +96,7 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
     }
   }
 
-  for (n = 0; n < sub_size; n++){
+  for (n = 0; n < N; n++){
     for (m = M; m < sub_size; m++){
       subMatrix[n*sub_size + m] = 0.0;
     }
