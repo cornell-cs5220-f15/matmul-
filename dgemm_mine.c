@@ -186,8 +186,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 
     // const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
 
-    for (bi = 0; bi < n_blocks; bi++){
-      for (bj = 0; bj < n_blocks; bj++){
+    for (bj = 0; bj < n_blocks; bj++){
+      for (bi = 0; bi < n_blocks; bi++){
         matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
         for (bk = 0; bk < n_blocks; bk++){
           matrix_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
