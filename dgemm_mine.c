@@ -13,17 +13,15 @@ const char* dgemm_desc = "My awesome dgemm.";
 #define INNER_BLOCK_SIZE ((int) 4)
 #endif
 
-#ifdef USE_SHUFPD
-#  define swap_sse_doubles(a) _mm_shuffle_pd(a, a, 1)
-#else
-#  define swap_sse_doubles(a) (__m128d) _mm_shuffle_epi32((__m128i) a, 0x4e)
-#endif
-
+// #ifdef USE_SHUFPD
+// #  define swap_sse_doubles(a) _mm_shuffle_pd(a, a, 1)
+// #else
+// #  define swap_sse_doubles(a) (__m128d) _mm_shuffle_epi32((__m128i) a, 0x4e)
+// #endif
 
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B,
-                 double* restrict C)
-{
+                 double* restrict C){
   /* For the new kernal function, A must be stored in row-major
     lda is the leading dimension of the matrix (the M of square_dgemm).
     A is M-by-K, B is K-by-N and C is M-by-N */
@@ -38,59 +36,6 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
       }
     }
 }
-
-void mine_dgemm( const double* restrict A, const double* restrict B,
-                 double* restrict C){
-    /*  My kernal function that uses AVX for optimal performance
-        It always assumes an input of A = 2 * P, B = P * 2
-        Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
-        B should be stored in its row form.
-    */
-
-    double C_swap = C[1];
-    C[1] = C[3];
-    C[3] = C_swap;
-
-    // This is really implicit in using the aligned ops...
-    __assume_aligned(A, 16);
-    __assume_aligned(B, 16);
-    __assume_aligned(C, 16);
-
-    // Load diagonal and off-diagonals
-    __m128d cd = _mm_load_pd(C+0);
-    __m128d co = _mm_load_pd(C+2);
-
-    /*
-    Assuming 2*2 case, and we do traditional, naive three loop multiplication.
-    Except in this case we don't need any loop because it's small.
-    */
-
-    __m128d a0 = _mm_load_pd(A);
-    __m128d b0 = _mm_load_pd(B);
-    __m128d td0 = _mm_mul_pd(a0, b0);
-    __m128d bs0 = swap_sse_doubles(b0);
-    __m128d to0 = _mm_mul_pd(a0, bs0);
-
-    __m128d a1 = _mm_load_pd(A+2);
-    __m128d b1 = _mm_load_pd(B+BLOCK_SIZE);
-    __m128d td1 = _mm_mul_pd(a1, b1);
-    __m128d bs1 = swap_sse_doubles(b1);
-    __m128d to1 = _mm_mul_pd(a1, bs1);
-
-    __m128d td_sum = _mm_add_pd(td0, td1);
-    __m128d to_sum = _mm_add_pd(to0, to1);
-
-    cd = _mm_add_pd(cd, td_sum);
-    co = _mm_add_pd(co, to_sum);
-
-    _mm_store_pd(C+0, cd);
-    _mm_store_pd(C+2, co);
-
-    C_swap = C[3];
-    C[3] = C[1];
-    C[1] = C_swap;
-}
-
 void mine_fma_dgemm( const double* restrict A, const double* restrict B,
                  double* restrict C){
     /*
@@ -108,7 +53,6 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __assume_aligned(A, 32);
     __assume_aligned(B, 32);
     __assume_aligned(C, 32);
-
     // Load matrix A. The load function is loadu, which doesn't require alignment of the meory
     __m256d a0 = _mm256_load_pd((A + Matrix_size * 0));
     __m256d a1 = _mm256_load_pd((A + Matrix_size * 1));
@@ -116,13 +60,12 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __m256d a3 = _mm256_load_pd((A + Matrix_size * 3));
 
     __m256d bij;
-    int i, j;
+    __m256d c;
+    int i;
     for (i = 0; i < Matrix_size; i++){
       // Load one column of C, C(:,i)
-      __m256d c = _mm256_load_pd((C + Matrix_size*i));
-      // __m256d c = _mm256_set1_pd(0.0); // No need to copy the original for this one
-      // Perform FMA on A*B(:,i)
-      bij = _mm256_set1_pd(*(B+i*Matrix_size+0));
+      c = _mm256_load_pd((C + Matrix_size*i));
+      bij = _mm256_set1_pd(*(B+i*Matrix_size+0)); // Perform FMA on A*B(:,i)
       c = _mm256_fmadd_pd(a0, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
       c = _mm256_fmadd_pd(a1, bij, c);
@@ -130,26 +73,9 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c = _mm256_fmadd_pd(a2, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
       c = _mm256_fmadd_pd(a3, bij, c);
-      // Store C(:,i)
-      _mm256_store_pd((C+i*Matrix_size),c);
+      _mm256_store_pd((C+i*Matrix_size),c); // Store C(:,i)
     }
 }
-
-
-void do_block(const int lda,
-              const double* restrict A, const double* restrict B, double* restrict C,
-              const int i, const int j, const int k)
-{
-    // Determine the size of each sub-block
-    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
-    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
-    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-
-    // basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
-    // mine_dgemm(A,B,C);
-    mine_fma_dgemm(A,B,C);
-}
-
 void matrix_copy (const int mat_size, const int sub_size, const int i, const int j,
         const double* restrict Matrix, double* restrict subMatrix){
   // Get a copy of submatrix
@@ -188,10 +114,7 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
       }
     }
 }
-
-
-void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
-{
+void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C){
     // // Preallocate a space for submatrices A, B and C
     // double* A_transposed = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
     // double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
@@ -207,20 +130,49 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
 
     // Testing code
-    const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
+    const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
+    const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    int bi, bj, bk;
     int sbi, sbj, sbk;
-    for (sbi = 0; sbi < n_inner_blocks; sbi++){
-      for (sbj = 0; sbj < n_inner_blocks; sbj++){
-        matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbi, C, C_inner);
-        for (sbk = 0; sbk < n_inner_blocks; sbk++){
-          matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
-          matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
-          mine_fma_dgemm(A_inner, B_inner, C_inner);
-          //printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
+    for (bi = 0; bi < n_blocks; bi ++){
+      for (bj = 0; bj < n_blocks; bj ++){
+        matrix_copy (M, BLOCK_SIZE, bj, bi, C, C_outer);
+        for (bk = 0; bk < n_blocks; bk++){
+          matrix_copy (M, BLOCK_SIZE, bk, bi, A, A_outer);
+          matrix_copy (M, BLOCK_SIZE, bj, bk, B, B_outer);
+          for (sbi = 0; sbi < n_inner_blocks; sbi++){
+            for (sbj = 0; sbj < n_inner_blocks; sbj++){
+              matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbj, sbi, C_outer, C_inner);
+              for (sbk = 0; sbk < n_inner_blocks; sbk++){
+                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbi, A_outer, A_inner);
+                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbj, sbk, B_outer, B_inner);
+                mine_fma_dgemm(A_inner, B_inner, C_inner);
+                //printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
+              }
+              matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+            }
+          }
         }
-        matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
-      }
+        matrix_update  (M, BLOCK_SIZE, bi, bj, C, C_outer);
     }
+
+
+    // functional avx2 script
+    // int sbi, sbj, sbk;
+    // for (sbi = 0; sbi < n_inner_blocks; sbi++){
+    //   for (sbj = 0; sbj < n_inner_blocks; sbj++){
+    //     matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbi, C, C_inner);
+    //     for (sbk = 0; sbk < n_inner_blocks; sbk++){
+    //       matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
+    //       matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
+    //       mine_fma_dgemm(A_inner, B_inner, C_inner);
+    //       //printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
+    //     }
+    //     matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
+    //   }
+    // }
+
+
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
@@ -295,4 +247,73 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     _mm_free(A_inner);
     _mm_free(B_inner);
     _mm_free(C_inner);
+}
+
+
+// Functiosn that are for testing and stuffs
+void mine_dgemm( const double* restrict A, const double* restrict B,
+                 double* restrict C){
+    /*  My kernal function that uses AVX for optimal performance
+        It always assumes an input of A = 2 * P, B = P * 2
+        Template from https://bitbucket.org/dbindel/cs5220-s14/wiki/sse
+        B should be stored in its row form.
+    */
+
+    double C_swap = C[1];
+    C[1] = C[3];
+    C[3] = C_swap;
+
+    // This is really implicit in using the aligned ops...
+    __assume_aligned(A, 16);
+    __assume_aligned(B, 16);
+    __assume_aligned(C, 16);
+
+    // Load diagonal and off-diagonals
+    __m128d cd = _mm_load_pd(C+0);
+    __m128d co = _mm_load_pd(C+2);
+
+    /*
+    Assuming 2*2 case, and we do traditional, naive three loop multiplication.
+    Except in this case we don't need any loop because it's small.
+    */
+
+    __m128d a0 = _mm_load_pd(A);
+    __m128d b0 = _mm_load_pd(B);
+    __m128d td0 = _mm_mul_pd(a0, b0);
+    __m128d bs0 = swap_sse_doubles(b0);
+    __m128d to0 = _mm_mul_pd(a0, bs0);
+
+    __m128d a1 = _mm_load_pd(A+2);
+    __m128d b1 = _mm_load_pd(B+BLOCK_SIZE);
+    __m128d td1 = _mm_mul_pd(a1, b1);
+    __m128d bs1 = swap_sse_doubles(b1);
+    __m128d to1 = _mm_mul_pd(a1, bs1);
+
+    __m128d td_sum = _mm_add_pd(td0, td1);
+    __m128d to_sum = _mm_add_pd(to0, to1);
+
+    cd = _mm_add_pd(cd, td_sum);
+    co = _mm_add_pd(co, to_sum);
+
+    _mm_store_pd(C+0, cd);
+    _mm_store_pd(C+2, co);
+
+    C_swap = C[3];
+    C[3] = C[1];
+    C[1] = C_swap;
+}
+
+
+void do_block(const int lda,
+              const double* restrict A, const double* restrict B, double* restrict C,
+              const int i, const int j, const int k)
+{
+    // Determine the size of each sub-block
+    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
+    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
+    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+
+    // basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
+    // mine_dgemm(A,B,C);
+    mine_fma_dgemm(A,B,C);
 }
