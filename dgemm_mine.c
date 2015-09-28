@@ -84,20 +84,21 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   // printf("\n For copy, M is %d, N is %d\n", M, N);
   // Make a copy
   int m, n;
-  for (m = 0; m < M; m++){
-    for (n = 0; n < N; n++){
-      subMatrix[m*sub_size + n] = Matrix[(i*sub_size+m)*mat_size + (j*sub_size+n)];
+  for (n = 0; n < N; n++){
+    for (m = 0; m < M; m++){
+      subMatrix[n*sub_size + m] = Matrix[(i*sub_size+n)*mat_size + (j*sub_size+m)];
     }
   }
   // Populate the submatrix with 0 to enforce regular pattern in the computation.
-  for (m = 0; m < M; m++){
-    for (n = N; n < sub_size; n++){
-      subMatrix[m*sub_size + n] = 0.0;
+  for (n = N; n < sub_size; n++){
+    for (m = 0; m < M; m++){
+      subMatrix[n*sub_size + m] = 0.0;
     }
   }
-  for (m = M; m < sub_size; m++){
-    for (n = 0; n < sub_size; n++){
-      subMatrix[m*sub_size + n] = 0.0;
+
+  for (n = 0; n < sub_size; n++){
+    for (m = M; m < sub_size; m++){
+      subMatrix[n*sub_size + m] = 0.0;
     }
   }
 }
@@ -180,12 +181,11 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     int sbi, sbj, sbk;
     for (sbi = 0; sbi < n_inner_blocks; sbi++){
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
-        matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbi, C, C_inner);
+        matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         for (sbk = 0; sbk < n_inner_blocks; sbk++){
-          matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbi, A, A_inner);
-          matrix_copy (M, INNER_BLOCK_SIZE, sbj, sbk, B, B_inner);
+          matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
+          matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
-          //printf("%lf", C_inner[INNER_BLOCK_SIZE]);// Strange behavior of the code. Without this line, C_inner will always be 0 for some reason.
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
       }
