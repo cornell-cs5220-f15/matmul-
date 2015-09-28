@@ -1,0 +1,47 @@
+   
+\documentclass[11pt]{article}
+\usepackage{amsmath,amsthm,verbatim,amssymb,amsfonts,amscd, graphicx}
+\usepackage{graphicx}
+\usepackage{float}
+\topmargin0.0cm
+\headheight0.0cm
+\headsep0.0cm
+\oddsidemargin0.0cm
+\textheight23.0cm
+\textwidth16.5cm
+\footskip1.0cm
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}
+\newtheorem{lemma}{Lemma}
+\newtheorem{proposition}{Proposition}
+\newtheorem*{surfacecor}{Corollary 1}
+\newtheorem{conjecture}{Conjecture} 
+\newtheorem{question}{Question} 
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\begin{document}
+\title{CS 5220\\ Project 1 - Matrix Multiplication Review of Group 23}
+\author{Weici Hu(wh343)\\ Sheroze Sheriffdeen(mss385)\\ Qinyu Wang(qw78)}
+\maketitle
+
+\section*{What was done well}
+\begin{itemize}
+	\item Clear explanation of the optimization approaches used.
+	\item The comprehensive list of compiler flags and their effect on the performance is interesting. Our group would love to borrow some of the compiler flags used here. 
+	\item Good performance gain from smart optimizations.
+\end{itemize}
+\section*{What needs to be improved}
+\begin{itemize}
+	\item In each performance plot, a concise description of the optimizations used in conjunction could help understand how the 'mine' line is changing with added optimizations. You can also add a progress plot at the end documenting the changes in performance as consecutive optimizations were added.
+	\item Trying out other optimization techniques such as copy optimization and autotuning.
+	\item It is unclear as to which compiler was used to generate the plot. By the compiler flags section, we assumed that the compiler used was \texttt{gcc}.
+	\item Displaying plots of different combinations of the compiler flags and other optimizations to show any performance drops when bad mixtures of optimizations occur. (A section describing what did not work and why).
+\end{itemize}
+
+
+
+ 
+ 
+\end{document}
