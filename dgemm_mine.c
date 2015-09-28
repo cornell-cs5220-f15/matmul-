@@ -76,27 +76,28 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       _mm256_store_pd((C+i*Matrix_size),c); // Store C(:,i)
     }
 }
+
 void matrix_copy (const int mat_size, const int sub_size, const int i, const int j,
         const double* restrict Matrix, double* restrict subMatrix){
   // Get a copy of submatrix
-  const int M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
-  const int N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
+  const int sub_M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
+  const int sub_N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
   // printf("\n For copy, M is %d, N is %d\n", M, N);
   // Make a copy
   int m, n;
-  for (n = 0; n < N; n++){
-    for (m = 0; m < M; m++){
+  for (n = 0; n < sub_N; n++){
+    for (m = 0; m < sub_M; m++){
       subMatrix[n*sub_size + m] = Matrix[(i*sub_size+n)*mat_size + (j*sub_size+m)];
     }
   }
   // Populate the submatrix with 0 to enforce regular pattern in the computation.
-  for (n = N; n < sub_size; n++){
+  for (n = sub_N; n < sub_size; n++){
     for (m = 0; m < sub_size; m++){
       subMatrix[n*sub_size + m] = 0.0;
     }
   }
-  for (n = 0; n < N; n++){
-    for (m = M; m < sub_size; m++){
+  for (n = 0; n < sub_N; n++){
+    for (m = sub_M; m < sub_size; m++){
       subMatrix[n*sub_size + m] = 0.0;
     }
   }
