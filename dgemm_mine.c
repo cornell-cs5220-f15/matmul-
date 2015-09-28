@@ -21,11 +21,9 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 			for (j = 0; j < N; ++j) { 
 				for (i = 0; i < M; ++i) {
 					C[j*lda+i] += Anew[k*M+i] * Bnew[j*K+k];
-					//C[j*lda+i] += A[k*lda+i] * B[j*lda+k];
-					/// FIX THIS
-            }
-        }
-    }
+				}
+			}
+		}
 }
 
 void do_block(const int lda,
@@ -40,9 +38,7 @@ void do_block(const int lda,
 				Anew + bk*lda*BLOCK_SIZE + bi*BLOCK_SIZE*K,
 				Bnew + bj*lda*BLOCK_SIZE + bk*BLOCK_SIZE*N,
 				C + bj*lda*BLOCK_SIZE + bi*BLOCK_SIZE);
-                //A + i + k*lda, B + k + j*lda, C + i + j*lda)
-				// FIX THIS
-}
+  }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
