@@ -243,12 +243,12 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         // }
 
         // // Don't transpose anything for AVX 4*4
-        // for (bj = 0; bj < n_blocks; ++bj){
-        //   const int j = bj * BLOCK_SIZE;
-        do_block(M, A_transposed, B, C, i, j, k);
+        for (bj = 0; bj < n_blocks; ++bj){
+          const int j = bj * BLOCK_SIZE;
+          do_block(M, A_transposed, B, C, i, j, k);
         //   // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
         //   do_block(M, A, B, C, i, j, k); // For AVX 4*4
-        // }
+        }
       }
     }
     // Free memory for basic kernal and AVX kernal.
