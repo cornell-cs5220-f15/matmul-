@@ -5,7 +5,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into L1 cache
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 200)
+#define BLOCK_SIZE ((int) 64)
 #endif
 
 // Block size that is used to fit submatrices into register
@@ -146,7 +146,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     // double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     //
     // // functional avx2 script with blocking
-    // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
+    const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
     // int bi, bj, bk;
     // int sbi, sbj, sbk;
