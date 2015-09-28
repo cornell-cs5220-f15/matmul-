@@ -19,8 +19,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
     // j = column
     // i = row
-    for (i = 0; i < M; ++i) {
-        for (j = 0; j < M; j++) {
+    for (j = 0; j < M; ++j) {
+        for (i = 0; i < M; i++) {
             double cij = C[j*M + i];
             for (k = 0; k < M; ++k) {
                 cij += D[i*M + k] * B[j*M + k];
