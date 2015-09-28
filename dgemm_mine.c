@@ -36,7 +36,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
       }
     }
 }
-void mine_fma_dgemm( const double* restrict A, const double* restrict B,
+void mine_fma_dgemm(const double* restrict A, const double* restrict B,
                  double* restrict C){
     /*
     My kernal function that utilizes the architecture of totient node.
@@ -74,7 +74,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       c = _mm256_fmadd_pd(a2, bij, c);
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
       c = _mm256_fmadd_pd(a3, bij, c);
-      
+
       _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
     }
 }
@@ -179,33 +179,20 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //   printf("\n");
 
     // functional avx2 script
-    // const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
-    // int sbi, sbj, sbk;
-    // for (sbi = 0; sbi < n_inner_blocks; sbi++){
-    //   for (sbj = 0; sbj < n_inner_blocks; sbj++){
-    //     matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
-    //     for (sbk = 0; sbk < n_inner_blocks; sbk++){
-    //       matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
-    //       matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
-    //       mine_fma_dgemm(A_inner, B_inner, C_inner);
-    //     }
-    //     matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
-    //   }
-    // }
-
     const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
     int sbi, sbj, sbk;
     for (sbi = 0; sbi < n_inner_blocks; sbi++){
       for (sbj = 0; sbj < n_inner_blocks; sbj++){
-        // matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
+        matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
         for (sbk = 0; sbk < n_inner_blocks; sbk++){
-          // matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
-          // matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
-          mine_fma_dgemm(A_inner+sbi+sbk*M, B_inner+sbk+sbj*M, C_inner+sbi+sbj*M);
+          matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
+          matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
+          mine_fma_dgemm(A_inner, B_inner, C_inner);
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
       }
     }
+
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
     // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // For convenience, choose block size to be multiple of inner block size.
