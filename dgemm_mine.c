@@ -85,12 +85,9 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   // printf("\n For copy, M is %d, N is %d\n", M, N);
   // Make a copy
   int m, n;
-  printf("\nin the middle of copying, the m,n are:");
   for (n = 0; n < sub_N; n++){
-    printf("\n");
     for (m = 0; m < sub_M; m++){
       subMatrix[n*sub_size + m] = Matrix[(j*sub_size+n)*mat_size + (i*sub_size+m)];
-      printf("(%d, %d)\n", m,n);
     }
   }
   // Populate the submatrix with 0 to enforce regular pattern in the computation.
@@ -189,41 +186,9 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_copy (M, INNER_BLOCK_SIZE, sbi, sbk, A, A_inner);
           matrix_copy (M, INNER_BLOCK_SIZE, sbk, sbj, B, B_inner);
           mine_fma_dgemm(A_inner, B_inner, C_inner);
-
-
-          int it, jt;
-          printf("Matrix A_inner is:\n");
-          for (it = 0; it < INNER_BLOCK_SIZE; it++){
-            for (jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf\t", A_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
-          printf("Matrix B_inner is:\n");
-          for (it = 0; it < INNER_BLOCK_SIZE; it++){
-            for (jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf\t", B_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
-          printf("Matrix C_inner is:\n");
-          for (it = 0; it < INNER_BLOCK_SIZE; it++){
-            for (jt = 0; jt < INNER_BLOCK_SIZE; jt ++){
-              printf("%lf\t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-            }
-            printf("\n");
-          }
         }
         matrix_update (M, INNER_BLOCK_SIZE, sbi, sbj, C, C_inner);
       }
-    }
-    int it, jt;
-    printf("Matrix B is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt ++){
-        printf("%lf\t", B[jt*M+it]);
-      }
-      printf("\n");
     }
     // // Assign blocks for kernals to perform fast computation.
     // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
