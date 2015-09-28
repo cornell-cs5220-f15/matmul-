@@ -110,16 +110,16 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
     __assume_aligned(C, 32);
 
     // Load matrix A. The load function is loadu, which doesn't require alignment of the meory
-    __m256d a0 = _mm256_loadu_pd((A + Matrix_size * 0));
-    __m256d a1 = _mm256_loadu_pd((A + Matrix_size * 1));
-    __m256d a2 = _mm256_loadu_pd((A + Matrix_size * 2));
-    __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
+    __m256d a0 = _mm256_load_pd((A + Matrix_size * 0));
+    __m256d a1 = _mm256_load_pd((A + Matrix_size * 1));
+    __m256d a2 = _mm256_load_pd((A + Matrix_size * 2));
+    __m256d a3 = _mm256_load_pd((A + Matrix_size * 3));
 
     __m256d bij;
     int i, j;
     for (i = 0; i < Matrix_size; i++){
       // Load one column of C, C(:,i)
-      __m256d c = _mm256_loadu_pd((C + Matrix_size*i));
+      __m256d c = _mm256_load_pd((C + Matrix_size*i));
       // __m256d c = _mm256_set1_pd(0.0); // No need to copy the original for this one
       // Perform FMA on A*B(:,i)
       bij = _mm256_set1_pd(*(B+i*Matrix_size+0));
@@ -131,7 +131,7 @@ void mine_fma_dgemm( const double* restrict A, const double* restrict B,
       bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
       c = _mm256_fmadd_pd(a3, bij, c);
       // Store C(:,i)
-      _mm256_storeu_pd((C+i*Matrix_size),c);
+      _mm256_store_pd((C+i*Matrix_size),c);
     }
 }
 
@@ -355,7 +355,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     _mm_free(A_outer);
     _mm_free(B_outer);
     _mm_free(C_outer);
-    
+
     _mm_free(A_inner);
     _mm_free(B_inner);
     _mm_free(C_inner);
