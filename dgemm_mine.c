@@ -83,7 +83,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       // low to high: xy00+xy01 xy10+xy11 xy22+xy23 xy32+xy33
       __m256d blended = _mm256_blend_pd(temp01, temp23, 0b1100);
       __m256d dotproduct = _mm256_add_pd( swapped, blended );
-      c = _mm256_add_pd( c, dotproduct;
+      c = _mm256_add_pd( c, dotproduct );
       _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
     }
     // int it, jt;
