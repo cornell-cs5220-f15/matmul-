@@ -240,24 +240,24 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                       matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, A_mid, B_inner);
                       mine_fma_dgemm(A_inner, B_inner, C_inner);
                       int it, jt;
-                      printf("Matrix A_mid is:\n");
+                      printf("Matrix A_inner is:\n");
                       for (it = 0; it < MID_BLOCK_SIZE; it++){
                         for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                          printf("%lf\t", A_mid[jt*MID_BLOCK_SIZE+it]);
+                          printf("%lf\t", A_inner[jt*MID_BLOCK_SIZE+it]);
                         }
                         printf("\n");
                       }
-                      printf("Matrix B_mid is:\n");
+                      printf("Matrix B_inner is:\n");
                       for (it = 0; it < MID_BLOCK_SIZE; it++){
                         for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                          printf("%lf\t", B_mid[jt*MID_BLOCK_SIZE+it]);
+                          printf("%lf\t", B_inner[jt*MID_BLOCK_SIZE+it]);
                         }
                         printf("\n");
                       }
-                      printf("Matrix C_mid is:\n");
+                      printf("Matrix C_inner is:\n");
                       for (it = 0; it < MID_BLOCK_SIZE; it++){
                         for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                          printf("%lf\t", C_mid[jt*MID_BLOCK_SIZE+it]);
+                          printf("%lf\t", C_inner[jt*MID_BLOCK_SIZE+it]);
                         }
                         printf("\n");
                       }
