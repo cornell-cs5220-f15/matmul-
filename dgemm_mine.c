@@ -67,6 +67,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     int i;
     for (i = 0; i < Matrix_size; i++){
       __m256d b = _mm256_loadu_pd((B + Matrix_size * i));
+      __m256d c = _mm256_loadu_pd((C + Matrix_size * i));
       // Routine to compute four dot product once.
       // Credit to http://stackoverflow.com/questions/10454150/intel-avx-256-bits-version-of-dot-product-for-double-precision-floating-point
       __m256d xy0 = _mm256_mul_pd( a0, b );
@@ -82,7 +83,8 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       // low to high: xy00+xy01 xy10+xy11 xy22+xy23 xy32+xy33
       __m256d blended = _mm256_blend_pd(temp01, temp23, 0b1100);
       __m256d dotproduct = _mm256_add_pd( swapped, blended );
-      _mm256_storeu_pd((C+i*Matrix_size),dotproduct); // Store C(:,i)
+      c = _mm256_add_pd( c, dotproduct)
+      _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
     }
     // int it, jt;
     // printf("Matrix A is:\n");
