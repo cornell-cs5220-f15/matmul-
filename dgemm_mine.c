@@ -148,7 +148,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     _mm_free(B_inner);
     _mm_free(C_inner);
 
-
     // functional avx2 script for reference
     // const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
     // int sbi, sbj, sbk;
