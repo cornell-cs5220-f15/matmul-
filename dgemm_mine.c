@@ -143,8 +143,11 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 	   L2bi, L2bj index of L2
            L2nblock= number of L1block that fit into L2
 	   L2rem number of remaining blocks 
+           rem : remainder of blocks after l2 blocking
+	   Ai, Aj, Ak : "addresses of i j k loops"
 	*/
-	int pad_size, bi, bj, bk, L2bi, L2bj, L2bk, nblock, L2nblock;
+
+	int pad_size, bi, bj, bk, L2bi, L2bj, L2bk, nblock, L2nblock, rem;
 
 	if (M%L1_BS==0){
 		nblock=M/L1_BS;
@@ -158,44 +161,107 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 	// number of L2
 
 	if(pad_size%(L2_BS*L1_BS)==0){
-	L2nblock=pad_size/(L2_BS*L1_BS);}
+	L2nblock=pad_size/(L2_BS*L1_BS);
+	// define remainder to be a whole block in this case for consistency
+	 rem = L2_BS;}
 
-	else{L2nblock=pad_size/(L2_BS*L1_BS)+1;}
-		
-	 //use something like double bA[size] __attribute__((aligned(64))); instead?
-	/*
-	double bA[pad_size*pad_size] __attribute__((aligned(64))); 
-	double bB[pad_size*pad_size] __attribute__((aligned(64))); 
-	double bC[pad_size*pad_size] __attribute__((aligned(64))); 
-	*/
-	
+	else{L2nblock=pad_size/(L2_BS*L1_BS)+1;
+	     rem= (pad_size%(L2_BS*L1_BS))/L1_BS;	}
+
 	
 	double *restrict bA= (double*) _mm_malloc(pad_size*pad_size*sizeof(double),64);
 	double *restrict bB= (double*) _mm_malloc(pad_size*pad_size*sizeof(double),64);
 	double *restrict bC= (double*) _mm_malloc(pad_size*pad_size*sizeof(double),64);
 	
-	
-	
-	
+
 	// change indexing
 	row_to_block(M,nblock, A, bA);
 	row_to_block_transpose(M,nblock, B, bB);
 	row_to_block(M,nblock, C, bC);
 
-	for (L2bk=0; L2bk < L2nblock; ++L2bk){  
-	for (L2bj=0; L2bj < L2nblock; ++L2bj){
-	for (L2bi=0; L2bi < L2nblock; ++L2bi){
+
+
+
+
+		// MAIN LOOP
+	for (L2bk=0; L2bk < L2nblock-1; ++L2bk){  
+	for (L2bj=0; L2bj < L2nblock-1; ++L2bj){
+	for (L2bi=0; L2bi < L2nblock-1; ++L2bi){
 	for (bk = 0; bk < L2_BS; ++bk) {
+		int Ak=L2bk*L2_BS +bk;
 		for (bj = 0; bj < L2_BS; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
 			for (bi = 0; bi < L2_BS; ++bi) {
-				if ((L2bi*L2_BS+bi <  nblock) && (L2bj*L2_BS+bj < nblock) && (L2bk*L2_BS +bk <nblock)){
-				do_block(M, nblock, bA, bB, bC, L2bi*L2_BS+bi, L2bj*L2_BS+bj, L2bk*L2_BS+bk);}
+				int Ai=L2bi*L2_BS+bi;	
+		//		printf("currently on %d %d %d \n ", Ai, Aj, Ak); 
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);}
 			}
 		}
 	}
 	}
 	}
+	if (L2nblock !=1){
+		printf("remainder: %d \n", rem);}
+	
+
+	// ADDITIONAL LOOPS TO AVOID IF STATEMENTS
+
+	//printf("we got here\n");
+	L2bk=L2nblock-1; 
+	for (L2bj=0; L2bj < L2nblock-1; ++L2bj){
+	printf("got here \n");
+	for (L2bi=0; L2bi < L2nblock-1; ++L2bi){
+	for (bk = 0; bk < rem; ++bk) {
+		int Ak=L2bk*L2_BS+bk;
+		for (bj = 0; bj < L2_BS; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
+			for (bi = 0; bi < L2_BS; ++bi) {
+				int Ai=L2bi*L2_BS+bi;	
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
+                                if (Aj==8){ printf("here doing: (%d, %d) (%d,%d) \n", Ai, Ak, Ak, Aj);}     			
+			
+		}
 	}
+	}
+	}
+	}
+
+
+	L2bj=L2nblock-1;
+	for (L2bi=0; L2bi < L2nblock-1; ++L2bi){
+	for (bk = 0; bk < rem; ++bk) {
+		int Ak=L2bk*L2_BS +bk;
+		for (bj = 0; bj < rem; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
+			for (bi = 0; bi < L2_BS; ++bi) {
+
+				int Ai=L2bi*L2_BS+bi;	
+                                if (Aj==8){ printf("here doing: (%d, %d) (%d,%d) \n", Ai, Ak, Ak, Aj);}     			
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
+			}		
+		}
+	}
+	}
+	
+
+ 	L2bi=L2nblock-1;
+	for (bk = 0; bk < rem; ++bk) {
+		int Ak=L2bk*L2_BS +bk;
+		for (bj = 0; bj < rem; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
+			for (bi = 0; bi < rem; ++bi) {
+				int Ai=L2bi*L2_BS+bi;	
+	//printf("currentlay on %d %d %d \n ", Ai, Aj, Ak); 
+                                if (Aj==8){ printf("here doing: (%d, %d) (%d,%d) \n", Ai, Ak, Ak, Aj);}     			
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
+			
+		}
+	}
+	}
+	
+	
+		
 // reindex back to column
 	block_to_row(M,nblock,C,bC);
 }
+
