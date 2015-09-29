@@ -7,7 +7,7 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3 -funroll-loops -ftree-vectorize -vec -ipo -xHost -no-prec-div -ansi-alias -axCORE-AVX2 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout -restrict
+OPTFLAGS = -O3 -funroll-loops -ftree-vectorize -vec -ipo -xHost -no-prec-div -ansi-alias -axCORE-AVX2 -restrict #-parallel
 CFLAGS = -std=gnu99  
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main
