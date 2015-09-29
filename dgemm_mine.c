@@ -252,7 +252,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           //////////////////////
           // Start of Mid loop//
           //////////////////////
-          // printf("I_m, J_m, K_m is %d, %d, %d\n", I_m, J_m, K_m);
           for(mbi = 0; mbi < I_m; mbi++){
             const int I_mid = I_outer + mbi*MID_BLOCK_SIZE; // Starting element index I for mid submatrix
             for(mbj = 0; mbj < J_m; mbj++){
@@ -276,20 +275,28 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                       submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B_mid, B_inner);
                       mine_fma_dgemm(A_inner, B_inner, C_inner);
                       submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
-                      int it, jt;
-                      printf("======== Matrix C_inner ==========\n");
-                      for (it = 0; it < INNER_BLOCK_SIZE; it++){
-                        for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
-                          printf("%lf\t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-                        }
-                        printf("\n");
-                      }
+                      // int it, jt;
+                      // printf("======== Matrix C_inner ==========\n");
+                      // for (it = 0; it < INNER_BLOCK_SIZE; it++){
+                      //   for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
+                      //     printf("%lf\t", C_inner[jt*INNER_BLOCK_SIZE+it]);
+                      //   }
+                      //   printf("\n");
+                      // }
                     }
                   }
                 }
                 ///////////////////////
                 // End of Inner Loop //
                 ///////////////////////
+              }
+              int it, jt;
+              printf("======== Matrix C_mid ==========\n");
+              for (it = 0; it < MID_BLOCK_SIZE; it++){
+                for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
+                  printf("%lf\t", C_mid[jt*INNER_BLOCK_SIZE+it]);
+                }
+                printf("\n");
               }
               submatrix_update(M, MID_BLOCK_SIZE, I_mid, J_mid, C, C_mid);
             }
@@ -300,7 +307,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         }
       }
     }
-
     // Free _mm_malloc memory
     _mm_free(A_mid);
     _mm_free(B_mid);
