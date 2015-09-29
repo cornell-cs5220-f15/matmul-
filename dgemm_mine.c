@@ -10,7 +10,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into register
 #ifndef MID_BLOCK_SIZE
-#define MID_BLOCK_SIZE ((int) 32)
+#define MID_BLOCK_SIZE ((int) 128)
 #endif
 
 // Block size that is used to fit submatrices into register
@@ -91,28 +91,6 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       c = _mm256_add_pd( c, dotproduct );
       _mm256_storeu_pd((C + i*Matrix_size),c); // Store C(:,i)
     }
-    // int it, jt;
-    // printf("Matrix A is:\n");
-    // for (it = 0; it < Matrix_size; it++){
-    //   for (jt = 0; jt < Matrix_size; jt++){
-    //     printf("%lf\t", A[jt*Matrix_size+it]);
-    //   }
-    //   printf("\n");
-    // }
-    // printf("Matrix B is:\n");
-    // for (it = 0; it < Matrix_size; it++){
-    //   for (jt = 0; jt < Matrix_size; jt++){
-    //     printf("%lf\t", B[jt*Matrix_size+it]);
-    //   }
-    //   printf("\n");
-    // }
-    // printf("Matrix C is:\n");
-    // for (it = 0; it < Matrix_size; it++){
-    //   for (jt = 0; jt < Matrix_size; jt++){
-    //     printf("%lf\t", C[jt*Matrix_size+it]);
-    //   }
-    //   printf("\n");
-    // }
 }
 
 
@@ -146,7 +124,6 @@ void matrix_transpose_copy (const int mat_size, const int sub_size, const int i,
   // Get a copy of submatrix
   const int sub_M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
   const int sub_N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
-  // printf("\n For copy, M is %d, N is %d\n", M, N);
   // Make a copy
   int m, n;
   for (n = 0; n < sub_N; n++){
