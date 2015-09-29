@@ -18,8 +18,6 @@ const char* dgemm_desc = "My awesome dgemm.";
 #define INNER_BLOCK_SIZE ((int) 4)
 #endif
 
-
-
 // Part of AVX implementation, now for reference
 // #ifdef USE_SHUFPD
 // #  define swap_sse_doubles(a) _mm_shuffle_pd(a, a, 1)
@@ -182,74 +180,94 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
     }
 }
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C){
-    // Preallocate spaces for outer matrices A, B and C;
-    double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    // Preallocate spaces for middle submatrices A, B and C;
-    double* A_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
-    double* B_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
-    double* C_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
-    // Preallocate spaces for inner matrices A, B and C;
-    double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
-    double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
-    double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
-    // // functional avx2 script with blocking
-    const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
-    const int n_mid_blocks = BLOCK_SIZE / MID_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
-    const int n_inner_blocks = MID_BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    const int n_outer_blocks = M / BLOCK_SIZE + (M % BLOCK_SIZE ? 1 : 0); // # of blocks
+    const int n_mid_blocks = BLOCK_SIZE / MID_BLOCK_SIZE; // # of next level blocking
+    const int n_inner_blocks = MID_BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner blocking
+
+    double* A_outer_transpose = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
 
     int bi, bj, bk;
     int mbi, mbj, mbk;
     int sbi, sbj, sbk;
-
-    // It is probably better to use functions since each layer is the same
     for (bi = 0; bi < n_blocks; bi++){
-      for (bj = 0; bj < n_blocks; bj++){
-        matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
-        for (bk = 0; bk < n_blocks; bk++){
-          matrix_transpose_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
-          matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
-          for (mbi = 0; mbi < n_mid_blocks; mbi++){
-            for (mbj = 0; mbj < n_mid_blocks; mbj++){
-              matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbi, mbj, C_outer, C_mid);
-              for (mbk = 0; mbk < n_mid_blocks; mbk++){
-                matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbi, A_outer, A_mid);
-                matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbj, B_outer, B_mid);
-                for (sbi = 0; sbi < n_inner_blocks; sbi++){
-                  for (sbj = 0; sbj < n_inner_blocks; sbj++){
-                    matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
-                    for (sbk = 0; sbk < n_inner_blocks; sbk++){
-                      // matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
-                      matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbi, A_mid, A_inner); // For transposed A
-                      matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_mid, B_inner);
-                      mine_fma_dgemm(A_inner, B_inner, C_inner);
-                    }
-                    matrix_update (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
-                  }
-                }
-              }
-              matrix_update (BLOCK_SIZE, MID_BLOCK_SIZE, mbi, mbj, C_outer, C_mid);
-            }
-          }
+      for (bk = 0; bk < n_blocks; bk++){
+        matrix_copy(M, BLOCK_SIZE, bi, bk, A, A_outer_transpose);
+        for (bj = 0; bj < n_blocks; bj++){
+          
         }
-        matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
       }
     }
 
-    // Free memory for basic kernel and AVX kernel.
-    _mm_free(A_outer);
-    _mm_free(B_outer);
-    _mm_free(C_outer);
+    // Functional AVX2 script with blocking
+    // // Preallocate spaces for outer matrices A, B and C;
+    // double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    // double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    // double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    // // Preallocate spaces for middle submatrices A, B and C;
+    // double* A_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
+    // double* B_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
+    // double* C_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
+    // // Preallocate spaces for inner matrices A, B and C;
+    // double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+    // double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+    // double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+    // // // functional avx2 script with blocking
+    // const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
+    // const int n_mid_blocks = BLOCK_SIZE / MID_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    // const int n_inner_blocks = MID_BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    //
+    // int bi, bj, bk;
+    // int mbi, mbj, mbk;
+    // int sbi, sbj, sbk;
+    //
+    // // It is probably better to use functions since each layer is the same
+    // for (bi = 0; bi < n_blocks; bi++){
+    //   for (bj = 0; bj < n_blocks; bj++){
+    //     matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
+    //     for (bk = 0; bk < n_blocks; bk++){
+    //       matrix_transpose_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
+    //       matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
+    //       for (mbi = 0; mbi < n_mid_blocks; mbi++){
+    //         for (mbj = 0; mbj < n_mid_blocks; mbj++){
+    //           matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbi, mbj, C_outer, C_mid);
+    //           for (mbk = 0; mbk < n_mid_blocks; mbk++){
+    //             matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbi, A_outer, A_mid);
+    //             matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbj, B_outer, B_mid);
+    //             for (sbi = 0; sbi < n_inner_blocks; sbi++){
+    //               for (sbj = 0; sbj < n_inner_blocks; sbj++){
+    //                 matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
+    //                 for (sbk = 0; sbk < n_inner_blocks; sbk++){
+    //                   // matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
+    //                   matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbi, A_mid, A_inner); // For transposed A
+    //                   matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_mid, B_inner);
+    //                   mine_fma_dgemm(A_inner, B_inner, C_inner);
+    //                 }
+    //                 matrix_update (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
+    //               }
+    //             }
+    //           }
+    //           matrix_update (BLOCK_SIZE, MID_BLOCK_SIZE, mbi, mbj, C_outer, C_mid);
+    //         }
+    //       }
+    //     }
+    //     matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
+    //   }
+    // }
+    //
+    // // Free memory for basic kernel and AVX kernel.
+    // _mm_free(A_outer);
+    // _mm_free(B_outer);
+    // _mm_free(C_outer);
+    //
+    // _mm_free(A_mid);
+    // _mm_free(B_mid);
+    // _mm_free(C_mid);
+    //
+    // _mm_free(A_inner);
+    // _mm_free(B_inner);
+    // _mm_free(C_inner);
 
-    _mm_free(A_mid);
-    _mm_free(B_mid);
-    _mm_free(C_mid);
-
-    _mm_free(A_inner);
-    _mm_free(B_inner);
-    _mm_free(C_inner);
-
+    /////////////////////////////////////////////////
     // functional avx2 script for reference
     // const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
     // int sbi, sbj, sbk;
