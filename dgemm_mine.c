@@ -38,6 +38,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     The matrices are all assumed to be stored in column major
      */
 
+
     const int Matrix_size = 4; // 256 bits for 4*64 bits doubles
     // A command that I got from S14 code. Helps compiler optimize
     __assume_aligned(A, 32);
@@ -238,6 +239,28 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                       matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_mid, A_inner); // For transposed A
                       matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, A_mid, B_inner);
                       mine_fma_dgemm(A_inner, B_inner, C_inner);
+                      int it, jt;
+                      printf("Matrix A_mid is:\n");
+                      for (it = 0; it < MID_BLOCK_SIZE; it++){
+                        for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
+                          printf("%lf\t", A_mid[jt*MID_BLOCK_SIZE+it]);
+                        }
+                        printf("\n");
+                      }
+                      printf("Matrix B_mid is:\n");
+                      for (it = 0; it < MID_BLOCK_SIZE; it++){
+                        for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
+                          printf("%lf\t", B_mid[jt*MID_BLOCK_SIZE+it]);
+                        }
+                        printf("\n");
+                      }
+                      printf("Matrix C_mid is:\n");
+                      for (it = 0; it < MID_BLOCK_SIZE; it++){
+                        for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
+                          printf("%lf\t", C_mid[jt*MID_BLOCK_SIZE+it]);
+                        }
+                        printf("\n");
+                      }
                     }
                     matrix_update (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
                   }
