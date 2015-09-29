@@ -66,8 +66,8 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       // low to high: xy00+xy01 xy10+xy11 xy22+xy23 xy32+xy33
       __m256d blended = _mm256_blend_pd(temp01, temp23, 0b1100);
       __m256d dotproduct = _mm256_add_pd( swapped, blended );
-      c = _mm256_add_pd( c, dotproduct );
-      _mm256_storeu_pd((C + i*Matrix_size),c); // Store C(:,i)
+      __m256d sum = _mm256_add_pd( c, dotproduct ); // Try to avoid latency, not sure if this does anything
+      _mm256_storeu_pd((C + i*Matrix_size),sum); // Store C(:,i)
     }
 
     // Functional AVX2 code
@@ -275,14 +275,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                       submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B_mid, B_inner);
                       mine_fma_dgemm(A_inner, B_inner, C_inner);
                       submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
-                      // int it, jt;
-                      // printf("======== Matrix C_inner ==========\n");
-                      // for (it = 0; it < INNER_BLOCK_SIZE; it++){
-                      //   for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
-                      //     printf("%lf\t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-                      //   }
-                      //   printf("\n");
-                      // }
                     }
                   }
                 }
