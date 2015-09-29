@@ -44,30 +44,46 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
 
     // Functional AVX2 code
-    __m256d bij;
-    __m256d c;
-    int i;
-    for (i = 0; i < Matrix_size; i++){
-      // Load one column of C, C(:,i)
-      c = _mm256_loadu_pd((C + Matrix_size*i));
-
-      bij = _mm256_set1_pd(*(B+i*Matrix_size+0)); // Perform FMA on A*B(:,i)
-      c = _mm256_fmadd_pd(a0, bij, c);
-      bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
-      c = _mm256_fmadd_pd(a1, bij, c);
-      bij = _mm256_set1_pd(*(B+i*Matrix_size+2));
-      c = _mm256_fmadd_pd(a2, bij, c);
-      bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
-      c = _mm256_fmadd_pd(a3, bij, c);
-
-      _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
-    }
+    // __m256d bij;
+    // __m256d c;
+    // int i;
+    // for (i = 0; i < Matrix_size; i++){
+    //   // Load one column of C, C(:,i)
+    //   c = _mm256_loadu_pd((C + Matrix_size*i));
+    //
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+0)); // Perform FMA on A*B(:,i)
+    //   c = _mm256_fmadd_pd(a0, bij, c);
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+1));
+    //   c = _mm256_fmadd_pd(a1, bij, c);
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+2));
+    //   c = _mm256_fmadd_pd(a2, bij, c);
+    //   bij = _mm256_set1_pd(*(B+i*Matrix_size+3));
+    //   c = _mm256_fmadd_pd(a3, bij, c);
+    //
+    //   _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
+    // }
 
     // Try something else
-    // __m256d b0 = _mm256_load_pd((B + Matrix_size * 0));
-    // __m256d b1 = _mm256_load_pd((B + Matrix_size * 1));
-    // __m256d b2 = _mm256_load_pd((B + Matrix_size * 2));
-    // __m256d b3 = _mm256_load_pd((B + Matrix_size * 3));
+
+    for (i = 0; i < Matrix_size; i++){
+      __m256d b = _mm256_loadu_pd((B + Matrix_size * i));
+      // Routine to compute four dot product once.
+      // Credit to http://stackoverflow.com/questions/10454150/intel-avx-256-bits-version-of-dot-product-for-double-precision-floating-point
+      __m256d xy0 = _mm256_mul_pd( a0, b );
+      __m256d xy1 = _mm256_mul_pd( a1, b );
+      __m256d xy2 = _mm256_mul_pd( a2, b );
+      __m256d xy3 = _mm256_mul_pd( a3, b );
+      // low to high: xy00+xy01 xy10+xy11 xy02+xy03 xy12+xy13
+      __m256d temp01 = _mm256_hadd_pd( xy0, xy1 );
+      // low to high: xy20+xy21 xy30+xy31 xy22+xy23 xy32+xy33
+      __m256d temp23 = _mm256_hadd_pd( xy2, xy3 );
+      // low to high: xy02+xy03 xy12+xy13 xy20+xy21 xy30+xy31
+      __m256d swapped = _mm256_permute2f128_pd( temp01, temp23, 0x21 );
+      // low to high: xy00+xy01 xy10+xy11 xy22+xy23 xy32+xy33
+      __m256d blended = _mm256_blend_pd(temp01, temp23, 0b1100);
+      __m256d dotproduct = _mm256_add_pd( swapped, blended );
+      _mm256_storeu_pd((C+i*Matrix_size),dotproduct); // Store C(:,i)
+    }
 }
 
 
@@ -93,6 +109,31 @@ void matrix_copy (const int mat_size, const int sub_size, const int i, const int
   for (n = 0; n < sub_N; n++){
     for (m = sub_M; m < sub_size; m++){
       subMatrix[n*sub_size + m] = 0.0;
+    }
+  }
+}
+void matrix_transpose_copy (const int mat_size, const int sub_size, const int i, const int j,
+        const double* restrict Matrix, double* restrict subMatrix){
+  // Get a copy of submatrix
+  const int sub_M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
+  const int sub_N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
+  // printf("\n For copy, M is %d, N is %d\n", M, N);
+  // Make a copy
+  int m, n;
+  for (n = 0; n < sub_N; n++){
+    for (m = 0; m < sub_M; m++){
+      subMatrix[m*sub_size + n] = Matrix[(j*sub_size+n)*mat_size + (i*sub_size+m)];
+    }
+  }
+  // Populate the submatrix with 0 to enforce regular pattern in the computation.
+  for (n = sub_N; n < sub_size; n++){
+    for (m = 0; m < sub_size; m++){
+      subMatrix[m*sub_size + n] = 0.0;
+    }
+  }
+  for (n = 0; n < sub_N; n++){
+    for (m = sub_M; m < sub_size; m++){
+      subMatrix[m*sub_size + n] = 0.0;
     }
   }
 }
@@ -128,7 +169,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       for (bj = 0; bj < n_blocks; bj++){
         matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
         for (bk = 0; bk < n_blocks; bk++){
-          matrix_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
+          matrix_transpose_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
           matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
           for (sbi = 0; sbi < n_inner_blocks; sbi++){
             for (sbj = 0; sbj < n_inner_blocks; sbj++){
