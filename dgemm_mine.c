@@ -25,8 +25,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
   const int n_rect = M/rect_length + (M%rect_length? 1 : 0);
   const int n_blocks = M / block_size + (M%block_size? 1 : 0);
 
-  double* A_block = (double*) mm_malloc(rect_length * block_size * sizeof(double),64);
-  double* B_block = (double*) mm_malloc(block_size * block_size * sizeof(double),64);
+  double* A_block = (double*) _mm_malloc(rect_length * block_size * sizeof(double),64);
+  double* B_block = (double*) _mm_malloc(block_size * block_size * sizeof(double),64);
   
   // Block loop
   for(J=0; J<n_blocks; ++J) {
@@ -41,7 +41,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           for(k=0; k<k_end; ++k) {
             Aind = (I*rect_length)+(K*block_size+k)*M;
             A_block_ind = k*rect_length;
-            B_block[B_block_ind] = 0.0;
             B_block[B_block_ind+k] = B[Bind+k];
             i_end = ((I+1)*rect_length < M? rect_length : (M-(I*rect_length)));
             for(i=0; i< i_end; ++i) {
@@ -71,6 +70,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
   }
   
-  mm_free(A_block);
-  mm_free(B_block);
+  _mm_free(A_block);
+  _mm_free(B_block);
 }
