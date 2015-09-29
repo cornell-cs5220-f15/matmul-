@@ -72,7 +72,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
 
     // Another way of updating the problem
     int i;
-    for (i = 0; i < Matrix_size; i++){
+    for (i = 0; i < Register_size; i++){
       __m256d b = _mm256_loadu_pd((B + Register_size * i));
       __m256d c = _mm256_loadu_pd((C + Register_size * i));
       // Routine to compute four dot product once.
