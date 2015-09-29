@@ -161,6 +161,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
 //       }
 //     }
 // }
+
 submatrix_copy(const int matrix_size, const int block_size,
         const int I, const int J, const double* restrict matrix, double* restrict submatrix){
         // submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B, B_mid);
@@ -198,21 +199,8 @@ submatrix_transpose(const int matrix_size, const int block_size,
           }
         }
 }
-void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
-        double* restrict matrix, const double* restrict submatrix){
-    int m, n;
-    const int M = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
-    const int N = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
-    // printf("\n M is %d, N is %d\n", M, N);
-    for (m = 0; m < M; m++){
-      for (n = 0; n < N; n++){
-        // printf("\n m is %d, n is %d\n", m, n);
-         matrix[(j*sub_size+m)*mat_size + (i*sub_size+n)] = submatrix[m*sub_size + n];
-      }
-    }
-}
 submatrix_update(const int matrix_size, const int block_size,
-        const int I, const int J, const double* matrix, const double* restrict submatrix){
+        const int I, const int J, double* restrict matrix, const double* restrict submatrix){
         // It's basically the copy function, just in reverse direction
         // Compute how much does it need to copy
         const int M = (I + block_size) > matrix_size ? matrix_size - I : block_size;
