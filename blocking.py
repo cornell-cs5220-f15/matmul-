@@ -2,7 +2,7 @@ block_list = [16,32,64,128,256,512]
 
 sourcename   = 'dgemm_mine.c'
 makefilename = 'Makefile.in.icc'
-jobname      = 'job-blocked.pbs'    
+jobname      = 'blocked'
 
 ### Create the source files with new blocking
 for block in block_list:
@@ -29,11 +29,11 @@ with open(makefilename,'r') as sourcefile:
 
 ### Create new pbs scripts
 for block in block_list:
-	with open(jobname,'r') as sourcefile:
+	with open('job-'+jobname+'.pbs','r') as sourcefile:
 		targetname = 'job-block'+str(block)+'.pbs'
 		with open(targetname,'w') as targetfile:
 			for line in sourcefile:
-				if line.find('blocked') > -1:
-					targetfile.write(line.replace('blocked','block'+str(block)))
+				if line.find(jobname) > -1:
+					targetfile.write(line.replace('jobname','block'+str(block)))
 				else:
 					targetfile.write(line)
