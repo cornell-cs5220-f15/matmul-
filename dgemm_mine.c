@@ -194,6 +194,13 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       }
       printf("\n");
     }
+    printf("Matrix B is:\n");
+    for (it = 0; it < M; it++){
+      for (jt = 0; jt < M; jt++){
+        printf("%lf\t", B[jt*M+it]);
+      }
+      printf("\n");
+    }
     for (bi = 0; bi < n_blocks; bi++){
       for (bj = 0; bj < n_blocks; bj++){
         matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
