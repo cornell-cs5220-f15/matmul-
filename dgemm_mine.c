@@ -254,12 +254,24 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         for (bk = 0; bk < n_blocks; bk++){
           const int K_outer = bk*BLOCK_SIZE; // Starting element index K for outer submatrix.
           // Compute number of loops it takes for the mid submatrix to reach outside the boundary
-          if (M-I_outer < MID_BLOCK_SIZE) const int I = (M-I_outer)/MID_BLOCK_SIZE + ((M-I_outer)%MID_BLOCK_SIZE? 1 : 0);
-          else const int I = n_mid_blocks;
-          if (M-J_outer < MID_BLOCK_SIZE) const int J = (M-J_outer)/MID_BLOCK_SIZE + ((M-J_outer)%MID_BLOCK_SIZE? 1 : 0);
-          else const int J = n_mid_blocks;
-          if (M-K_outer < MID_BLOCK_SIZE) const int K = (M-K_outer)/MID_BLOCK_SIZE + ((M-K_outer)%MID_BLOCK_SIZE? 1 : 0);
-          else const int K = n_mid_blocks;
+          if (M-I_outer < MID_BLOCK_SIZE){
+            const int I = (M-I_outer)/MID_BLOCK_SIZE + ((M-I_outer)%MID_BLOCK_SIZE? 1 : 0);
+          }
+          else{
+            const int I = n_mid_blocks;
+          }
+          if (M-J_outer < MID_BLOCK_SIZE){
+            const int J = (M-J_outer)/MID_BLOCK_SIZE + ((M-J_outer)%MID_BLOCK_SIZE? 1 : 0);
+          }
+          else{
+            const int J = n_mid_blocks;
+          }
+          if (M-K_outer < MID_BLOCK_SIZE){
+            const int K = (M-K_outer)/MID_BLOCK_SIZE + ((M-K_outer)%MID_BLOCK_SIZE? 1 : 0);
+          }
+          else{
+            const int K = n_mid_blocks;
+          }
           //////////////////////
           // Start of Mid loop//
           //////////////////////
