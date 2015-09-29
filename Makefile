@@ -73,6 +73,9 @@ dgemm_veclib.o: dgemm_blas.c
 dgemm_compiler.o: dgemm_compiler.c
 	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
 
+dgemm_mjw.o: dgemm_mjw.c
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
+
 # ---
 # Rules for building timing CSV outputs
 
