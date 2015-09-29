@@ -84,28 +84,28 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       __m256d dotproduct = _mm256_add_pd( swapped, blended );
       _mm256_storeu_pd((C+i*Matrix_size),dotproduct); // Store C(:,i)
     }
-    int it, jt;
-    printf("Matrix A is:\n");
-    for (it = 0; it < Matrix_size; it++){
-      for (jt = 0; jt < Matrix_size; jt++){
-        printf("%lf\t", A[jt*Matrix_size+it]);
-      }
-      printf("\n");
-    }
-    printf("Matrix B is:\n");
-    for (it = 0; it < Matrix_size; it++){
-      for (jt = 0; jt < Matrix_size; jt++){
-        printf("%lf\t", B[jt*Matrix_size+it]);
-      }
-      printf("\n");
-    }
-    printf("Matrix C is:\n");
-    for (it = 0; it < Matrix_size; it++){
-      for (jt = 0; jt < Matrix_size; jt++){
-        printf("%lf\t", C[jt*Matrix_size+it]);
-      }
-      printf("\n");
-    }
+    // int it, jt;
+    // printf("Matrix A is:\n");
+    // for (it = 0; it < Matrix_size; it++){
+    //   for (jt = 0; jt < Matrix_size; jt++){
+    //     printf("%lf\t", A[jt*Matrix_size+it]);
+    //   }
+    //   printf("\n");
+    // }
+    // printf("Matrix B is:\n");
+    // for (it = 0; it < Matrix_size; it++){
+    //   for (jt = 0; jt < Matrix_size; jt++){
+    //     printf("%lf\t", B[jt*Matrix_size+it]);
+    //   }
+    //   printf("\n");
+    // }
+    // printf("Matrix C is:\n");
+    // for (it = 0; it < Matrix_size; it++){
+    //   for (jt = 0; jt < Matrix_size; jt++){
+    //     printf("%lf\t", C[jt*Matrix_size+it]);
+    //   }
+    //   printf("\n");
+    // }
 }
 
 
@@ -202,6 +202,14 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                 mine_fma_dgemm(A_inner, B_inner, C_inner);
               }
               matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+              int it, jt;
+              printf("Matrix C_outer is:\n");
+              for (it = 0; it < BLOCK_SIZE; it++){
+                for (jt = 0; jt < BLOCK_SIZE; jt++){
+                  printf("%lf\t", C_outer[jt*Matrix_size+it]);
+                }
+                printf("\n");
+              }
             }
           }
         }
