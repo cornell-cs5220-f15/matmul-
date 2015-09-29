@@ -186,21 +186,21 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
     int bi, bj, bk;
     int sbi, sbj, sbk;
-    int it, jt;
-    printf("Matrix A is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt++){
-        printf("%lf\t", A[jt*M+it]);
-      }
-      printf("\n");
-    }
-    printf("Matrix B is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt++){
-        printf("%lf\t", B[jt*M+it]);
-      }
-      printf("\n");
-    }
+    // int it, jt;
+    // printf("Matrix A is:\n");
+    // for (it = 0; it < M; it++){
+    //   for (jt = 0; jt < M; jt++){
+    //     printf("%lf\t", A[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
+    // printf("Matrix B is:\n");
+    // for (it = 0; it < M; it++){
+    //   for (jt = 0; jt < M; jt++){
+    //     printf("%lf\t", B[jt*M+it]);
+    //   }
+    //   printf("\n");
+    // }
     for (bi = 0; bi < n_blocks; bi++){
       for (bj = 0; bj < n_blocks; bj++){
         matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
@@ -208,12 +208,12 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           matrix_transpose_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
           matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
           int it, jt;
-          printf("Matrix A_outer is:\n");
-          for (it = 0; it < BLOCK_SIZE; it++){
-            for (jt = 0; jt < BLOCK_SIZE; jt++){
-              printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
-            }
-            printf("\n");
+          // printf("Matrix A_outer is:\n");
+          // for (it = 0; it < BLOCK_SIZE; it++){
+          //   for (jt = 0; jt < BLOCK_SIZE; jt++){
+          //     printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
+          //   }
+          //   printf("\n");
           }
           for (sbi = 0; sbi < n_inner_blocks; sbi++){
             for (sbj = 0; sbj < n_inner_blocks; sbj++){
@@ -222,9 +222,38 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                 matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
                 matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
                 mine_fma_dgemm(A_inner, B_inner, C_inner);
+                int it, jt;
+                printf("Matrix A_outer is:\n");
+                for (it = 0; it < BLOCK_SIZE; it++){
+                  for (jt = 0; jt < BLOCK_SIZE; jt++){
+                    printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
+                  }
+                  printf("\n");
+                }
+                printf("Matrix B_outer is:\n");
+                for (it = 0; it < BLOCK_SIZE; it++){
+                  for (jt = 0; jt < BLOCK_SIZE; jt++){
+                    printf("%lf\t", B_outer[jt*BLOCK_SIZE+it]);
+                  }
+                  printf("\n");
+                }
               }
               matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
               int it, jt;
+              printf("Matrix A_outer is:\n");
+              for (it = 0; it < BLOCK_SIZE; it++){
+                for (jt = 0; jt < BLOCK_SIZE; jt++){
+                  printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
+                }
+                printf("\n");
+              }
+              printf("Matrix B_outer is:\n");
+              for (it = 0; it < BLOCK_SIZE; it++){
+                for (jt = 0; jt < BLOCK_SIZE; jt++){
+                  printf("%lf\t", B_outer[jt*BLOCK_SIZE+it]);
+                }
+                printf("\n");
+              }
               printf("Matrix C_outer is:\n");
               for (it = 0; it < BLOCK_SIZE; it++){
                 for (jt = 0; jt < BLOCK_SIZE; jt++){
