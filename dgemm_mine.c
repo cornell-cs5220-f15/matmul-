@@ -243,32 +243,32 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           const int K_outer = bk*BLOCK_SIZE; // Starting element index K for outer submatrix.
           // Compute number of loops it takes for the mid submatrix to reach outside the boundary
           if (M-I_outer < MID_BLOCK_SIZE){
-            const int I = (M-I_outer)/MID_BLOCK_SIZE + ((M-I_outer)%MID_BLOCK_SIZE? 1 : 0);
+            const int I_m = (M-I_outer)/MID_BLOCK_SIZE + ((M-I_outer)%MID_BLOCK_SIZE? 1 : 0);
           }
           else{
-            const int I = n_mid_blocks;
+            const int I_m = n_mid_blocks;
           }
           if (M-J_outer < MID_BLOCK_SIZE){
-            const int J = (M-J_outer)/MID_BLOCK_SIZE + ((M-J_outer)%MID_BLOCK_SIZE? 1 : 0);
+            const int J_m = (M-J_outer)/MID_BLOCK_SIZE + ((M-J_outer)%MID_BLOCK_SIZE? 1 : 0);
           }
           else{
-            const int J = n_mid_blocks;
+            const int J_m = n_mid_blocks;
           }
           if (M-K_outer < MID_BLOCK_SIZE){
-            const int K = (M-K_outer)/MID_BLOCK_SIZE + ((M-K_outer)%MID_BLOCK_SIZE? 1 : 0);
+            const int K_m = (M-K_outer)/MID_BLOCK_SIZE + ((M-K_outer)%MID_BLOCK_SIZE? 1 : 0);
           }
           else{
-            const int K = n_mid_blocks;
+            const int K_m = n_mid_blocks;
           }
           //////////////////////
           // Start of Mid loop//
           //////////////////////
-          for(mbi = 0; mbi < I; mbi++){
+          for(mbi = 0; mbi < I_m; mbi++){
             const int I_mid = I_outer + mbi*MID_BLOCK_SIZE; // Starting element index I for mid submatrix
-            for(mbj = 0; mbj < J; mbj++){
+            for(mbj = 0; mbj < J_m; mbj++){
               const int J_mid = J_outer + mbj*MID_BLOCK_SIZE; // Starting element index J for mid submatrix
               submatrix_copy(M, MID_BLOCK_SIZE, I_mid, J_mid, C, C_mid); // Copy submatrix C_mid
-              for(mbk = 0; mbk < K; mbk++){
+              for(mbk = 0; mbk < K_m; mbk++){
                 const int K_mid = K_outer + mbk*MID_BLOCK_SIZE; // Starting element index K for mid submatrix
                 submatrix_copy(M, MID_BLOCK_SIZE, I_mid, K_mid, A, A_mid); // Copy submatrix A_mid
                 submatrix_copy(M, MID_BLOCK_SIZE, K_mid, J_mid, B, B_mid); // Copy submatrix B_mid
