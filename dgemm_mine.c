@@ -117,19 +117,16 @@ void do_block(const int M, const int nblock,
     	sub_BA_C=BA_C+L1_BS*i;
         __assume(sub_BA_C%8==0);
 
-	for (j = 0; j < L1_BS; ++j){
-	    sub_BA_B=BA_B+L1_BS*j;
+	for (k = 0; k < L1_BS; ++k){
+	    sub_BA_B=BA_B+L1_BS*k;
             __assume(sub_BA_B%8==0);
-
-	    double cij = C[sub_BA_C+j];
 	
-            for (k = 0; k < L1_BS; ++k) {
-		// new kernel using block to row transpose	
-                cij += A[sub_BA_A+k] * B[sub_BA_B+k];
+            for (j = 0; j < L1_BS; ++j) {
+		// old kernel using block to row transpose	
+                C[sub_BA_C+j]+= A[sub_BA_A+j] * B[sub_BA_B+j];
        		//without transpose: 
        		//cij += A[((bk*nblock+bi))*L1_BS*L1_BS+L1_BS*i+k] * B[((bj*nblock)+bk)*L1_BS*L1_BS+L1_BS*k+j];
 		}
-	 C[sub_BA_C+j]= cij;
         }
     }
 }
@@ -176,7 +173,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
 	// change indexing
 	row_to_block(M,nblock, A, bA);
-	row_to_block_transpose(M,nblock, B, bB);
+	row_to_block(M,nblock, B, bB);
 	row_to_block(M,nblock, C, bC);
 
 
