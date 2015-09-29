@@ -177,12 +177,12 @@ submatrix_copy(const int matrix_size, const int block_size,
         // Populate the submatrix with 0 to enforce regular pattern in the computation.
         for (n = N; n < block_size; n++){
           for (m = 0; m < block_size; m++){
-            subMatrix[n * block_size + m] = 0.0;
+            submatrix[n * block_size + m] = 0.0;
           }
         }
         for (n = 0; n < N; n++){
           for (m = M; m < block_size; m++){
-            subMatrix[n * block_size + m] = 0.0;
+            submatrix[n * block_size + m] = 0.0;
           }
         }
 }
@@ -199,7 +199,7 @@ submatrix_transpose(const int matrix_size, const int block_size,
         }
 }
 void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
-        double* restrict Matrix, const double* restrict subMatrix){
+        double* restrict matrix, const double* restrict submatrix){
     int m, n;
     const int M = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
     const int N = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size);
@@ -207,7 +207,7 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
     for (m = 0; m < M; m++){
       for (n = 0; n < N; n++){
         // printf("\n m is %d, n is %d\n", m, n);
-         Matrix[(j*sub_size+m)*mat_size + (i*sub_size+n)] = subMatrix[m*sub_size + n];
+         matrix[(j*sub_size+m)*mat_size + (i*sub_size+n)] = submatrix[m*sub_size + n];
       }
     }
 }
@@ -239,7 +239,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     // // functional avx2 script with blocking
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
-    // const int n_mid_blocks = BLOCK_SIZE / MID_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    const int n_mid_blocks = BLOCK_SIZE / MID_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
     // const int n_mid_blocks_max = M / MID_BLOCK_SIZE + (M%MID_BLOCK_SIZE? 1 : 0); // # of inner subblocks, use integer multiplier here when choosing blocksizes
     const int n_inner_blocks = MID_BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
 
@@ -255,11 +255,11 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           const int K_outer = bk*BLOCK_SIZE; // Starting element index K for outer submatrix.
           // Compute number of loops it takes for the mid submatrix to reach outside the boundary
           if (M-I_outer < MID_BLOCK_SIZE) const int I = (M-I_outer)/MID_BLOCK_SIZE + ((M-I_outer)%MID_BLOCK_SIZE? 1 : 0);
-          else I = n_mid_blocks;
+          else const int I = n_mid_blocks;
           if (M-J_outer < MID_BLOCK_SIZE) const int J = (M-J_outer)/MID_BLOCK_SIZE + ((M-J_outer)%MID_BLOCK_SIZE? 1 : 0);
-          else J = n_mid_blocks;
+          else const int J = n_mid_blocks;
           if (M-K_outer < MID_BLOCK_SIZE) const int K = (M-K_outer)/MID_BLOCK_SIZE + ((M-K_outer)%MID_BLOCK_SIZE? 1 : 0);
-          else K = n_mid_blocks;
+          else const int K = n_mid_blocks;
           //////////////////////
           // Start of Mid loop//
           //////////////////////
