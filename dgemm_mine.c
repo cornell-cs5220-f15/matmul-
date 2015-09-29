@@ -38,11 +38,12 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     __assume_aligned(B, 32);
     __assume_aligned(C, 32);
     // Load matrix A. The load function is loadu, which doesn't require alignment of the meory
-    __m256d a0 = _mm256_loadu_pd((A + Matrix_size * 0));
-    __m256d a1 = _mm256_loadu_pd((A + Matrix_size * 1));
-    __m256d a2 = _mm256_loadu_pd((A + Matrix_size * 2));
-    __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
+    __m256d a0 = _mm256_load_pd((A + Matrix_size * 0));
+    __m256d a1 = _mm256_load_pd((A + Matrix_size * 1));
+    __m256d a2 = _mm256_load_pd((A + Matrix_size * 2));
+    __m256d a3 = _mm256_load_pd((A + Matrix_size * 3));
 
+    // Functional AVX2 code
     // __m256d bij;
     // __m256d c;
     // int i;
@@ -61,6 +62,12 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     //
     //   _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
     // }
+
+    // Try something else
+    __m256d b0 = _mm256_load_pd((B + Matrix_size * 0));
+    __m256d b1 = _mm256_load_pd((B + Matrix_size * 1));
+    __m256d b2 = _mm256_load_pd((B + Matrix_size * 2));
+    __m256d b3 = _mm256_load_pd((B + Matrix_size * 3));
 }
 
 
@@ -104,9 +111,9 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
 }
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C){
     // Preallocate spaces for outer matrices A, B and C;
-    double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* A_outer = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* B_outer = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* C_outer = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
     // Preallocate spaces for inner matrices A, B and C;
     double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
@@ -140,9 +147,9 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
 
     // Free memory for basic kernel and AVX kernel.
-    _mm_free(A_outer);
-    _mm_free(B_outer);
-    _mm_free(C_outer);
+    free(A_outer);
+    free(B_outer);
+    free(C_outer);
 
     _mm_free(A_inner);
     _mm_free(B_inner);
