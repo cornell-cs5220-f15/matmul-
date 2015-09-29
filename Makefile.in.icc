@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine mine2 naive
+BUILDS=mine mine64 naive
 
 # C and Fortran compilers
 CC=icc
