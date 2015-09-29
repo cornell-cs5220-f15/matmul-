@@ -27,6 +27,9 @@ def matrix_to_file(m, filename):
 ################################################################################
 # matrix construction
 ################################################################################
+def empty(n, m):
+    return [["" for j in range(m)] for i in range(n)]
+
 def nbym(c, n, m):
     return [[element_to_string(c, i, j) for j in range(m)] for i in range(n)]
 
@@ -41,6 +44,24 @@ def nbym_to_file(c, n, m):
 
 def nbym_transpose_to_file(c, n, m):
     matrix_to_file(transpose(nbym(c, n, m)), matrix_transpose_to_filename(c, n, m))
+
+def ijk(c, N, K, M):
+    i = 0
+    j = 0
+    count = 0
+    A = empty(N, K)
+    B = empty(K, M)
+    C = empty(N, M)
+
+    for j in range(M):
+        for k in range(K):
+            count += 1
+            if A[i][k] == "":
+                A[i][k] = str(count)
+            B[k][j] = str(count)
+        C[i][j] = str(count)
+
+    return A, B, C
 
 ################################################################################
 # main
