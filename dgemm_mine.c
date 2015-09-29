@@ -223,17 +223,17 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                 matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
                 mine_fma_dgemm(A_inner, B_inner, C_inner);
                 int it, jt;
-                printf("Matrix A_outer is:\n");
-                for (it = 0; it < BLOCK_SIZE; it++){
-                  for (jt = 0; jt < BLOCK_SIZE; jt++){
-                    printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
+                printf("Matrix A_inner is:\n");
+                for (it = 0; it < INNER_BLOCK_SIZE; it++){
+                  for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
+                    printf("%lf\t", A_inner[jt*INNER_BLOCK_SIZE+it]);
                   }
                   printf("\n");
                 }
-                printf("Matrix B_outer is:\n");
-                for (it = 0; it < BLOCK_SIZE; it++){
-                  for (jt = 0; jt < BLOCK_SIZE; jt++){
-                    printf("%lf\t", B_outer[jt*BLOCK_SIZE+it]);
+                printf("Matrix B_inner is:\n");
+                for (it = 0; it < INNER_BLOCK_SIZE; it++){
+                  for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
+                    printf("%lf\t", B_inner[jt*INNER_BLOCK_SIZE+it]);
                   }
                   printf("\n");
                 }
