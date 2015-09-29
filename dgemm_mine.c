@@ -202,22 +202,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     int bi, bj, bk;
     int mbi, mbj, mbk;
     int sbi, sbj, sbk;
-    int it, jt;
-    printf("Matrix A is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt++){
-        printf("%lf\t", A[jt*M+it]);
-      }
-      printf("\n");
-    }
-    printf("Matrix B is:\n");
-    for (it = 0; it < M; it++){
-      for (jt = 0; jt < M; jt++){
-        printf("%lf\t", B[jt*M+it]);
-      }
-      printf("\n");
-    }
-
+    
     // It is probably better to use functions since each layer is the same
     for (bi = 0; bi < n_blocks; bi++){
       for (bj = 0; bj < n_blocks; bj++){
@@ -239,54 +224,10 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                       matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbi, A_mid, A_inner); // For transposed A
                       matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_mid, B_inner);
                       mine_fma_dgemm(A_inner, B_inner, C_inner);
-                      int it, jt;
-                      printf("Matrix A_inner is:\n");
-                      for (it = 0; it < MID_BLOCK_SIZE; it++){
-                        for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                          printf("%lf\t", A_inner[jt*MID_BLOCK_SIZE+it]);
-                        }
-                        printf("\n");
-                      }
-                      printf("Matrix B_inner is:\n");
-                      for (it = 0; it < MID_BLOCK_SIZE; it++){
-                        for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                          printf("%lf\t", B_inner[jt*MID_BLOCK_SIZE+it]);
-                        }
-                        printf("\n");
-                      }
-                      printf("Matrix C_inner is:\n");
-                      for (it = 0; it < MID_BLOCK_SIZE; it++){
-                        for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                          printf("%lf\t", C_inner[jt*MID_BLOCK_SIZE+it]);
-                        }
-                        printf("\n");
-                      }
                     }
                     matrix_update (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
                   }
                 }
-              }
-              int it, jt;
-              printf("Matrix A_mid is:\n");
-              for (it = 0; it < MID_BLOCK_SIZE; it++){
-                for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                  printf("%lf\t", A_mid[jt*MID_BLOCK_SIZE+it]);
-                }
-                printf("\n");
-              }
-              printf("Matrix B_mid is:\n");
-              for (it = 0; it < MID_BLOCK_SIZE; it++){
-                for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                  printf("%lf\t", B_mid[jt*MID_BLOCK_SIZE+it]);
-                }
-                printf("\n");
-              }
-              printf("Matrix C_mid is:\n");
-              for (it = 0; it < MID_BLOCK_SIZE; it++){
-                for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                  printf("%lf\t", C_mid[jt*MID_BLOCK_SIZE+it]);
-                }
-                printf("\n");
               }
               matrix_update (BLOCK_SIZE, MID_BLOCK_SIZE, mbi, mbj, C_outer, C_mid);
             }
