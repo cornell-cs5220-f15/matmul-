@@ -193,23 +193,34 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 			int Aj=L2bj*L2_BS+bj;
 			for (bi = 0; bi < L2_BS; ++bi) {
 				int Ai=L2bi*L2_BS+bi;	
-		//		printf("currently on %d %d %d \n ", Ai, Aj, Ak); 
+	
 				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);}
 			}
 		}
 	}
 	}
 	}
-	if (L2nblock !=1){
-		printf("remainder: %d \n", rem);}
+
+
 	
 
 	// ADDITIONAL LOOPS TO AVOID IF STATEMENTS
-
+	// there are 8 cases: (we denote j not at boundary by j0 and j at boundary with j1
+	// 1: k0 j0 i0 (main loop)
+	// 2: k1 j0 i0
+	// 3: k0 j1 i0
+	// 4: k0 j0 i1
+	// 5: k1 j1 i0
+	// 6: k1 j0 i1
+	// 7: k0 j0 i1
+	// 8: k1 j1 i1
 	//printf("we got here\n");
+	
+
+	// case 2 k1 j0 i0
 	L2bk=L2nblock-1; 
 	for (L2bj=0; L2bj < L2nblock-1; ++L2bj){
-	printf("got here \n");
+	
 	for (L2bi=0; L2bi < L2nblock-1; ++L2bi){
 	for (bk = 0; bk < rem; ++bk) {
 		int Ak=L2bk*L2_BS+bk;
@@ -218,7 +229,43 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 			for (bi = 0; bi < L2_BS; ++bi) {
 				int Ai=L2bi*L2_BS+bi;	
 				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
-                                if (Aj==8){ printf("here doing: (%d, %d) (%d,%d) \n", Ai, Ak, Ak, Aj);}     			
+           
+			
+		}
+	}
+	}
+	}
+	}
+	// case 3: k0 j1 i0
+	L2bj=L2nblock-1; 
+	for (L2bk=0; L2bk < L2nblock-1; ++L2bk){
+	for (L2bi=0; L2bi < L2nblock-1; ++L2bi){
+	for (bk = 0; bk < L2_BS; ++bk) {
+		int Ak=L2bk*L2_BS+bk;
+		for (bj = 0; bj < rem; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
+			for (bi = 0; bi < L2_BS; ++bi) {
+				int Ai=L2bi*L2_BS+bi;	
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
+                                
+			
+		}
+	}
+	}
+	}
+	}
+	// case 4: k0 j0 i1
+	L2bi=L2nblock-1; 
+	for (L2bk=0; L2bk < L2nblock-1; ++L2bk){
+	for (L2bj=0; L2bj < L2nblock-1; ++L2bj){
+	for (bk = 0; bk < L2_BS; ++bk) {
+		int Ak=L2bk*L2_BS+bk;
+		for (bj = 0; bj < L2_BS; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
+			for (bi = 0; bi < rem; ++bi) {
+				int Ai=L2bi*L2_BS+bi;	
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
+                               
 			
 		}
 	}
@@ -227,7 +274,10 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 	}
 
 
+
+	// case 5: k1 j1 i0
 	L2bj=L2nblock-1;
+	L2bk=L2nblock-1;
 	for (L2bi=0; L2bi < L2nblock-1; ++L2bi){
 	for (bk = 0; bk < rem; ++bk) {
 		int Ak=L2bk*L2_BS +bk;
@@ -236,14 +286,50 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 			for (bi = 0; bi < L2_BS; ++bi) {
 
 				int Ai=L2bi*L2_BS+bi;	
-                                if (Aj==8){ printf("here doing: (%d, %d) (%d,%d) \n", Ai, Ak, Ak, Aj);}     			
+                       
 				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
 			}		
 		}
 	}
 	}
 	
+	// case 6: k1 j0 i1
+	L2bi=L2nblock-1;
+	L2bk=L2nblock-1;
+	for (L2bj=0; L2bj < L2nblock-1; ++L2bj){
+	for (bk = 0; bk < rem; ++bk) {
+		int Ak=L2bk*L2_BS +bk;
+		for (bj = 0; bj < L2_BS; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
+			for (bi = 0; bi < rem; ++bi) {
 
+				int Ai=L2bi*L2_BS+bi;	
+                       
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
+			}		
+		}
+	}
+	}
+	// case 7: k0 j1 i1
+	L2bj=L2nblock-1;
+	L2bi=L2nblock-1;
+	for (L2bk=0; L2bk < L2nblock-1; ++L2bk){
+	for (bk = 0; bk < L2_BS; ++bk) {
+		int Ak=L2bk*L2_BS +bk;
+		for (bj = 0; bj < rem; ++bj) {
+			int Aj=L2bj*L2_BS+bj;
+			for (bi = 0; bi < rem; ++bi) {
+
+				int Ai=L2bi*L2_BS+bi;	
+                       
+				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
+			}		
+		}
+	}
+	}
+	// case 8: k1 j1 i1
+	L2bj=L2nblock-1;
+	L2bj=L2nblock-1;
  	L2bi=L2nblock-1;
 	for (bk = 0; bk < rem; ++bk) {
 		int Ak=L2bk*L2_BS +bk;
@@ -251,8 +337,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 			int Aj=L2bj*L2_BS+bj;
 			for (bi = 0; bi < rem; ++bi) {
 				int Ai=L2bi*L2_BS+bi;	
-	//printf("currentlay on %d %d %d \n ", Ai, Aj, Ak); 
-                                if (Aj==8){ printf("here doing: (%d, %d) (%d,%d) \n", Ai, Ak, Ak, Aj);}     			
+
+        
 				do_block(M, nblock, bA, bB, bC, Ai, Aj, Ak);
 			
 		}
