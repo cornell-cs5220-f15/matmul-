@@ -239,6 +239,14 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                   printf("\n");
                 }
               }
+              int it, jt;
+              printf("Matrix C_inner is:\n");
+              for (it = 0; it < INNER_BLOCK_SIZE; it++){
+                for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
+                  printf("%lf\t", C_inner[jt*INNER_BLOCK_SIZE+it]);
+                }
+                printf("\n");
+              }
               matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
               // int it, jt;
               // printf("Matrix A_outer is:\n");
