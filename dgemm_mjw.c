@@ -7,7 +7,7 @@
 const char* dgemm_desc = "mjw297 dgemm.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 16)
+#define BLOCK_SIZE ((int) 128)
 #endif
 
 /*
@@ -21,13 +21,14 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double *A, const double *B, double *C) {
     int i, j, k;
     double *A_ = cm_transpose(A, lda, lda, M, K);
-    double *B_ = cm_copy(B, lda, lda, K, N);
+    // double *B_ = cm_copy(B, lda, lda, K, N);
 
     for (i = 0; i < M; ++i) {
         for (j = 0; j < N; ++j) {
             double cij = C[cm(lda, lda, i, j)];
             for (k = 0; k < K; ++k) {
-                cij += A_[rm(M, K, i, k)] * B_[cm(K, N, k, j)];
+                // cij += A_[rm(M, K, i, k)] * B_[cm(K, N, k, j)];
+                cij += A_[rm(M, K, i, k)] * B[cm(lda, lda, k, j)];
             }
             C[cm(lda, lda, i, j)] = cij;
         }
