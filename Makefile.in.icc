@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine naive
+BUILDS=mine mine2 naive
 
 # C and Fortran compilers
 CC=icc
@@ -13,8 +13,8 @@ FFLAGS =
 LDFLAGS = -openmp -nofor_main
 
 # Add -DEBUG_RUN to CPPFLAGS to cut down on the cases.
-CPPFLAGS = "-DDEBUG_RUN -DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
-# CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
+# CPPFLAGS = "-DDEBUG_RUN -DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
+CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm -lirng
