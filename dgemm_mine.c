@@ -166,58 +166,6 @@ void matrix_transpose_copy (const int mat_size, const int sub_size, const int i,
     }
   }
 }
-void matrix_transpose (const int lda, const int mat_size, const int sub_size,
-        const int bi, const int bj, const int mbi, const int mbj,
-        const double* restrict Matrix, double* restrict subMatrix){
-  // Get a copy of submatrix
-  const int sub_M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
-  const int sub_N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
-  // printf("\n For copy, M is %d, N is %d\n", M, N);
-  // Make a copy
-  int m, n;
-  for (n = 0; n < sub_N; n++){
-    for (m = 0; m < sub_M; m++){
-      subMatrix[m*sub_size + n] = Matrix[(j*sub_size+n)*mat_size + (i*sub_size+m)];
-    }
-  }
-  // Populate the submatrix with 0 to enforce regular pattern in the computation.
-  for (n = sub_N; n < sub_size; n++){
-    for (m = 0; m < sub_size; m++){
-      subMatrix[m*sub_size + n] = 0.0;
-    }
-  }
-  for (n = 0; n < sub_N; n++){
-    for (m = sub_M; m < sub_size; m++){
-      subMatrix[m*sub_size + n] = 0.0;
-    }
-  }
-}
-void matrix_normal (const int lda, const int mat_size, const int sub_size,
-        const int bi, const int bj, const int mbi, const int mbj,
-        const double* restrict Matrix, double* restrict subMatrix){
-  // Get a copy of submatrix
-  const int sub_M = ((i+1)*sub_size > mat_size? mat_size-i*sub_size : sub_size); // Maybe we can do this outside, but I'm not worried about this right now.
-  const int sub_N = ((j+1)*sub_size > mat_size? mat_size-j*sub_size : sub_size);
-  // printf("\n For copy, M is %d, N is %d\n", M, N);
-  // Make a copy
-  int m, n;
-  for (n = 0; n < sub_N; n++){
-    for (m = 0; m < sub_M; m++){
-      subMatrix[m*sub_size + n] = Matrix[(j*sub_size+n)*mat_size + (i*sub_size+m)];
-    }
-  }
-  // Populate the submatrix with 0 to enforce regular pattern in the computation.
-  for (n = sub_N; n < sub_size; n++){
-    for (m = 0; m < sub_size; m++){
-      subMatrix[m*sub_size + n] = 0.0;
-    }
-  }
-  for (n = 0; n < sub_N; n++){
-    for (m = sub_M; m < sub_size; m++){
-      subMatrix[m*sub_size + n] = 0.0;
-    }
-  }
-}
 void matrix_update (const int mat_size, const int sub_size, const int i, const int j,
         double* restrict Matrix, const double* restrict subMatrix){
     int m, n;
