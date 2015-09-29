@@ -206,7 +206,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
               printf("Matrix C_outer is:\n");
               for (it = 0; it < BLOCK_SIZE; it++){
                 for (jt = 0; jt < BLOCK_SIZE; jt++){
-                  printf("%lf\t", C_outer[jt*Matrix_size+it]);
+                  printf("%lf\t", C_outer[jt*BLOCK_SIZE+it]);
                 }
                 printf("\n");
               }
