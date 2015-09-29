@@ -5,13 +5,20 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into L1 cache
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 64)
+#define BLOCK_SIZE ((int) 256)
+#endif
+
+// Block size that is used to fit submatrices into register
+#ifndef MID_BLOCK_SIZE
+#define MID_BLOCK_SIZE ((int) 32)
 #endif
 
 // Block size that is used to fit submatrices into register
 #ifndef INNER_BLOCK_SIZE
 #define INNER_BLOCK_SIZE ((int) 4)
 #endif
+
+
 
 // Part of AVX implementation, now for reference
 // #ifdef USE_SHUFPD
@@ -31,17 +38,17 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     The matrices are all assumed to be stored in column major
      */
 
-    const int Matrix_size = 4;
-
+    const int Register_size = 4; // 256 bits for 4*64 bits doubles
+    const int Rec_size = 6;
     // A command that I got from S14 code. Helps compiler optimize
     __assume_aligned(A, 32);
     __assume_aligned(B, 32);
     __assume_aligned(C, 32);
     // Load matrix A. The load function is loadu, which doesn't require alignment of the meory
-    __m256d a0 = _mm256_loadu_pd((A + Matrix_size * 0));
-    __m256d a1 = _mm256_loadu_pd((A + Matrix_size * 1));
-    __m256d a2 = _mm256_loadu_pd((A + Matrix_size * 2));
-    __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
+    __m256d a0 = _mm256_loadu_pd((A + Register_size * 0));
+    __m256d a1 = _mm256_loadu_pd((A + Register_size * 1));
+    __m256d a2 = _mm256_loadu_pd((A + Register_size * 2));
+    __m256d a3 = _mm256_loadu_pd((A + Register_size * 3));
 
     // Functional AVX2 code
     // __m256d bij;
@@ -63,11 +70,11 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     //   _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
     // }
 
-    // Try something else
+    // Another way of updating the problem
     int i;
     for (i = 0; i < Matrix_size; i++){
-      __m256d b = _mm256_loadu_pd((B + Matrix_size * i));
-      __m256d c = _mm256_loadu_pd((C + Matrix_size * i));
+      __m256d b = _mm256_loadu_pd((B + Register_size * i));
+      __m256d c = _mm256_loadu_pd((C + Register_size * i));
       // Routine to compute four dot product once.
       // Credit to http://stackoverflow.com/questions/10454150/intel-avx-256-bits-version-of-dot-product-for-double-precision-floating-point
       __m256d xy0 = _mm256_mul_pd( a0, b );
@@ -84,7 +91,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       __m256d blended = _mm256_blend_pd(temp01, temp23, 0b1100);
       __m256d dotproduct = _mm256_add_pd( swapped, blended );
       c = _mm256_add_pd( c, dotproduct );
-      _mm256_storeu_pd((C+i*Matrix_size),c); // Store C(:,i)
+      _mm256_storeu_pd((C + i*Register_size),c); // Store C(:,i)
     }
     // int it, jt;
     // printf("Matrix A is:\n");
@@ -179,14 +186,21 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
     double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
     double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    // Preallocate spaces for middle submatrices A, B and C;
+    double* A_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
+    double* B_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
+    double* C_mid = (double*) _mm_malloc(MID_BLOCK_SIZE * MID_BLOCK_SIZE * sizeof(double),32);
     // Preallocate spaces for inner matrices A, B and C;
     double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     // // functional avx2 script with blocking
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
-    const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    const int n_mid_blocks = BLOCK_SIZE / MID_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    const int n_inner_blocks = MID_BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+
     int bi, bj, bk;
+    int mbi, mbj, mbk;
     int sbi, sbj, sbk;
     // int it, jt;
     // printf("Matrix A is:\n");
@@ -203,75 +217,34 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //   }
     //   printf("\n");
     // }
+
+    // It is probably better to use functions since each layer is the same
     for (bi = 0; bi < n_blocks; bi++){
       for (bj = 0; bj < n_blocks; bj++){
         matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
         for (bk = 0; bk < n_blocks; bk++){
           matrix_transpose_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
           matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
-          int it, jt;
-          // printf("Matrix A_outer is:\n");
-          // for (it = 0; it < BLOCK_SIZE; it++){
-          //   for (jt = 0; jt < BLOCK_SIZE; jt++){
-          //     printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
-          //   }
-          //   printf("\n");
-          // }
-          for (sbi = 0; sbi < n_inner_blocks; sbi++){
-            for (sbj = 0; sbj < n_inner_blocks; sbj++){
-              matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
-              for (sbk = 0; sbk < n_inner_blocks; sbk++){
-                // matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
-                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbi, A_outer, A_inner); // For transposed A
-                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
-                mine_fma_dgemm(A_inner, B_inner, C_inner);
-                // int it, jt;
-                // printf("Matrix A_inner is:\n");
-                // for (it = 0; it < INNER_BLOCK_SIZE; it++){
-                //   for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
-                //     printf("%lf\t", A_inner[jt*INNER_BLOCK_SIZE+it]);
-                //   }
-                //   printf("\n");
-                // }
-                // printf("Matrix B_inner is:\n");
-                // for (it = 0; it < INNER_BLOCK_SIZE; it++){
-                //   for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
-                //     printf("%lf\t", B_inner[jt*INNER_BLOCK_SIZE+it]);
-                //   }
-                //   printf("\n");
-                // }
-                // printf("Matrix C_inner is:\n");
-                // for (it = 0; it < INNER_BLOCK_SIZE; it++){
-                //   for (jt = 0; jt < INNER_BLOCK_SIZE; jt++){
-                //     printf("%lf\t", C_inner[jt*INNER_BLOCK_SIZE+it]);
-                //   }
-                //   printf("\n");
-                // }
+          for (mbi = 0; bi < n_mid_blocks; bi++){
+            for (mbj = 0; bj < n_mid_blocks; bj++){
+              matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbi, mbj, C_outer, C_mid);
+              for (mbk = 0; bk < n_mid_blocks; bk++){
+                matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbi, A_outer, A_mid);
+                matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbj, B_outer, B_mid);
+                for (sbi = 0; sbi < n_inner_blocks; sbi++){
+                  for (sbj = 0; sbj < n_inner_blocks; sbj++){
+                    matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
+                    for (sbk = 0; sbk < n_inner_blocks; sbk++){
+                      // matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
+                      matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbi, A_mid, A_inner); // For transposed A
+                      matrix_copy (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, A_mid, B_inner);
+                      mine_fma_dgemm(A_inner, B_inner, C_inner);
+                    }
+                    matrix_update (MID_BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_mid, C_inner);
+                  }
+                }
               }
-
-              matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
-              // int it, jt;
-              // printf("Matrix A_outer is:\n");
-              // for (it = 0; it < BLOCK_SIZE; it++){
-              //   for (jt = 0; jt < BLOCK_SIZE; jt++){
-              //     printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
-              //   }
-              //   printf("\n");
-              // }
-              // printf("Matrix B_outer is:\n");
-              // for (it = 0; it < BLOCK_SIZE; it++){
-              //   for (jt = 0; jt < BLOCK_SIZE; jt++){
-              //     printf("%lf\t", B_outer[jt*BLOCK_SIZE+it]);
-              //   }
-              //   printf("\n");
-              // }
-              // printf("Matrix C_outer is:\n");
-              // for (it = 0; it < BLOCK_SIZE; it++){
-              //   for (jt = 0; jt < BLOCK_SIZE; jt++){
-              //     printf("%lf\t", C_outer[jt*BLOCK_SIZE+it]);
-              //   }
-              //   printf("\n");
-              // }
+              matrix_update (BLOCK_SIZE, MID_BLOCK_SIZE, sbi, sbj, C_outer, C_mid);
             }
           }
         }
@@ -283,6 +256,10 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     _mm_free(A_outer);
     _mm_free(B_outer);
     _mm_free(C_outer);
+
+    _mm_free(A_mid);
+    _mm_free(B_mid);
+    _mm_free(C_mid);
 
     _mm_free(A_inner);
     _mm_free(B_inner);
