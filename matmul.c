@@ -233,7 +233,7 @@ int main(int argc, char** argv)
     double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
-
+  
     matrix_init(A);
     matrix_init(B);
 
