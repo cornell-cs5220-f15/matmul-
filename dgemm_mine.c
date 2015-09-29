@@ -38,17 +38,16 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     The matrices are all assumed to be stored in column major
      */
 
-    const int Register_size = 4; // 256 bits for 4*64 bits doubles
-    const int Rec_size = 6;
+    const int Matrix_size = 4; // 256 bits for 4*64 bits doubles
     // A command that I got from S14 code. Helps compiler optimize
     __assume_aligned(A, 32);
     __assume_aligned(B, 32);
     __assume_aligned(C, 32);
     // Load matrix A. The load function is loadu, which doesn't require alignment of the meory
-    __m256d a0 = _mm256_loadu_pd((A + Register_size * 0));
-    __m256d a1 = _mm256_loadu_pd((A + Register_size * 1));
-    __m256d a2 = _mm256_loadu_pd((A + Register_size * 2));
-    __m256d a3 = _mm256_loadu_pd((A + Register_size * 3));
+    __m256d a0 = _mm256_loadu_pd((A + Matrix_size * 0));
+    __m256d a1 = _mm256_loadu_pd((A + Matrix_size * 1));
+    __m256d a2 = _mm256_loadu_pd((A + Matrix_size * 2));
+    __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
 
     // Functional AVX2 code
     // __m256d bij;
@@ -72,9 +71,9 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
 
     // Another way of updating the problem
     int i;
-    for (i = 0; i < Register_size; i++){
-      __m256d b = _mm256_loadu_pd((B + Register_size * i));
-      __m256d c = _mm256_loadu_pd((C + Register_size * i));
+    for (i = 0; i < Matrix_size; i++){
+      __m256d b = _mm256_loadu_pd((B + Matrix_size * i));
+      __m256d c = _mm256_loadu_pd((C + Matrix_size * i));
       // Routine to compute four dot product once.
       // Credit to http://stackoverflow.com/questions/10454150/intel-avx-256-bits-version-of-dot-product-for-double-precision-floating-point
       __m256d xy0 = _mm256_mul_pd( a0, b );
@@ -91,7 +90,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       __m256d blended = _mm256_blend_pd(temp01, temp23, 0b1100);
       __m256d dotproduct = _mm256_add_pd( swapped, blended );
       c = _mm256_add_pd( c, dotproduct );
-      _mm256_storeu_pd((C + i*Register_size),c); // Store C(:,i)
+      _mm256_storeu_pd((C + i*Matrix_size),c); // Store C(:,i)
     }
     // int it, jt;
     // printf("Matrix A is:\n");
