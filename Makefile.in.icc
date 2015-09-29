@@ -1,19 +1,19 @@
 # Versions to build
-BUILDS=mine blocked
+BUILDS=mine blocked mkl
 
 # C and Fortran compilers
 CC=icc
 FC=ifort
 LD=ifort
 
-# Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -O3 -parallel -ansi-alias -ftree-vectorize -xHost -axCORE-AVX2 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout
-CFLAGS = -std=gnu99 -openmp
+# Compiler optimization flags
+OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -parallel -ansi-alias -xHost -DALIGNED -restrict
+CFLAGS = -std=gnu99 -fopenmp -pedantic -Wall -Wextra
 FFLAGS =
 LDFLAGS = -openmp -nofor_main
 
 # Add -DEBUG_RUN to CPPFLAGS to cut down on the cases.
-CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
+CPPFLAGS = "-DDEBUG_RUN -DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm -lirng
