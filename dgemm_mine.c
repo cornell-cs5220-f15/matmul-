@@ -300,7 +300,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                       submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
                       submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B_mid, B_inner);
                       mine_fma_dgemm(A_inner, B_inner, C_inner);
-                      submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C, C_mid);
+                      submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
                       int it, jt;
                       printf("======== Matrix A_inner ==========\n");
                       for (it = 0; it < INNER_BLOCK_SIZE; it++){
