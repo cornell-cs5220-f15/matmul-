@@ -5,12 +5,12 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into L1 cache
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 4)
+#define BLOCK_SIZE ((int) 256)
 #endif
 
 // Block size that is used to fit submatrices into register
 #ifndef MID_BLOCK_SIZE
-#define MID_BLOCK_SIZE ((int) 4)
+#define MID_BLOCK_SIZE ((int) 32)
 #endif
 
 // Block size that is used to fit submatrices into register
@@ -202,7 +202,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     int bi, bj, bk;
     int mbi, mbj, mbk;
     int sbi, sbj, sbk;
-    
+
     // It is probably better to use functions since each layer is the same
     for (bi = 0; bi < n_blocks; bi++){
       for (bj = 0; bj < n_blocks; bj++){
