@@ -1,0 +1,141 @@
+icc -c -std=gnu99  "-DCOMPILER=\"icc\"" "-DFLAGS=\"-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout\"" matmul.c
+icc -c -std=gnu99  -O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout "-DCOMPILER=\"icc\"" "-DFLAGS=\"-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout\"" dgemm_group21_blocked.c
+ifort -o matmul-group21_blocked matmul.o dgemm_group21_blocked.o -fopenmp -nofor_main -lm -lirng
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: disabled
+  -inline-max-per-compile: disabled
+
+
+Begin optimization report for: square_dgemm(const int, const double *, const double *, double *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (square_dgemm(const int, const double *, const double *, double *)) [1] dgemm_group21_blocked.c(87,1)
+  -> INLINE: (93,22) padded_transpose(const double *, const int)
+  -> INLINE: (94,22) padded_copy(const double *, const int)
+  -> INLINE: (95,22) padded_copy(const double *, const int)
+  -> INLINE: (106,17) do_block(const int, const double *, const double *, double *, const int, const int, const int)
+    -> INLINE: (43,5) basic_dgemm(const int, const double *, const double *, double *)
+
+===========================================================================
+
+Begin optimization report for: padded_copy(const double *, const int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (padded_copy(const double *, const int)) dgemm_group21_blocked.c(66,51)
+
+===========================================================================
+
+Begin optimization report for: padded_transpose(const double *, const int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (padded_transpose(const double *, const int)) dgemm_group21_blocked.c(46,56)
+
+===========================================================================
+
+Begin optimization report for: do_block(const int, const double *, const double *, double *, const int, const int, const int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (do_block(const int, const double *, const double *, double *, const int, const int, const int)) dgemm_group21_blocked.c(42,1)
+
+===========================================================================
+
+Begin optimization report for: basic_dgemm(const int, const double *, const double *, double *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (basic_dgemm(const int, const double *, const double *, double *)) dgemm_group21_blocked.c(17,1)
+
+===========================================================================
+icc -c -std=gnu99  -O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout "-DCOMPILER=\"icc\"" "-DFLAGS=\"-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout\"" dgemm_group21.c
+ifort -o matmul-group21 matmul.o dgemm_group21.o -fopenmp -nofor_main -lm -lirng
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: disabled
+  -inline-max-per-compile: disabled
+
+
+Begin optimization report for: square_dgemm(const int, const double *, const double *, double *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (square_dgemm(const int, const double *, const double *, double *)) [1] dgemm_group21.c(96,1)
+  -> INLINE: (121,26) padded_transpose(const double *, const int)
+  -> INLINE: (122,26) padded_copy(const double *, const int)
+  -> INLINE: (123,26) padded_copy(const double *, const int)
+  -> INLINE: (131,21) do_block(const int, const double *, const double *, double *, const int, const int, const int)
+    -> INLINE: (50,5) basic_dgemm(const int, const int, const int, const int, const double *, const double *, double *)
+
+===========================================================================
+
+Begin optimization report for: padded_copy(const double *, const int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (padded_copy(const double *, const int)) dgemm_group21.c(74,51)
+
+===========================================================================
+
+Begin optimization report for: padded_transpose(const double *, const int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (padded_transpose(const double *, const int)) dgemm_group21.c(54,56)
+
+===========================================================================
+
+Begin optimization report for: do_block(const int, const double *, const double *, double *, const int, const int, const int)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (do_block(const int, const double *, const double *, double *, const int, const int, const int)) dgemm_group21.c(46,1)
+
+===========================================================================
+
+Begin optimization report for: basic_dgemm(const int, const int, const int, const int, const double *, const double *, double *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+DEAD STATIC FUNCTION: (basic_dgemm(const int, const int, const int, const int, const double *, const double *, double *)) dgemm_group21.c(21,1)
+
+===========================================================================
+icc -c -std=gnu99  "-DCOMPILER=\"icc\"" "-DFLAGS=\"-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout\""  dgemm_blas.c 
+ifort -o matmul-blas matmul.o dgemm_blas.o -fopenmp -nofor_main -lm -lirng -lopenblas
+icc -c -std=gnu99  -O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout "-DCOMPILER=\"icc\"" "-DFLAGS=\"-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout\"" dgemm_group21_best.c
+ifort -o matmul-group21_best matmul.o dgemm_group21_best.o -fopenmp -nofor_main -lm -lirng
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINING OPTION VALUES:
+  -inline-factor: 100
+  -inline-min-size: 30
+  -inline-max-size: 230
+  -inline-max-total-size: 2000
+  -inline-max-per-routine: disabled
+  -inline-max-per-compile: disabled
+
+
+Begin optimization report for: square_dgemm(const int, const double *, const double *, double *)
+
+    Report from: Interprocedural optimizations [ipo]
+
+INLINE REPORT: (square_dgemm(const int, const double *, const double *, double *)) [1] dgemm_group21_best.c(8,1)
+
+===========================================================================
+rm dgemm_group21.o dgemm_group21_best.o dgemm_group21_blocked.o

@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl blocked_unrolled blocked_SSE blocked_32 blocked_64 blocked_54 blocked_8 blocked_16 blocked_unrolled_64 blocked_unrolled_16 blocked_unrolled_32 jik_outer_jki blocked_jik group21 copy_opt
+BUILDS=mine basic blocked f2c blas mkl
 
 # C and Fortran compilers
 CC=icc
