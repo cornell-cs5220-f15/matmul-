@@ -7,7 +7,7 @@
 const char* dgemm_desc = "mjw297 dgemm.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 1000)
+#define BLOCK_SIZE ((int) 1024)
 #endif
 
 /*
@@ -17,14 +17,17 @@ const char* dgemm_desc = "mjw297 dgemm.";
 
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
-void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double *A, const double *B, double *C) {
+void basic_dgemm(const int lda,
+                 const int M, const int N, const int K,
+                 const double* A,
+                 const double* B,
+                       double* C) {
     int i, j, k;
     double *A_ = cm_transpose(A, lda, lda, M, K);
     // double *B_ = cm_copy(B, lda, lda, K, N);
 
-    for (i = 0; i < M; ++i) {
-        for (j = 0; j < N; ++j) {
+    for (j = 0; j < N; ++j) {
+        for (i = 0; i < M; ++i) {
             double cij = C[cm(lda, lda, i, j)];
             for (k = 0; k < K; ++k) {
                 // cij += A_[rm(M, K, i, k)] * B_[cm(K, N, k, j)];
@@ -38,7 +41,9 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 }
 
 void do_block(const int lda,
-              const double *A, const double *B, double *C,
+              const double* A,
+              const double* B,
+                    double* C,
               const int i, const int j, const int k) {
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
@@ -47,7 +52,10 @@ void do_block(const int lda,
                 &A[cm(lda, lda, i, k)], &B[cm(lda, lda, k, j)], &C[cm(lda, lda, i, j)]);
 }
 
-void square_dgemm(const int M, const double *A, const double *B, double *C) {
+void square_dgemm(const int M,
+                  const double* A,
+                  const double* B,
+                        double* C) {
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
     for (bi = 0; bi < n_blocks; ++bi) {
