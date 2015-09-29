@@ -5,7 +5,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into L1 cache
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 4)
+#define BLOCK_SIZE ((int) 8)
 #endif
 
 // Block size that is used to fit submatrices into register
