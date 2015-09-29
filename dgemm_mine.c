@@ -214,7 +214,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           //     printf("%lf\t", A_outer[jt*BLOCK_SIZE+it]);
           //   }
           //   printf("\n");
-          }
+          // }
           for (sbi = 0; sbi < n_inner_blocks; sbi++){
             for (sbj = 0; sbj < n_inner_blocks; sbj++){
               matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
