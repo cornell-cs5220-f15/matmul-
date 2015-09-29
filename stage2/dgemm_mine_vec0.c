@@ -37,8 +37,8 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 			smallB[j*BLOCK_SIZE+K]=0;
 		}
 	}
-	__assume_aligned(A,512);
-	__assume_aligned(B,512);
+	__assume_aligned(smallA,512);
+	__assume_aligned(smallB,512);
     
     for (j = 0; j < N; ++j) {
          for (i = 0; i < M; ++i){
