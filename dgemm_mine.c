@@ -297,8 +297,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                     submatrix_transpose(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, K_inner, A_mid, A_inner);
                     for (sbj = 0; sbj < n_inner_blocks; sbj++) {
                       const int J_inner = sbj*INNER_BLOCK_SIZE; // Starting element index J for inner submatrix (relative to mid submatrix)
-                      submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C, C_mid);
-                      submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B, B_mid);
+                      submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
+                      submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B_mid, B_inner);
                       mine_fma_dgemm(A_inner, B_inner, C_inner);
                       submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C, C_mid);
                       int it, jt;
