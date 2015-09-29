@@ -10,7 +10,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into register
 #ifndef MID_BLOCK_SIZE
-#define MID_BLOCK_SIZE ((int) 32)
+#define MID_BLOCK_SIZE ((int) 4)
 #endif
 
 // Block size that is used to fit submatrices into register
