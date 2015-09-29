@@ -234,11 +234,13 @@ int main(int argc, char** argv)
 //    double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
 //    double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
 
-    // Align matrices in memory to 256b to allow vector loads/stores
+    // Align matrices in memory to cache lines (64B) to allow vector
+    // loads/stores when the matrix dimensions are evenly divisible by
+    // the SIMD width (256b).
     double *A, *B, *C;
-    posix_memalign((void**)&A, 32, MAX_SIZE * MAX_SIZE * sizeof(double));
-    posix_memalign((void**)&B, 32, MAX_SIZE * MAX_SIZE * sizeof(double));
-    posix_memalign((void**)&C, 32, MAX_SIZE * MAX_SIZE * sizeof(double));
+    posix_memalign((void**)&A, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
+    posix_memalign((void**)&B, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
+    posix_memalign((void**)&C, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
 
     matrix_init(A);
     matrix_init(B);

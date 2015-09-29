@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c veclib avx_regular avx_irregular loop
+BUILDS=mine basic blocked f2c veclib avx_regular avx_irregular copy loop
 
 # C and Fortran compilers
 CC=gcc-5
