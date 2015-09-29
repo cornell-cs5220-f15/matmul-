@@ -252,6 +252,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
           //////////////////////
           // Start of Mid loop//
           //////////////////////
+          printf("I_m, J_m, K_m is %d, %d, %d\n", I_m, J_m, K_m);
           for(mbi = 0; mbi < I_m; mbi++){
             const int I_mid = I_outer + mbi*MID_BLOCK_SIZE; // Starting element index I for mid submatrix
             for(mbj = 0; mbj < J_m; mbj++){
