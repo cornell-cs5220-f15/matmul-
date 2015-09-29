@@ -5,7 +5,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into L1 cache
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 64)
+#define BLOCK_SIZE ((int) 128)
 #endif
 
 // Block size that is used to fit submatrices into register
@@ -13,29 +13,13 @@ const char* dgemm_desc = "My awesome dgemm.";
 #define INNER_BLOCK_SIZE ((int) 4)
 #endif
 
-#ifdef USE_SHUFPD
-#  define swap_sse_doubles(a) _mm_shuffle_pd(a, a, 1)
-#else
-#  define swap_sse_doubles(a) (__m128d) _mm_shuffle_epi32((__m128i) a, 0x4e)
-#endif
+// Part of AVX implementation, now for reference
+// #ifdef USE_SHUFPD
+// #  define swap_sse_doubles(a) _mm_shuffle_pd(a, a, 1)
+// #else
+// #  define swap_sse_doubles(a) (__m128d) _mm_shuffle_epi32((__m128i) a, 0x4e)
+// #endif
 
-void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double* restrict A, const double* restrict B,
-                 double* restrict C){
-  /* For the new kernel function, A must be stored in row-major
-    lda is the leading dimension of the matrix (the M of square_dgemm).
-    A is M-by-K, B is K-by-N and C is M-by-N */
-    int i, j, k;
-    for(j = 0; j < N; ++j){
-      for(i = 0; i < M; ++i){
-        double cij = C[i + j*lda];
-        for (k = 0; k < K; ++k){
-          cij += A[i * BLOCK_SIZE + k] * B[k + j * lda];
-        }
-        C[i + j*lda] = cij;
-      }
-    }
-}
 void mine_fma_dgemm(const double* restrict A, const double* restrict B,
                  double* restrict C){
     /*
@@ -79,18 +63,6 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     }
 }
 
-void do_block(const int lda,
-              const double* restrict A, const double* restrict B, double* restrict C,
-              const int i, const int j, const int k){
-    // Determine the size of each sub-block
-    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
-    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
-    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-
-    basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
-    // mine_dgemm(A,B,C);
-    // mine_fma_dgemm(A,B,C);
-}
 
 void matrix_copy (const int mat_size, const int sub_size, const int i, const int j,
         const double* restrict Matrix, double* restrict subMatrix){
@@ -131,48 +103,53 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
     }
 }
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C){
-    // // Preallocate a space for submatrices A, B and C
-    double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    // double* B_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),16);
-
-    // // Preallocate spaces for outer matrices A, B and C;
-    // double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    // double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    // double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    // // Preallocate spaces for inner matrices A, B and C;
-    // double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
-    // double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
-    // double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
-    //
+    // Preallocate spaces for outer matrices A, B and C;
+    double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    // Preallocate spaces for inner matrices A, B and C;
+    double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+    double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
+    double* C_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     // // functional avx2 script with blocking
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
-    // const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
-    // int bi, bj, bk;
-    // int sbi, sbj, sbk;
-    // for (bi = 0; bi < n_blocks; bi++){
-    //   for (bj = 0; bj < n_blocks; bj++){
-    //     matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
-    //     for (bk = 0; bk < n_blocks; bk++){
-    //       matrix_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
-    //       matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
-    //       for (sbi = 0; sbi < n_inner_blocks; sbi++){
-    //         for (sbj = 0; sbj < n_inner_blocks; sbj++){
-    //           matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
-    //           for (sbk = 0; sbk < n_inner_blocks; sbk++){
-    //             matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
-    //             matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
-    //             mine_fma_dgemm(A_inner, B_inner, C_inner);
-    //           }
-    //           matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
-    //         }
-    //       }
-    //
-    //     }
-    //     matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
-    //   }
-    // }
+    const int n_inner_blocks = BLOCK_SIZE / INNER_BLOCK_SIZE; // # of inner subblocks, use integer multiplier here when choosing blocksizes
+    int bi, bj, bk;
+    int sbi, sbj, sbk;
 
-    // functional avx2 script
+    for (bi = 0; bi < n_blocks; bi++){
+      for (bj = 0; bj < n_blocks; bj++){
+        matrix_copy(M, BLOCK_SIZE, bi, bj, C, C_outer);
+        for (bk = 0; bk < n_blocks; bk++){
+          matrix_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
+          matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
+          for (sbi = 0; sbi < n_inner_blocks; sbi++){
+            for (sbj = 0; sbj < n_inner_blocks; sbj++){
+              matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+              for (sbk = 0; sbk < n_inner_blocks; sbk++){
+                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
+                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
+                mine_fma_dgemm(A_inner, B_inner, C_inner);
+              }
+              matrix_update (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
+            }
+          }
+        }
+        matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
+      }
+    }
+
+    // Free memory for basic kernel and AVX kernel.
+    _mm_free(A_outer);
+    _mm_free(B_outer);
+    _mm_free(C_outer);
+
+    _mm_free(A_inner);
+    _mm_free(B_inner);
+    _mm_free(C_inner);
+
+
+    // functional avx2 script for reference
     // const int n_inner_blocks = M / INNER_BLOCK_SIZE + (M%INNER_BLOCK_SIZE? 1 : 0); // # of blocks
     // int sbi, sbj, sbk;
     // for (sbi = 0; sbi < n_inner_blocks; sbi++){
@@ -213,56 +190,63 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     //     matrix_update (M, BLOCK_SIZE, bi, bj, C, C_outer);
     //   }
     // }
-
-    int bi, bj, bk;
-    for (bi = 0; bi < n_blocks; ++bi){
-      const int i = bi * BLOCK_SIZE;
-      for (bk = 0; bk < n_blocks; ++bk){
-        const int k = bk * BLOCK_SIZE;
-        // for (bj = 0; bj < n_blocks; ++bj){
-        //   const int j = bj * BLOCK_SIZE;
-          // do_block(M, A_transposed, B, C, i, j, k);
-          // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
-          // do_block(M, A, B, C, i, j, k); // For AVX 4*4
-        // }
-        // Transpose A.
-        const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
-        const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
-        int it, kt;
-        for (it = 0; it < M_sub; ++it){
-          for (kt = 0; kt < K; ++kt)
-            A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
-        }
-        // // Instead of transposing A, transpose B for AVX 2*2
-        // for (it = 0; it < M_sub; ++it){
-        //   for (kt = 0; kt < K; ++kt)
-        //     B_transposed[it*BLOCK_SIZE + kt] = B[i + k*M + it + kt*M];
-        // }
-
-        // // Don't transpose anything for AVX 4*4
-        for (bj = 0; bj < n_blocks; ++bj){
-          const int j = bj * BLOCK_SIZE;
-          do_block(M, A_transposed, B, C, i, j, k);
-        //   // do_block(M, A, B_transposed, C, i, j, k); // For AVX 2*2
-        //   do_block(M, A, B, C, i, j, k); // For AVX 4*4
-        }
-      }
-    }
-    // Free memory for basic kernel and AVX kernel.
-    _mm_free(A_transposed);
-    // _mm_free(B_transposed);
-    // _mm_free(A_outer);
-    // _mm_free(B_outer);
-    // _mm_free(C_outer);
-    //
-    // _mm_free(A_inner);
-    // _mm_free(B_inner);
-    // _mm_free(C_inner);
 }
 
+// Functional Version for basic implementation
+// void basic_dgemm(const int lda, const int M, const int N, const int K,
+//                  const double* restrict A, const double* restrict B,
+//                  double* restrict C){
+//   /* For the new kernel function, A must be stored in row-major
+//     lda is the leading dimension of the matrix (the M of square_dgemm).
+//     A is M-by-K, B is K-by-N and C is M-by-N */
+//     int i, j, k;
+//     for(j = 0; j < N; ++j){
+//       for(i = 0; i < M; ++i){
+//         double cij = C[i + j*lda];
+//         for (k = 0; k < K; ++k){
+//           cij += A[i * BLOCK_SIZE + k] * B[k + j * lda];
+//         }
+//         C[i + j*lda] = cij;
+//       }
+//     }
+// }
+// void do_block(const int lda,
+//               const double* restrict A, const double* restrict B, double* restrict C,
+//               const int i, const int j, const int k){
+//     // Determine the size of each sub-block
+//     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
+//     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
+//     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+//
+//     basic_dgemm(lda, M, N, K, A, B + k + j*lda, C + i + j*lda);
+//     // mine_dgemm(A,B,C);
+// }
+// void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C){
+//     double* A_transposed = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+//     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0); // # of blocks
+//     int bi, bj, bk;
+//     for (bi = 0; bi < n_blocks; ++bi){
+//       const int i = bi * BLOCK_SIZE;
+//       for (bk = 0; bk < n_blocks; ++bk){
+//         const int k = bk * BLOCK_SIZE;
+//         const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
+//         const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
+//         int it, kt;
+//         for (it = 0; it < M_sub; ++it){
+//           for (kt = 0; kt < K; ++kt)
+//             A_transposed[it*BLOCK_SIZE + kt] = A[i + k*M + it + kt*M];
+//         }
+//         for (bj = 0; bj < n_blocks; ++bj){
+//           const int j = bj * BLOCK_SIZE;
+//           do_block(M, A_transposed, B, C, i, j, k);
+//         }
+//       }
+//     }
+//     _mm_free(A_transposed);
+// }
 
 // Functiosn that are for testing and stuffs
-void mine_dgemm( const double* restrict A, const double* restrict B,
+// void mine_dgemm( const double* restrict A, const double* restrict B,
                  double* restrict C){
     /*  My kernel function that uses AVX for optimal performance
         It always assumes an input of A = 2 * P, B = P * 2
