@@ -1,0 +1,4 @@
+Compiler:	icc
+Options:	-O3 -funroll-loops -ftree-vectorize -vec -ipo -xHost -no-prec-div -ansi-alias -axCORE-AVX2 -restrict 
+Description:	My super awesome dgemm.
+
