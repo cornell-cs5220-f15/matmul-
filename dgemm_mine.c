@@ -10,7 +10,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // Block size that is used to fit submatrices into register
 #ifndef MID_BLOCK_SIZE
-#define MID_BLOCK_SIZE ((int) 16)
+#define MID_BLOCK_SIZE ((int) 8)
 #endif
 
 // Block size that is used to fit submatrices into register
@@ -162,7 +162,7 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
 //     }
 // }
 
-submatrix_copy(const int matrix_size, const int block_size,
+void submatrix_copy(const int matrix_size, const int block_size,
         const int I, const int J, const double* restrict matrix, double* restrict submatrix){
         // submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B, B_mid);
         // Compute how much does it need to copy
@@ -187,7 +187,7 @@ submatrix_copy(const int matrix_size, const int block_size,
           }
         }
 }
-submatrix_transpose(const int matrix_size, const int block_size,
+void submatrix_transpose(const int matrix_size, const int block_size,
         const int I, const int J, const double* restrict matrix, double* restrict submatrix){
         // Make a transposed copy
         // Here we assume the matrix to transpose is square and we do not need to worry
@@ -199,7 +199,7 @@ submatrix_transpose(const int matrix_size, const int block_size,
           }
         }
 }
-submatrix_update(const int matrix_size, const int block_size,
+void submatrix_update(const int matrix_size, const int block_size,
         const int I, const int J, double* restrict matrix, const double* restrict submatrix){
         // It's basically the copy function, just in reverse direction
         // Compute how much does it need to copy
@@ -212,6 +212,25 @@ submatrix_update(const int matrix_size, const int block_size,
             matrix[(J + n) * matrix_size + I + m] = submatrix[n * block_size + m] ;
           }
         }
+}
+void kernel_dgemm(const int MID_BLOCK_SIZE, const int INNER_BLOCK_SIZE, const int n_inner_blocks,
+                const double* restrict A, double* restrict sub_A, const double* restrict B, double* restrict sub_B,
+                double* restrict C, double* restrict sub_C){
+  int sbi, sbj, sbk;
+  for (sbi = 0; sbi < n_inner_blocks; sbi++) {
+    const int I_inner = sbi*INNER_BLOCK_SIZE; // Starting element index I for inner submatrix (relative to mid submatrix)
+    for (sbk = 0; sbk < n_inner_blocks; sbk++) {
+      const int K_inner = sbk*INNER_BLOCK_SIZE; // Starting element index K for inner submatrix (relative to mid submatrix)
+      submatrix_transpose(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, K_inner, A, sub_A);
+      for (sbj = 0; sbj < n_inner_blocks; sbj++) {
+        const int J_inner = sbj*INNER_BLOCK_SIZE; // Starting element index J for inner submatrix (relative to mid submatrix)
+        submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C, sub_C);
+        submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B, sub_B);
+        mine_fma_dgemm(sub_A, sub_B, sub_C);
+        submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C, sub_C);
+      }
+    }
+  }
 }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C){
@@ -233,7 +252,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
 
     int bi, bj, bk;
     int mbi, mbj, mbk;
-    int sbi, sbj, sbk;
+    // int sbi, sbj, sbk;
 
     for (bi = 0; bi < n_blocks; bi++){
       const int I_outer = bi*BLOCK_SIZE; // Starting element index I for outer submatrix.
@@ -264,31 +283,24 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                 /////////////////////////////////////////////////////////////
                 // Now loop through the mid submatrix using kernel function//
                 /////////////////////////////////////////////////////////////
-                for (sbi = 0; sbi < n_inner_blocks; sbi++) {
-                  const int I_inner = sbi*INNER_BLOCK_SIZE; // Starting element index I for inner submatrix (relative to mid submatrix)
-                  for (sbk = 0; sbk < n_inner_blocks; sbk++) {
-                    const int K_inner = sbk*INNER_BLOCK_SIZE; // Starting element index K for inner submatrix (relative to mid submatrix)
-                    submatrix_transpose(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, K_inner, A_mid, A_inner);
-                    for (sbj = 0; sbj < n_inner_blocks; sbj++) {
-                      const int J_inner = sbj*INNER_BLOCK_SIZE; // Starting element index J for inner submatrix (relative to mid submatrix)
-                      submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
-                      submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B_mid, B_inner);
-                      mine_fma_dgemm(A_inner, B_inner, C_inner);
-                      submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
-                    }
-                  }
-                }
+                // for (sbi = 0; sbi < n_inner_blocks; sbi++) {
+                //   const int I_inner = sbi*INNER_BLOCK_SIZE; // Starting element index I for inner submatrix (relative to mid submatrix)
+                //   for (sbk = 0; sbk < n_inner_blocks; sbk++) {
+                //     const int K_inner = sbk*INNER_BLOCK_SIZE; // Starting element index K for inner submatrix (relative to mid submatrix)
+                //     submatrix_transpose(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, K_inner, A_mid, A_inner);
+                //     for (sbj = 0; sbj < n_inner_blocks; sbj++) {
+                //       const int J_inner = sbj*INNER_BLOCK_SIZE; // Starting element index J for inner submatrix (relative to mid submatrix)
+                //       submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
+                //       submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B_mid, B_inner);
+                //       mine_fma_dgemm(A_inner, B_inner, C_inner);
+                //       submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C_mid, C_inner);
+                //     }
+                //   }
+                // }
+                kernel_dgemm(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, n_inner_blocks, A_mid, A_inner, B_mid, B_inner, C_mid, C_inner);
                 ///////////////////////
                 // End of Inner Loop //
                 ///////////////////////
-              }
-              int it, jt;
-              printf("======== Matrix C_mid ==========\n");
-              for (it = 0; it < MID_BLOCK_SIZE; it++){
-                for (jt = 0; jt < MID_BLOCK_SIZE; jt++){
-                  printf("%lf\t", C_mid[jt*INNER_BLOCK_SIZE+it]);
-                }
-                printf("\n");
               }
               submatrix_update(M, MID_BLOCK_SIZE, I_mid, J_mid, C, C_mid);
             }
