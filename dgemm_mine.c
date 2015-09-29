@@ -111,9 +111,9 @@ void matrix_update (const int mat_size, const int sub_size, const int i, const i
 }
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C){
     // Preallocate spaces for outer matrices A, B and C;
-    double* A_outer = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    double* B_outer = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
-    double* C_outer = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* A_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* B_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
+    double* C_outer = (double*) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double),32);
     // Preallocate spaces for inner matrices A, B and C;
     double* A_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
     double* B_inner = (double*) _mm_malloc(INNER_BLOCK_SIZE * INNER_BLOCK_SIZE * sizeof(double),32);
@@ -147,9 +147,9 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
     }
 
     // Free memory for basic kernel and AVX kernel.
-    free(A_outer);
-    free(B_outer);
-    free(C_outer);
+    _mm_free(A_outer);
+    _mm_free(B_outer);
+    _mm_free(C_outer);
 
     _mm_free(A_inner);
     _mm_free(B_inner);
