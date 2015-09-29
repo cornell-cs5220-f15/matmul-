@@ -38,10 +38,10 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
     __assume_aligned(B, 32);
     __assume_aligned(C, 32);
     // Load matrix A. The load function is loadu, which doesn't require alignment of the meory
-    __m256d a0 = _mm256_load_pd((A + Matrix_size * 0));
-    __m256d a1 = _mm256_load_pd((A + Matrix_size * 1));
-    __m256d a2 = _mm256_load_pd((A + Matrix_size * 2));
-    __m256d a3 = _mm256_load_pd((A + Matrix_size * 3));
+    __m256d a0 = _mm256_loadu_pd((A + Matrix_size * 0));
+    __m256d a1 = _mm256_loadu_pd((A + Matrix_size * 1));
+    __m256d a2 = _mm256_loadu_pd((A + Matrix_size * 2));
+    __m256d a3 = _mm256_loadu_pd((A + Matrix_size * 3));
 
     // Functional AVX2 code
     __m256d bij;
