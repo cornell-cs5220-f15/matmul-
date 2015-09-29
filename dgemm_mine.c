@@ -84,6 +84,28 @@ void mine_fma_dgemm(const double* restrict A, const double* restrict B,
       __m256d dotproduct = _mm256_add_pd( swapped, blended );
       _mm256_storeu_pd((C+i*Matrix_size),dotproduct); // Store C(:,i)
     }
+    int it, jt;
+    printf("Matrix A is:\n");
+    for (it = 0; it < Matrix_size; it++){
+      for (jt = 0; jt < Matrix_size; jt++){
+        printf("%lf\t", A[jt*Matrix_size+it]);
+      }
+      printf("\n");
+    }
+    printf("Matrix B is:\n");
+    for (it = 0; it < Matrix_size; it++){
+      for (jt = 0; jt < Matrix_size; jt++){
+        printf("%lf\t", B[jt*Matrix_size+it]);
+      }
+      printf("\n");
+    }
+    printf("Matrix C is:\n");
+    for (it = 0; it < Matrix_size; it++){
+      for (jt = 0; jt < Matrix_size; jt++){
+        printf("%lf\t", C[jt*Matrix_size+it]);
+      }
+      printf("\n");
+    }
 }
 
 
