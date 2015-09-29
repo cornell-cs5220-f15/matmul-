@@ -219,7 +219,8 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
             for (sbj = 0; sbj < n_inner_blocks; sbj++){
               matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbj, C_outer, C_inner);
               for (sbk = 0; sbk < n_inner_blocks; sbk++){
-                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
+                // matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbi, sbk, A_outer, A_inner);
+                matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbi, A_outer, A_inner); // For transposed A
                 matrix_copy (BLOCK_SIZE, INNER_BLOCK_SIZE, sbk, sbj, B_outer, B_inner);
                 mine_fma_dgemm(A_inner, B_inner, C_inner);
                 int it, jt;
