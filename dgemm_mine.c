@@ -213,21 +213,21 @@ void submatrix_update(const int matrix_size, const int block_size,
           }
         }
 }
-void kernel_dgemm(int MID_BLOCK_SIZE, int INNER_BLOCK_SIZE, int n_inner_blocks,
+void kernel_dgemm(int mid_size, int inner_size, int n_in_blocks,
                 const double* restrict A, double* restrict sub_A, const double* restrict B, double* restrict sub_B,
                 double* restrict C, double* restrict sub_C){
       int sbi, sbj, sbk;
-      for (sbi = 0; sbi < n_inner_blocks; sbi++) {
-        const int I_inner = sbi*INNER_BLOCK_SIZE; // Starting element index I for inner submatrix (relative to mid submatrix)
-        for (sbk = 0; sbk < n_inner_blocks; sbk++) {
-          const int K_inner = sbk*INNER_BLOCK_SIZE; // Starting element index K for inner submatrix (relative to mid submatrix)
-          submatrix_transpose(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, K_inner, A, sub_A);
-          for (sbj = 0; sbj < n_inner_blocks; sbj++) {
-            const int J_inner = sbj*INNER_BLOCK_SIZE; // Starting element index J for inner submatrix (relative to mid submatrix)
-            submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C, sub_C);
-            submatrix_copy(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, K_inner, J_inner, B, sub_B);
+      for (sbi = 0; sbi < n_in_blocks; sbi++) {
+        const int I_inner = sbi*inner_size; // Starting element index I for inner submatrix (relative to mid submatrix)
+        for (sbk = 0; sbk < n_in_blocks; sbk++) {
+          const int K_inner = sbk*inner_size; // Starting element index K for inner submatrix (relative to mid submatrix)
+          submatrix_transpose(mid_size, inner_size, I_inner, K_inner, A, sub_A);
+          for (sbj = 0; sbj < n_in_blocks; sbj++) {
+            const int J_inner = sbj*inner_size; // Starting element index J for inner submatrix (relative to mid submatrix)
+            submatrix_copy(mid_size, inner_size, I_inner, J_inner, C, sub_C);
+            submatrix_copy(mid_size, inner_size, K_inner, J_inner, B, sub_B);
             mine_fma_dgemm(sub_A, sub_B, sub_C);
-            submatrix_update(MID_BLOCK_SIZE, INNER_BLOCK_SIZE, I_inner, J_inner, C, sub_C);
+            submatrix_update(mid_size, inner_size, I_inner, J_inner, C, sub_C);
           }
         }
       }
