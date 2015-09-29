@@ -225,10 +225,10 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
         for (bk = 0; bk < n_blocks; bk++){
           matrix_transpose_copy(M, BLOCK_SIZE, bi, bk, A, A_outer);
           matrix_copy(M, BLOCK_SIZE, bk, bj, B, B_outer);
-          for (mbi = 0; bi < n_mid_blocks; bi++){
-            for (mbj = 0; bj < n_mid_blocks; bj++){
+          for (mbi = 0; mbi < n_mid_blocks; mbi++){
+            for (mbj = 0; mbj < n_mid_blocks; mbj++){
               matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbi, mbj, C_outer, C_mid);
-              for (mbk = 0; bk < n_mid_blocks; bk++){
+              for (mbk = 0; mbk < n_mid_blocks; mbk++){
                 matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbi, A_outer, A_mid);
                 matrix_copy(BLOCK_SIZE, MID_BLOCK_SIZE, mbk, mbj, B_outer, B_mid);
                 for (sbi = 0; sbi < n_inner_blocks; sbi++){
