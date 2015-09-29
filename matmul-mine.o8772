@@ -1,0 +1,7 @@
+Matrix multiply failed.
+C(0,0) should be 6.05137, was 0.06414
+Error of 5.98723, acceptable limit 1.24962e-13
+Compiler:	icc
+Options:	-O3 -funroll-loops -ftree-vectorize -vec -ipo -xHost -no-prec-div -ansi-alias -axCORE-AVX2 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout -restrict
+Description:	My super awesome dgemm.
+
