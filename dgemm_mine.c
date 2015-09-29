@@ -301,7 +301,7 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
                 ///////////////////////
                 // End of Inner Loop //
                 ///////////////////////
-                printf("%lf",C_mid[0]);
+                printf("%lf",C_inner[0]);
               }
               submatrix_update(M, MID_BLOCK_SIZE, I_mid, J_mid, C, C_mid);
             }
