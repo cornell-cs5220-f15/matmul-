@@ -40,7 +40,7 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 //(It was for column major layout at the beginning, C = A*B assuming col major,
 // but I switched the order of the arguments
 // so now it reads C' = B' * A' if you think column major layout.)
-void MMult4by4VRegAC(const double * restrict B, const double * restrict A, double * restrict C)
+void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
 {
   int p;
   __m256d a0,b0,b1,b2,b3,c00,c01,c02,c03;
@@ -74,7 +74,7 @@ void MMult4by4VRegAC(const double * restrict B, const double * restrict A, doubl
 
 // read (L1 x L1) matrix from A(i,j) into block_A (assumes col major A)
 // block_A is row major (historical reasons)
-void read_to_contiguous(const int M, const double *A, double *block_A,
+void read_to_contiguous(const int M, const double* restrict A, double* restrict block_A,
                         const int i, const int j) {
     // guard against matrix edge case
     const int mBound = (j+L1 > M? M-j : L1);
@@ -100,8 +100,8 @@ void read_to_contiguous(const int M, const double *A, double *block_A,
 }
 
 // write block_C into C(i,j)
-void write_from_contiguousC(const int M, double * restrict C,
-                            const double * block_C,
+void write_from_contiguousC(const int M, double* restrict C,
+                            const double* restrict block_C,
                             const int i, const int j) {
     // guard against matrix edge case
     // printf("%d %d\n", i, j);
@@ -119,10 +119,10 @@ void write_from_contiguousC(const int M, double * restrict C,
 
 //Assumes L3 is integer mutliple of L2 and L2 is integer multiple of L1
 void to_contiguous3lvlBlock(const int M,
-                            const double * restrict A,
-                            double * restrict Ak,
-                            const double * restrict B,
-                            double * restrict Bk) {
+                            const double* restrict A,
+                            double* restrict Ak,
+                            const double* restrict B,
+                            double* restrict Bk) {
     int ind_Ak = 0, ind_Bk = 0;
     const int n3 = M / L3_BLOCK_SIZE + (M%L3_BLOCK_SIZE? 1 : 0);
     for(int i = 0; i < n3; i++){
@@ -153,8 +153,8 @@ void to_contiguous3lvlBlock(const int M,
 }
 
 void from_contiguous3lvlBlock(const int M,
-                              double * restrict C,
-                              const double * restrict Ck){
+                              double* restrict C,
+                              const double* restrict Ck){
     int ind_Ck = 0;
     const int n3 = M / L3 + (M%L3? 1 : 0);
     for(int i = 0; i < n3; i++){
