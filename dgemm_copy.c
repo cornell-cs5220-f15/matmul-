@@ -12,7 +12,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 
 const char* dgemm_desc = "Blocked dgemm with copy optimization (block_size=36).";
 
