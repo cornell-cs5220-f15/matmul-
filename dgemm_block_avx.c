@@ -4,8 +4,8 @@
 
 const char* dgemm_desc = "AVX + copy + padded + blocked dgemm.";
 
-#ifndef REG_SIZE
-#define REG_SIZE ((int) 4)
+#ifndef REGISTER_SIZE
+#define REGISTER_SIZE ((int) 4)
 #endif
 
 #ifndef BLOCK_SIZE
@@ -13,17 +13,15 @@ const char* dgemm_desc = "AVX + copy + padded + blocked dgemm.";
 #endif
 
 /*
-  A is M-by-K
-  B is K-by-N
-  C is M-by-N
-
-  lda is the leading dimension of the matrix (the M of square_dgemm).
+  lda is the leading dimension of matrix A, ldb is the leading dimension of matrix B,
+  and ldc is the leading dimension of matrix C.
 */
 void dgemm_4x4(const int mult_a, const int lda, const int ldb, const int ldc,
                  const double *A, const double *B, double *C)
 {
-	//A, B, C are pointers to the relative positions
+	//A, B, C are pointers to the relative positions where the blocks begin
 
+	//4 columns of matrix C
 	__m256d c_0 = _mm256_load_pd(C + 0);
 	__m256d c_1 = _mm256_load_pd(C + 1*ldc);
 	__m256d c_2 = _mm256_load_pd(C + 2*ldc);
@@ -63,61 +61,64 @@ void dgemm_4x4(const int mult_a, const int lda, const int ldb, const int ldc,
 }
 
 
-void block_padding(const int M, const double* X, const int M_REG, double* XA)	{
+void copy_and_pad(const int M, const double* X, const int M_padded, double* X_aligned)	{
 	//copies matrix to a new location with zero padding
-	for (int i = 0; i < M_REG; ++i)	{
-		for (int j = 0; j < M_REG; ++j)	{
+	for (int i = 0; i < M_padded; ++i)	{
+		for (int j = 0; j < M_padded; ++j)	{
 			if ((i < M) && (j < M))	{
-				XA[j + i*M_REG] = X[j + i*M];
+				X_aligned[j + i*M_padded] = X[j + i*M];
 			} else	{
-				XA[j + i*M_REG] = 0;
+				X_aligned[j + i*M_padded] = 0;
 			}
 		}	
 	}
+
 }
 
 
-void reverse_copy(const int M, double* X, const int M_REG, double* XC)	{
+void copy_unpad(const int M, double* X, const int M_padded, double* X_padded)	{
 	for (int i = 0; i < M; ++i)	{
 		for (int j = 0; j < M; ++j)	{
-			X[j + i*M] = XC[j + i*M_REG];
+			X[j + i*M] = X_padded[j + i*M_padded];
 		}
 	}
 }
 
 
-void tile_copy( const int lda, const int K, const double* Xrel, const int ri,
-		const int rk, const int tile_size, double* XC)
+void tile_copy( const int lda, const int tile_height, const double* Xrel, const int j_offset,
+		const int i_offset, const int tile_width, double* X_tile)
 {
-	//Relative position of X as input
-	for (int k = 0; k < K; ++k)	{
-		for (int i = 0; i < tile_size; ++i)	{
-			if ((ri + i < lda) && (rk + k < lda))	{
-				XC[ i + k*tile_size] = Xrel[ i + k*lda];
+	//Xrel is a relative pointer into X, at offset given by j_offset and i_offset
+	for (int i = 0; i < tile_height; ++i)	{
+		for (int j = 0; j < tile_width; ++j)	{
+			if ((j_offset + j < lda) && (i_offset + i < lda))	{
+				X_tile[ j + i*tile_width] = Xrel[ j + i*lda];
 			} else	{
-				XC[ i + k*tile_size] = 0;
+				X_tile[ j + i*tile_width] = 0;
 			}
 		}
 	}
 }
 
 
-void do_block(  const int lda, const int ld_old, const double* A, 
+void do_block(const int lda, const int lda_old, const double* A, 
 		const double* B, double* C, const int j, const int k )
 {
 	//const int M = (i+BLOCK_SIZE > lda ? lda-i : BLOCK_SIZE);
 	const int K = (k+BLOCK_SIZE > lda ? lda-k : BLOCK_SIZE);
 	const int N = (j+BLOCK_SIZE > lda ? lda-j : BLOCK_SIZE);
 
-	//const int Arel = i + k*ld_old;
+	//const int Arel = i + k*lda_old;
 	//const int Brel = k + j*lda;
 	//const int Crel = i + j*lda;
 
-	const int Arel = k*ld_old;
-	const int Brel = k + j*lda;
-	const int Crel = j*lda;
+	//Offsets to the start of the current block's column and/or row
+	const int A_col_offset = k*lda_old;
+	const int B_block_offset = k + j*lda;
+	const int C_col_offset = j*lda;
 
-	double* Ak = _mm_malloc(lda * K * sizeof(double), 32);
+	//Aligned memory for an M-by-K slice of A
+	double* A_aligned = _mm_malloc(lda * K * sizeof(double), 32);
 
 	//unrolling loops by a factor of 4 for rows and columns of C (M-by-N)
 	int bi, bj;
@@ -126,29 +127,30 @@ void do_block(  const int lda, const int ld_old, const double* A,
 		for (bi = 0; bi < lda; bi += 4)	{
 
 			//copying (4-by-K) tile into contiguous, aligned memory
-			if (bj == 0)	{
-			tile_copy(ld_old, K, A + Arel + bi, bi, k,  4, Ak + bi*K);
+			if (bj == 0) {
+				tile_copy(lda_old, K, A + A_col_offset + bi, bi, k, REGISTER_SIZE, A_aligned + bi*K);
 			}
-			dgemm_4x4(K, 4, lda, lda, Ak + bi*K, B + Brel + bj*lda, C + Crel + bi + bj*lda);
+			dgemm_4x4(K, 4, lda, lda, A_aligned + bi*K, B + B_block_offset + bj*lda, C + C_col_offset + bi + bj*lda);
 		}	
 	}
-	_mm_free(Ak);
+	_mm_free(A_aligned);
 }
 
 
 void square_dgemm(const int M, const double* A, const double* B, double* C)
 {
 
-	const int M_REG = ( M/REG_SIZE + (M%REG_SIZE ? 1 : 0) ) * REG_SIZE;
+	//Round up M to the nearest multiple of the register size
+	const int M_padded = ( M/REGISTER_SIZE + (M%REGISTER_SIZE ? 1 : 0) ) * REGISTER_SIZE;
 
-	//copying into aligned blocks
-	double* Bk = _mm_malloc(M_REG * M_REG * sizeof(double), 32);
-	double* Ck = _mm_malloc(M_REG * M_REG * sizeof(double), 32);
+	//Allocate memory for aligned copies
+	double* B_aligned = _mm_malloc(M_padded * M_padded * sizeof(double), 32);
+	double* C_aligned = _mm_malloc(M_padded * M_padded * sizeof(double), 32);
 	
-	block_padding(M, B, M_REG, Bk);
-	memset(Ck, 0, M_REG * M_REG * sizeof(double));
+	copy_and_pad(M, B, M_padded, B_aligned);
+	memset(C_aligned, 0, M_padded * M_padded * sizeof(double));
 
-	const int n_blocks = M_REG / BLOCK_SIZE + (M_REG%BLOCK_SIZE ? 1 : 0);
+	const int n_blocks = M_padded / BLOCK_SIZE + (M_padded%BLOCK_SIZE ? 1 : 0);
 	int bi, bj, bk;
 	for (bj = 0; bj < n_blocks; ++bj)	{
 		const int j = bj * BLOCK_SIZE;
@@ -156,14 +158,14 @@ void square_dgemm(const int M, const double* A, const double* B, double* C)
 			const int k = bk * BLOCK_SIZE;
 				//for (bi = 0; bi < n_blocks; ++bi)	{
 				//	const int i = bi * BLOCK_SIZE;
-					do_block(M_REG, M, A, Bk, Ck, j, k);
+					do_block(M_padded, M, A, B_aligned, C_aligned, j, k);
 				//}
 		}
 	}
 
 	//copy back into original matrix
-	reverse_copy(M, C, M_REG, Ck);
+	copy_unpad(M, C, M_padded, C_aligned);
 
-	_mm_free(Bk);
-	_mm_free(Ck);
+	_mm_free(B_aligned);
+	_mm_free(C_aligned);
 }
