@@ -86,7 +86,7 @@ run-local:
 	( for build in $(BUILDS) ; do ./matmul-$$build ; done )
 
 timing-%.csv: matmul-%
-	qsub -l nodes=1:ppn=24 job-$*.pbs
+	qsub runner.pbs -N $* -vARG1=$<
 
 # ---
 #  Rules for plotting
@@ -96,6 +96,7 @@ plot:
 	python plotter.py $(BUILDS)
 
 # ---
+#  Rules for cleaning
 
 .PHONY:	clean realclean
 clean:
@@ -103,4 +104,9 @@ clean:
 
 realclean: clean
 	rm -f *~ timing-*.csv timing.pdf
+
+# ---
+#  Rules for printing
+
+print-%: ; @echo $*=$($*)
 

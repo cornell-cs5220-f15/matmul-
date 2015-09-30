@@ -1,16 +1,18 @@
-# Versions to build
-BUILDS = \
-	mine \
-	basic \
-	blocked \
-	f2c \
-	blas \
-	mkl \
-	copyopt \
-	compiler \
-	annotated \
-	big_blocked \
-	padded_blocked \
+# Versions to build.
+#
+# BUILDS is defined in a such a way that if you create a file called dgemm_*.c
+# or dgemm_*.f, it will be built and runnable. All you need to do is create the
+# file; you don't need to modify a Makefile, you don't have to add a pbs
+# script, etc.
+BUILDS := $(wildcard dgemm_*.[cf])          # dgemm_f2c_desc.c, dgemm_basic.c ...
+BUILDS := $(basename $(BUILDS))             # dgemm_f2c_desc, dgemm_basic ...
+BUILDS := $(subst dgemm_,,$(BUILDS))        # f2c_desc, basic, ...
+BUILDS := $(filter-out f2c_desc, $(BUILDS)) # basic, ...
+
+# If you want to only build or run a subset of the build rules, you can do so
+# by uncommenting out the following line and entering in the files you wish to
+# build.
+# BUILD = basic ...
 
 # C and Fortran compilers
 CC=icc
