@@ -10,29 +10,25 @@
 const char* dgemm_desc = "Basic, three-loop dgemm with copy optimization";
 
 /*
-  A is M-by-K
-  B is K-by-N
-  C is M-by-N
-
+  A, B, and C are all BLOCK_SIZE * BLOCK_SIZE
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
-void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double *A, const double *B, double *C)
+void basic_dgemm(const int lda, const double *A, const double *B, double *C)
 {
     int i, j, k;
     int jlda, ilda;
     __assume_aligned(A, 64);
     __assume_aligned(B, 64);
     __assume_aligned(C, 64);
-    for (j = 0; j < N; ++j) {
+    for (j = 0; j < BLOCK_SIZE; ++j) {
         jlda = j*lda;
         __assume_aligned(C, 64);
-        for (i = 0; i < M; ++i) {
+        for (i = 0; i < BLOCK_SIZE; ++i) {
             ilda = i*lda;
             double cij = C[jlda+i];
             __assume_aligned(A, 64);
             __assume_aligned(B, 64);
-            for (k = 0; k < K; ++k) {
+            for (k = 0; k < BLOCK_SIZE; ++k) {
                 cij += A[ilda+k] * B[jlda+k];
             }
             C[jlda+i] = cij;
@@ -44,16 +40,12 @@ void do_block(const int lda,
               const double *A, const double *B, double *C,
               const int i, const int j, const int k)
 {
-    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
-    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
-    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-    basic_dgemm(lda, M, N, K,
-                A + k + i*lda, B + k + j*lda, C + i + j*lda);
+    basic_dgemm(lda, A + k + i*lda, B + k + j*lda, C + i + j*lda);
 }
 
 double* padded_transpose(const double* A, const int M) {
     int i,j;
-    const int M_padded = M + ALIGNMENT - M%ALIGNMENT;
+    const int M_padded = M + (ALIGNMENT - M%ALIGNMENT) * (M%ALIGNMENT > 0);
     double* A_copy = (double*) _mm_malloc( sizeof(double) * M_padded * M_padded, 64 );
 
     for(i = 0; i<M; i++) {
@@ -73,7 +65,7 @@ double* padded_transpose(const double* A, const int M) {
 
 double* padded_copy(const double* A, const int M) {
     int i,j;
-    const int M_padded = M + ALIGNMENT - M%ALIGNMENT;
+    const int M_padded = M + (ALIGNMENT - M%ALIGNMENT) * (M%ALIGNMENT > 0);
     double* A_copy = (double*) _mm_malloc( sizeof(double) * M_padded * M_padded, 64 );
 
     for(i = 0; i<M; i++) {
@@ -95,6 +87,10 @@ void square_dgemm(const int M,
                   const double *A, const double *B, double *C)
 {
     int i,j,k;
+    if( M < 1 ) {
+        return;
+    }
+
     if( M <= 1024 ) {
         double *A_copy;
 
@@ -117,11 +113,13 @@ void square_dgemm(const int M,
         free(A_copy);
     } else {
         int bi, bj, bk;
-        const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
         double* A_copy = padded_transpose(A, M);
         double* B_copy = padded_copy(B, M);
         double* C_copy = padded_copy(C, M);
-        const int M_padded = M + ALIGNMENT - M%ALIGNMENT;
+
+        const int M_padded = M + (ALIGNMENT - M%ALIGNMENT) * (M%ALIGNMENT > 0);
+        const int n_blocks = M_padded / BLOCK_SIZE;
+
         for (bi = 0; bi < n_blocks; ++bi) {
             const int i = bi * BLOCK_SIZE;
             for (bj = 0; bj < n_blocks; ++bj) {

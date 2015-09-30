@@ -6,7 +6,5 @@
 
 module load cs5220
 cd $PBS_O_WORKDIR
-./matmul-group21_blocked
 ./matmul-group21
-./matmul-group21_best
 
