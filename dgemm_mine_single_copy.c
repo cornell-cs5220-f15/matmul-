@@ -31,6 +31,66 @@ const char* dgemm_desc =
 #define BLOCK_SIZE ((int) 128)
 #endif
 
+// Helper method for copying data from input matrices into scratchpad
+// with the data from each block laid out in contiguous memory.
+void load_copy(const int lda, const int n_blocks,
+               double *A_copy, double *B_copy,
+               const double *A, const double *B)
+{
+    const int edge_size = lda % BLOCK_SIZE;
+
+    int i, j, k;
+    for (j = 0; j < n_blocks; ++j) {
+        const int is_j_edge = (j == n_blocks - 1);
+        const int K = (is_j_edge && edge_size) ? edge_size : BLOCK_SIZE;
+
+        #pragma simd
+        for (i = 0; i < n_blocks; ++i) {
+            const int is_i_edge = (i == n_blocks - 1);
+            const int M = (is_i_edge && edge_size) ? edge_size : BLOCK_SIZE;
+
+            int offset = (i + j * lda) * BLOCK_SIZE;
+            const double *A_block = A + offset;
+            const double *B_block = B + offset;
+
+            for (k = 0; k < K; ++k) {
+                memcpy(A_copy, A_block, 8 * M);
+                memcpy(B_copy, B_block, 8 * M);
+                A_copy += BLOCK_SIZE; A_block += lda;
+                B_copy += BLOCK_SIZE; B_block += lda;
+            }
+        }
+    }
+}
+
+// Helper method for copying data from scratchpad into output matrix with
+// the data reverted to the original memory layout.
+void store_copy(const int lda, const int n_blocks,
+                double *C, double *C_copy)
+{
+    const int edge_size = lda % BLOCK_SIZE;
+
+    int i, j, k;
+    for (j = 0; j < n_blocks; ++j) {
+        const int is_j_edge = (j == n_blocks - 1);
+        const int K = (is_j_edge && edge_size) ? edge_size : BLOCK_SIZE;
+
+        #pragma simd
+        for (i = 0; i < n_blocks; ++i) {
+            const int is_i_edge = (i == n_blocks - 1);
+            const int M = (is_i_edge && edge_size) ? edge_size : BLOCK_SIZE;
+
+            int offset = (i + j * lda) * BLOCK_SIZE;
+            double *C_block = C + offset;
+
+            for (k = 0; k < K; ++k) {
+                memcpy(C_block, C_copy, 8 * M);
+                C_copy += BLOCK_SIZE; C_block += lda;
+            }
+        }
+    }
+}
+
 /*
   A is M-by-K
   B is K-by-N
@@ -53,6 +113,8 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     int num_wide_ops = (M + 3) / 4; // ceil(M/4)
     for (j = 0; j < N; ++j) {
         for (k = 0; k < K; ++k) {
+//            #pragma simd vectorlength(4) linear(i:1)
+//            #pragma prefetch A
             for (i = 0; i < num_wide_ops; ++i) {
                 // Load partial products in result matrix. We can use a
                 // vector load to efficiently load 4 doubles at once with a
@@ -75,57 +137,55 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     }
 }
 
-void do_block(const int lda,
-              const double *A, const double *B, double *C, double *D,
+void do_block(const int lda, const int n_blocks,
+              const double *A, const double *B, double *C,
               const int i, const int j, const int k)
 {
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
 
-    // Take the blocks we need for this iteration and copy the data into
-    // a contiguous cache-line-aligned scratchpad in memory. Matrices
-    // A/B/C are laid out consecutively in the same scratchpad.
-    double *D_A = D;
-    double *D_B = D + BLOCK_SIZE * BLOCK_SIZE;
-    double *D_C = D + 2 * BLOCK_SIZE * BLOCK_SIZE;
-
-    const double *A_block = A + i + k*lda;
-    const double *B_block = B + k + j*lda;
-          double *C_block = C + i + j*lda;
-
-    // Stripmine columns from the blocks into the scratchpad. Note that
-    // we need to increment by multiples of BLOCK_SIZE for the scratchpad
-    // and multiples of lda for the input matrices every iteration.
-    int idx;
-    for (idx = 0; idx < K; ++idx)
-      memcpy(D_A + idx*BLOCK_SIZE, A_block + idx*lda, 8 * M);
-    if (i == 0)
-      for (idx = 0; idx < N; ++idx)
-        memcpy(D_B + idx*BLOCK_SIZE, B_block + idx*lda, 8 * K);
-    for (idx = 0; idx < N; ++idx)
-      memcpy(D_C + idx*BLOCK_SIZE, C_block + idx*lda, 8 * M);
+    // Data in each block is laid out in contiguous memory so the offset
+    // to (i,j)th block is (i + j * n_blocks) * BLOCK_SIZE * BLOCK_SIZE.
+    // The equation below assumes that the i/j/k arguments are already
+    // multiplied by BLOCK_SIZE in order to handle the boundary
+    // condition calculations above.
+    const double *A_block = A + (i + k*n_blocks) * BLOCK_SIZE;
+    const double *B_block = B + (k + j*n_blocks) * BLOCK_SIZE;
+          double *C_block = C + (i + j*n_blocks) * BLOCK_SIZE;
 
     // Call the computation kernel. The lda argument must be set to
     // BLOCK_SIZE to reflect how the blocks are laid out in the
     // scratchpad.
-    basic_dgemm(BLOCK_SIZE, M, N, K, D_A, D_B, D_C);
-
-    // Copy the results back to the result matrix
-    for (idx = 0; idx < N; ++idx)
-      memcpy(C_block + idx*lda, D_C + idx*BLOCK_SIZE, 8 * M);
+    basic_dgemm(BLOCK_SIZE, M, N, K, A_block, B_block, C_block);
 }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
     // Scratchpad for copying blocks into cache-line-aligned (64B)
-    // memory. We allocate enough memory for three identically sized
-    // blocks.
-    double D[3*BLOCK_SIZE*BLOCK_SIZE] __attribute__((aligned(64)));
-//    posix_memalign((void**)&D, 64, 3 * BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    // memory. Each matrix is re-arranged so that the data in a block is
+    // in contiguous memory.
+
+    const int n_blocks  = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
+    const int copy_size = n_blocks * n_blocks * BLOCK_SIZE * BLOCK_SIZE;
+
+//    double *A_copy, *B_copy, *C_copy;
+//    posix_memalign((void**)&A_copy, 64, copy_size * sizeof(double));
+//    posix_memalign((void**)&B_copy, 64, copy_size * sizeof(double));
+//    posix_memalign((void**)&C_copy, 64, copy_size * sizeof(double));
+    double *D;
+    posix_memalign((void**)&D, 64, 3 * copy_size * sizeof(double));
+    double *A_copy = D;
+    double *B_copy = D + copy_size;
+    double *C_copy = D + 2 * copy_size;
+
+    // Load data from input matrices into scratchpad. We re-arrange the
+    // data once for both input matrices before any computation to
+    // amortize the overhead of the copy. There is no need to copy the
+    // result matrix before any partial products have been computed.
+    load_copy(M, n_blocks, A_copy, B_copy, A, B);
 
     // Divide and conquer computation into blocks
-    const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
     for (bj = 0; bj < n_blocks; ++bj) {
         const int j = bj * BLOCK_SIZE;
@@ -133,9 +193,12 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
             const int k = bk * BLOCK_SIZE;
             for (bi = 0; bi < n_blocks; ++bi) {
                 const int i = bi * BLOCK_SIZE;
-                do_block(M, A, B, C, D, i, j, k);
+                do_block(M, n_blocks, A_copy, B_copy, C_copy, i, j, k);
             }
         }
     }
+
+    // Store data from scratchpad into result matrix
+    store_copy(M, n_blocks, C, C_copy);
 }
 
