@@ -1,8 +1,0 @@
-#!/bin/sh -l
-
-#PBS -N plot-job
-#PBS -j oe
-
-module load cs5220
-cd $PBS_O_WORKDIR
-python plotter.py blocked_8 blocked_16 blocked_32 blocked_64
