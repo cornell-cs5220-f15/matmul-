@@ -6,23 +6,23 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #include <x86intrin.h>
 
 #ifndef L3_BLOCK_SIZE
-#define L3_BLOCK_SIZE ((int) 160)
+#define L3_BLOCK_SIZE ((int) 8)
 #define L3 L3_BLOCK_SIZE
 #endif
 
 #ifndef L2_BLOCK_SIZE
-#define L2_BLOCK_SIZE ((int) 40)
+#define L2_BLOCK_SIZE ((int) 4)
 #define L2 L2_BLOCK_SIZE
 #endif
 
 #ifndef L1_BLOCK_SIZE
-#define L1_BLOCK_SIZE ((int) 4)
+#define L1_BLOCK_SIZE ((int) 2)
 #define L1 L1_BLOCK_SIZE
 #endif
 
 //L0 fits into registers, we have a fast kernel for that part
 #ifndef L0_BLOCK_SIZE
-#define L0_BLOCK_SIZE ((int) 4)
+#define L0_BLOCK_SIZE ((int) 2)
 #define L0 L0_BLOCK_SIZE
 #endif
 
@@ -34,7 +34,6 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #include <stdlib.h>
 #include <stdio.h>
 
-double* printThisAddress;
 /*
   A is M-by-K
   B is K-by-N
@@ -43,36 +42,36 @@ double* printThisAddress;
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
 
-// void MMult4by4VRegAC(int M, const double * restrict A, const double * restrict B, double * restrict C)
-// {
-//   int p;
-//   __m256d a0,b0,b1,b2,b3,c00,c01,c02,c03;
-//   __m256d ab0,ab1,ab2,ab3;
-//   c00 = _mm256_load_pd(C+0);
-//   c01 = _mm256_load_pd(C+M);
-//   c02 = _mm256_load_pd(C+2*M);
-//   c03 = _mm256_load_pd(C+3*M);
-//
-//   for (p = 0; p <M; p++){
-//     a0 = _mm256_load_pd(A+4*p);
-//     b0 = _mm256_broadcast_sd(B+p);
-//     b1 = _mm256_broadcast_sd(B+p+M);
-//     b2 = _mm256_broadcast_sd(B+p+2*M);
-//     b3 = _mm256_broadcast_sd(B+p+3*M);
-//     ab0 = _mm256_mul_pd(a0,b0);
-//     ab1 = _mm256_mul_pd(a0,b1);
-//     ab2 = _mm256_mul_pd(a0,b2);
-//     ab3 = _mm256_mul_pd(a0,b3);
-//     c00 = _mm256_add_pd(c00,ab0);
-//     c01 = _mm256_add_pd(c01,ab1);
-//     c02 = _mm256_add_pd(c02,ab2);
-//     c03 = _mm256_add_pd(c03,ab3);
-//   }
-//   _mm256_store_pd(C+0,c00);
-//   _mm256_store_pd(C+M,c01);
-//   _mm256_store_pd(C+2*M,c02);
-//   _mm256_store_pd(C+3*M,c03);
-// }
+void MMult4by4VRegAC(const double * restrict A, const double * restrict B, double * restrict C)
+{
+  int p;
+  __m256d a0,b0,b1,b2,b3,c00,c01,c02,c03;
+  __m256d ab0,ab1,ab2,ab3;
+  c00 = _mm256_load_pd(C+0);
+  c01 = _mm256_load_pd(C+M);
+  c02 = _mm256_load_pd(C+2*M);
+  c03 = _mm256_load_pd(C+3*M);
+
+  for (p = 0; p <M; p++){
+    a0 = _mm256_load_pd(A+4*p);
+    b0 = _mm256_broadcast_sd(B+p);
+    b1 = _mm256_broadcast_sd(B+p+M);
+    b2 = _mm256_broadcast_sd(B+p+2*M);
+    b3 = _mm256_broadcast_sd(B+p+3*M);
+    ab0 = _mm256_mul_pd(a0,b0);
+    ab1 = _mm256_mul_pd(a0,b1);
+    ab2 = _mm256_mul_pd(a0,b2);
+    ab3 = _mm256_mul_pd(a0,b3);
+    c00 = _mm256_add_pd(c00,ab0);
+    c01 = _mm256_add_pd(c01,ab1);
+    c02 = _mm256_add_pd(c02,ab2);
+    c03 = _mm256_add_pd(c03,ab3);
+  }
+  _mm256_store_pd(C+0,c00);
+  _mm256_store_pd(C+M,c01);
+  _mm256_store_pd(C+2*M,c02);
+  _mm256_store_pd(C+3*M,c03);
+}
 
 
 // read (L1 x L1) matrix from A(i,j) into block_A (assumes col major A)
@@ -167,7 +166,7 @@ void to_contiguous3lvlBlock(const int M,
                         for (int n = 0; n < n1_s; n++){
                             read_to_contiguousA(M, A, Ak + ind_Ak, row_q + m * L1, col_s + n * L1);
                             ind_Ak += L1*L1;
-                            read_to_contiguousB(M, B, Bk + ind_Bk, col_s + n * L1, row_q + m * L1);
+                            read_to_contiguousA(M, B, Bk + ind_Bk, col_s + n * L1, row_q + m * L1);
                             ind_Bk += L1*L1;
                         }
                     }
@@ -218,33 +217,14 @@ void printMatrix(int M, const double* A){
     printf("===========================================================================\n");
 }
 
-// void basic_square_dgemm(const int M,
-//                   const double *A, const double *B, double *C)
-// {
-//     int i, j, k;
-//     for (i = 0; i < M; ++i) {
-//         for (j = 0; j < M; ++j) {
-//             double cij = C[i*M+j];
-//             for (k = 0; k < M; ++k) {
-//                 // if (C + i*M+j == printThisAddress){
-//                 //     printMatrix(2,A);
-//                 //     printf("\tC[0,2]+= %.2f %.2f\n",A[k+M*i], B[j*M+k]);
-//                 // }
-//                 cij += A[k+M*i] * B[j*M+k];
-//             }
-//             C[i*M+j] = cij;
-//         }
-//     }
-// }
-
-void MMult4by4VRegAC(const double* restrict A, const double* restrict B, double* restrict C) {
+void MMult4by4VRegAC_basic(const double* restrict A, const double* restrict B, double* restrict C) {
     int i, j, k;
     // printf("%f", A[0]);
     for (i = 0; i < L0; ++i) {
         for (j = 0; j < L0; ++j) {
             double cij = C[i*L0+j];
             for (k = 0; k < L0; ++k)
-                cij += A[i*L0+k] * B[j*L0+k];
+                cij += A[i*L0+k] * B[k*L0+j];
             C[i*L0+j] = cij;
         }
     }
@@ -340,10 +320,6 @@ void do_block_L3(const double* restrict Ak, const double* restrict Bk, double* r
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C) {
     const int N = (M / L1 + (M%L1? 1 : 0)) * L1;
-    // printf("%d\nA\n",N);
-    // printMatrix(M, A);
-    // printf("B\n");
-    // printMatrix(M, B);
 
     double* Ak = _mm_malloc(N*N*sizeof(double), 32);
     double* Bk = _mm_malloc(N*N*sizeof(double), 32);
