@@ -47,6 +47,8 @@ void square_dgemm(const int M, const double *restrict A, const double *restrict 
 	double* Anew = (double*) malloc(M*M*sizeof(double));
     double* Bnew = (double*) malloc(M*M*sizeof(double));
 	double* Cnew = (double*) malloc(M*M*sizeof(double));
+	// Zero out Cnew
+	memset(Cnew, 0, M*M*sizeof(double));
 
 	int blocki, blockj, irange, jrange, i, j;
 	for (blockj = 0; blockj < n_blocks; ++blockj) {
@@ -57,7 +59,7 @@ void square_dgemm(const int M, const double *restrict A, const double *restrict 
 				for (i = 0; i < irange; ++i) {
 					Anew[blockj*M*BLOCK_SIZE + blocki*BLOCK_SIZE*jrange + i + j*irange] = A[blockj*M*BLOCK_SIZE + j*M + blocki*BLOCK_SIZE +i];
 					Bnew[blockj*M*BLOCK_SIZE + blocki*BLOCK_SIZE*jrange + i + j*irange] = B[blockj*M*BLOCK_SIZE + j*M + blocki*BLOCK_SIZE +i];
-					Cnew[blockj*M*BLOCK_SIZE + blocki*BLOCK_SIZE*jrange + i + j*irange] = C[blockj*M*BLOCK_SIZE + j*M + blocki*BLOCK_SIZE +i];
+					//Cnew[blockj*M*BLOCK_SIZE + blocki*BLOCK_SIZE*jrange + i + j*irange] = C[blockj*M*BLOCK_SIZE + j*M + blocki*BLOCK_SIZE +i];
 				}
 			}
 		}
@@ -66,11 +68,8 @@ void square_dgemm(const int M, const double *restrict A, const double *restrict 
 
     int bi, bj, bk;
 	for (bj = 0; bj < n_blocks; ++bj) {
-		//const int j = bj * BLOCK_SIZE;
 		for (bk = 0; bk < n_blocks; ++bk) {
-			//const int k = bk * BLOCK_SIZE;
 			for (bi = 0; bi < n_blocks; ++bi) {
-				//const int i = bi * BLOCK_SIZE;
                 do_block(M, Anew, Bnew, Cnew, bi, bj, bk);
             }
         }
