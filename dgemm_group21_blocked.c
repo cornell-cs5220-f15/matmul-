@@ -1,13 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+const char* dgemm_desc = "Blocked dgemm with copy optimization with zero padding.";
+
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 32)
 #endif
 
 #define ALIGNMENT ((int) 64)
-
-const char* dgemm_desc = "Basic, three-loop dgemm with copy optimization";
 
 /*
   A, B, and C are all BLOCK_SIZE * BLOCK_SIZE
@@ -83,62 +83,39 @@ double* padded_copy(const double* A, const int M) {
     return A_copy;
 }
 
-void square_dgemm(const int M, 
-                  const double *A, const double *B, double *C)
+void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
-    int i,j,k;
+    int i, j, k;
+    int bi, bj, bk;
     if( M < 1 ) {
         return;
     }
+    double* A_copy = padded_transpose(A, M);
+    double* B_copy = padded_copy(B, M);
+    double* C_copy = padded_copy(C, M);
+    
 
-    if( M <= 1023 ) {
-        double *A_copy;
-
-        A_copy = (double*) malloc( sizeof(double) * M * M );
-        for(i = 0; i<M; i++) {
-            for(j = 0; j<M; j++) {
-                A_copy[i * M + j] = A[j * M + i];
+    const int M_padded = M + (ALIGNMENT - M%ALIGNMENT) * (M%ALIGNMENT > 0);
+    const int n_blocks = M_padded / BLOCK_SIZE;
+    for (bi = 0; bi < n_blocks; ++bi) {
+        const int i = bi * BLOCK_SIZE;
+        for (bj = 0; bj < n_blocks; ++bj) {
+            const int j = bj * BLOCK_SIZE;
+            for (bk = 0; bk < n_blocks; ++bk) {
+                const int k = bk * BLOCK_SIZE;
+                do_block(M_padded, A_copy, B_copy, C_copy, i, j, k);
             }
         }
-            
-        for (j = 0; j < M; ++j) {
-            for (i = 0; i < M; ++i) {
-                double cij = C[j*M+i];
-                for (k = 0; k < M; ++k)
-                    cij += A_copy[i*M+k] * B[j*M+k];
-                C[j*M+i] = cij;
-            }
-        }
-
-        free(A_copy);
-    } else {
-        int bi, bj, bk;
-        double* A_copy = padded_transpose(A, M);
-        double* B_copy = padded_copy(B, M);
-        double* C_copy = padded_copy(C, M);
-
-        const int M_padded = M + (ALIGNMENT - M%ALIGNMENT) * (M%ALIGNMENT > 0);
-        const int n_blocks = M_padded / BLOCK_SIZE;
-
-        for (bi = 0; bi < n_blocks; ++bi) {
-            const int i = bi * BLOCK_SIZE;
-            for (bj = 0; bj < n_blocks; ++bj) {
-                const int j = bj * BLOCK_SIZE;
-                for (bk = 0; bk < n_blocks; ++bk) {
-                    const int k = bk * BLOCK_SIZE;
-                    do_block(M_padded, A_copy, B_copy, C_copy, i, j, k);
-                }
-            }
-        }
-        for(i = 0; i<M; i++) {
-            for(j = 0; j<M; j++) {
-                C[j * M + i] = C_copy[j * M_padded + i];
-            }
-        }
-
-        _mm_free(A_copy);
-        _mm_free(B_copy);
-        _mm_free(C_copy);
     }
+
+    for(i = 0; i<M; i++) {
+        for(j = 0; j<M; j++) {
+            C[j * M + i] = C_copy[j * M_padded + i];
+        }
+    }
+
+    _mm_free(A_copy);
+    _mm_free(B_copy);
+    _mm_free(C_copy);
 }
 

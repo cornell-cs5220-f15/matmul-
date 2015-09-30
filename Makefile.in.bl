@@ -1,13 +1,14 @@
 # Versions to build
-BUILDS= group21_blocked group21 blas mkl
+BUILDS= group21_blocked group21 blas group21_best
 
 # C and Fortran compilers
 CC=icc
 FC=ifort 
 LD=ifort
 #
+# -O3 -fast -opt-prefetch -unroll-aggressive -parallel -openmp -ansi-alias -restrict -xHost
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=2 -qopt-report-file=stdout
+OPTFLAGS = -O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -axCORE-AVX2 -qopt-report-phase=vec -qopt-report=2 -qopt-report-file=stdout -align 
 CFLAGS = -std=gnu99 
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main
