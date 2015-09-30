@@ -14,6 +14,7 @@ BUILDS := mkl $(BUILDS)                     # mkl, basic, ...
 # by uncommenting out the following line and entering in the files you wish to
 # build.
 # BUILD = basic ...
+# BUILD := $(filter-out mkl $(BUILDS))
 
 # C and Fortran compilers
 CC=icc
