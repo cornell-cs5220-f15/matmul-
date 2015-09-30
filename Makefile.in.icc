@@ -7,13 +7,10 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-# Borrowed the -funroll-loops -ftree-vectorize -ipo -xHost -no\
--prec-div -ansi-alias -axCORE-AVX2 options from Robert Chiodi make file need to play around with the different ones though because one of these increased the mflops by almost 2x for the Fortran implementation. Though it is most likely one of the vectorization or unroll-loops options.
-#Have also played around with the -Ot option and -unroll options as well but didn't notice any significant difference
-#The -mtune=core-avx2 and -fast don't appear to have a huge advantage, and the -fast might even cause a slow down. 
-OPTFLAGS = -O3 -funroll-loops -ftree-vectorize -mtune=core-avx2 -ipo -xHost -ansi-alias -axCORE-AVX2 -no-prec-div
+OPTFLAGS = -O3 -axcore-avx2 -march=core-avx2 -unroll-aggressive -m64 -ipo -no-prec-div -ansi-alias
 CFLAGS = -std=gnu99
-FFLAGS =  
+FFLAGS = -D ALIGNED
+#FFLAGS = -ftree-vectorize -axcore-avx2 -mtune=core-avx2 -march=core-avx2
 LDFLAGS = -fopenmp -nofor_main
 
 # Add -DDEBUG_RUN to CPPFLAGS to cut down on the cases.
