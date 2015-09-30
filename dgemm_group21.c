@@ -91,7 +91,7 @@ void square_dgemm(const int M,
         return;
     }
 
-    if( M <= 1024 ) {
+    if( M <= 1023 ) {
         double *A_copy;
 
         A_copy = (double*) malloc( sizeof(double) * M * M );
