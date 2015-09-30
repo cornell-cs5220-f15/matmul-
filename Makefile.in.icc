@@ -7,10 +7,29 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-# -qopt-report=5
 OPTFLAGS = -O3
-EXPERIMENTAL_OPT_FLAGS = -xCORE-AVX2 -fast -ansi-alias -no-prec-div -ipo -qopt-report=5 -unroll8
-PGO_FLAG = # -prof-gen or -prog-use
+
+# Crazy compiler black magic. Tread carefully.
+# https://software.intel.com/sites/default/files/compiler_qrg12.pdf
+EXPERIMENTAL_OPT_FLAGS = \
+	-xCORE-AVX2 \
+	-fast \
+	-no-prec-div \
+	-ipo \
+	-qopt-report=5 \
+	-unroll-aggresive \
+	-opt-prefetch=4 \
+	# -ansi-alias \
+	# -fno-alias \
+	# -parallel \
+	# -align \
+	# -restrict \
+
+# Profile Guided Optimization.
+PGO_FLAG = \
+	# -prof-gen \
+	# -prog-use \
+
 CFLAGS = -std=gnu99
 FFLAGS =
 LDFLAGS = -fopenmp -nofor_main
