@@ -10,11 +10,16 @@ BUILDS := $(subst dgemm_,,$(BUILDS))        # f2c_desc, basic, ...
 BUILDS := $(filter-out f2c_desc, $(BUILDS)) # basic, ...
 BUILDS := mkl $(BUILDS)                     # mkl, basic, ...
 
+# Feel free to comment out any of the following.
+BUILDS := $(filter-out mkl, $(BUILDS))
+BUILDS := $(filter-out blas, $(BUILDS))
+BUILDS := $(filter-out annotated, $(BUILDS))
+BUILDS := $(filter-out compiler, $(BUILDS))
+
 # If you want to only build or run a subset of the build rules, you can do so
 # by uncommenting out the following line and entering in the files you wish to
 # build.
-# BUILD = basic ...
-# BUILD := $(filter-out mkl $(BUILDS))
+# BUILDS = basic ...
 
 # C and Fortran compilers
 CC=icc
