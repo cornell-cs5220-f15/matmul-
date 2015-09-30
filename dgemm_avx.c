@@ -3,21 +3,17 @@
 
 const char* dgemm_desc = "AVX + copy + padded  dgemm.";
 
-#ifndef REG_SIZE
-#define REG_SIZE ((int) 4)
+#ifndef REGISTER_SIZE
+#define REGISTER_SIZE ((int) 4)
 #endif
 
 /*
-  A is M-by-K
-  B is K-by-N
-  C is M-by-N
-
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
-void dgemm_4x4(const int lda, const int M, const int N, const int K,
-                 const double *A, const double *B, double *C)
+void dgemm_4x4(const int lda, const double * restrict A,
+		const double * restrict B, double * restrict C)
 {
-	//A, B, C are pointers to the relative positions
+	//A, B, C are pointers to the relative positions where the blocks begin
 
 	__m256d c_0 = _mm256_load_pd(C + 0);
 	__m256d c_1 = _mm256_load_pd(C + 1*lda);
@@ -31,7 +27,7 @@ void dgemm_4x4(const int lda, const int M, const int N, const int K,
 	//temp variables to store dot products
 	__m256d ctemp_0, ctemp_1, ctemp_2, ctemp_3;
 
-	for (int k = 0; k < K; ++k)	{
+	for (int k = 0; k < lda; ++k)	{
 		a_k = _mm256_load_pd(A + k*4);
 
 		b_0k = _mm256_broadcast_sd(B + k);
@@ -58,14 +54,14 @@ void dgemm_4x4(const int lda, const int M, const int N, const int K,
 }
 
 
-void block_copy(int M, const double* X, int M_REG, double* XA)	{
+void copy_and_pad(const int M, const double* X, const int M_padded, double* X_aligned)	{
 	//copies matrix to a new location with zero padding
-	for (int i = 0; i < M_REG; ++i)	{
-		for (int j = 0; j < M_REG; ++j)	{
+	for (int i = 0; i < M_padded; ++i)	{
+		for (int j = 0; j < M_padded; ++j)	{
 			if ((i < M) && (j < M))	{
-				XA[j + i*M_REG] = X[j + i*M];
+				X_aligned[j + i*M_padded] = X[j + i*M];
 			} else	{
-				XA[j + i*M_REG] = 0;
+				X_aligned[j + i*M_padded] = 0;
 			}
 		}	
 	}
@@ -73,22 +69,22 @@ void block_copy(int M, const double* X, int M_REG, double* XA)	{
 }
 
 
-void reverse_copy(int M, double* X, int M_REG, double* XC)	{
+void copy_unpad(const int M, double* X, const int M_padded, const double* X_aligned)	{
 	for (int i = 0; i < M; ++i)	{
 		for (int j = 0; j < M; ++j)	{
-			X[j + i*M] = XC[j + i*M_REG];
+			X[j + i*M] = X_aligned[j + i*M_padded];
 		}
 	}
 }
 
 
-void tile_copy(int K, int K_REG, int bi, const double* X, int tile_size, double* XC)	{
-	for (int i = 0; i < K_REG; ++i)	{
-		for (int j = 0; j < tile_size; ++j)	{
-			if ((i < K) && (j+bi < K))	{
-				XC[j + i*tile_size] = X[j+bi + i*K];
+void tile_copy_and_pad(const int M, const double* restrict X, const int M_padded, const int X_col_offset, const int tile_width, double* restrict X_tile)	{
+	for (int i = 0; i < M_padded; ++i)	{
+		for (int j = 0; j < tile_width; ++j)	{
+			if ((i < M) && (j+X_col_offset < M))	{
+				X_tile[j + i*tile_width] = X[j+X_col_offset + i*M];
 			} else	{
-				XC[j + i*tile_size] = 0;
+				X_tile[j + i*tile_width] = 0;
 			}
 		}
 	}
@@ -98,37 +94,40 @@ void tile_copy(int K, int K_REG, int bi, const double* X, int tile_size, double*
 void square_dgemm(const int M, const double* A, const double* B, double* C)
 {
 
-	int M_REG = ( M/REG_SIZE + (M%REG_SIZE ? 1 : 0) ) * REG_SIZE;
+	//Round up M to the nearest multiple of the register size
+	const int M_padded = ( M/REGISTER_SIZE + (M%REGISTER_SIZE ? 1 : 0) ) * REGISTER_SIZE;
 
-	int bi, bj;
+	int block_i_offset, block_j_offset;
 
-	//copying into aligned blocks
-	double* Bk = _mm_malloc(M_REG * M_REG * sizeof(double), 32);
-	double* Ck = _mm_malloc(M_REG * M_REG * sizeof(double), 32);
-	double* Ak = _mm_malloc(4 * M_REG * sizeof(double), 32);
+	//Allocate memory for aligned copies
+	double* restrict B_aligned = _mm_malloc(M_padded * M_padded * sizeof(double), 32);
+	double* restrict C_aligned = _mm_malloc(M_padded * M_padded * sizeof(double), 32);
+	double* restrict A_tile = _mm_malloc(4 * M_padded * sizeof(double), 32);
 
-	block_copy(M, B, M_REG, Bk);
-	//block_copy(M, C, M_REG, Ck);
-	memset(Ck, 0, M_REG * M_REG * sizeof(double));
+	//copy B into aligned memory with padding
+	copy_and_pad(M, B, M_padded, B_aligned);
+	memset(C_aligned, 0, M_padded * M_padded * sizeof(double));
 
 
-	for (bi = 0; bi < M_REG; bi += 4)	{
-		//copying (4-by-M) tile into contiguous, aligned memory
-		tile_copy(M, M_REG, bi, A, 4, Ak);
+	for (block_i_offset = 0; block_i_offset < M_padded; block_i_offset += REGISTER_SIZE) {
+		//copy (4-by-M) tile of A into contiguous, aligned memory
+		tile_copy_and_pad(M, A, M_padded, block_i_offset, REGISTER_SIZE, A_tile);
 
-		for (bj = 0; bj < M_REG; bj += 4)	{
-			dgemm_4x4(M_REG, M_REG, M_REG, M_REG, Ak, Bk + bj*M_REG, Ck + bi + bj*M_REG);
+		//For each long tile, compute the product with B in 4-by-4 blocks
+		for (block_j_offset = 0; block_j_offset < M_padded; block_j_offset += REGISTER_SIZE) {
+			dgemm_4x4(M_padded, A_tile, B_aligned + block_j_offset*M_padded, 
+					C_aligned + block_i_offset + block_j_offset*M_padded);
 
 		}
 	
 	}
 
-	//copy back into original matrix
-	reverse_copy(M, C, M_REG, Ck);
+	//copy output back into original matrix
+	copy_unpad(M, C, M_padded, C_aligned);
 
-	_mm_free(Ak);
-	_mm_free(Bk);
-	_mm_free(Ck);
+	_mm_free(A_tile);
+	_mm_free(B_aligned);
+	_mm_free(C_aligned);
 
 }
 
