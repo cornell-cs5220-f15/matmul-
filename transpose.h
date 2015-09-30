@@ -28,4 +28,16 @@ inline double *rm_transpose(const double *A,
     return transposed;
 }
 
+inline void *cm_transpose_into(const double *A,
+                               const int lN, const int lM,
+                               const int N,  const int M,
+                               double *A_,
+                               const int A_N, const int A_M) {
+    for (int n = 0; n < N; ++n) {
+        for (int m = 0; m < M; ++m) {
+            A_[rm(A_N, A_M, n, m)] = A[cm(lN, lM, n, m)];
+        }
+    }
+}
+
 #endif // __TRANSPOSE_H__
