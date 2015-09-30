@@ -76,11 +76,13 @@ void square_dgemm(const int M,
             const int k = bk * BLOCK_SIZE;
             const int Kblock = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
             // Now copy A into A_
+            memset(A_, 0, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
             cm_transpose_into(&A[cm(M, M, i, k)], M, M, Mblock, Kblock, A_, BLOCK_SIZE, BLOCK_SIZE);
             for (bj = 0; bj < n_blocks; ++bj) {
                 const int j = bj * BLOCK_SIZE;
                 do_block(M, A_, B, C, i, j, k);
             }
+
         }
     }
 }
