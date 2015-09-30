@@ -37,7 +37,7 @@ extern void square_dgemm();
   You may want to modify these to speed debugging...
 */
 #define MIN_RUNS 4
-/* #define MIN_SECS 1.0 */
+//#define MIN_SECS 1.0
 #define MIN_SECS 0.25
 
 /*
@@ -233,7 +233,7 @@ int main(int argc, char** argv)
     double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
-
+    
     matrix_init(A);
     matrix_init(B);
 

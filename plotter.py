@@ -1,4 +1,4 @@
-#!/share/apps/python/anaconda/bin/python
+#!/Users/rmc298/anaconda/lib/python2.7/site-packages
 
 
 import sys

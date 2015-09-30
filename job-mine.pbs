@@ -1,5 +1,7 @@
 #!/bin/sh -l
 
+
+#PBS -l nodes=en-cs-totient-06.coecis.cornell.edu:ppn=24
 #PBS -l walltime=0:30:00
 #PBS -N matmul-mine
 #PBS -j oe
