@@ -20,6 +20,8 @@ BUILDS := $(filter-out compiler, $(BUILDS))
 # by uncommenting out the following line and entering in the files you wish to
 # build.
 # BUILDS = basic ...
+# BUILDS = $(shell echo padded_blocked_{8,16,32,64,128,256,512,1024})
+# BUILDS = $(shell echo big_blocked_{8,16,32,64,128,256,512,1024})
 
 # C and Fortran compilers
 CC=icc
