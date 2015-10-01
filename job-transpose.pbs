@@ -1,0 +1,10 @@
+#!/bin/sh -l
+
+#PBS -l walltime=0:05:00
+#PBS -N matmul-transpose
+#PBS -j oe
+
+module load cs5220
+cd $PBS_O_WORKDIR
+./matmul-transpose
+

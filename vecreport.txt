@@ -1,0 +1,154 @@
+icc -c -std=gnu99  -O3 -fast -ftree-vectorize -opt-prefetch -unroll-aggressive -ansi-alias -restrict -openmp -xCORE-AVX2 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout "-DCOMPILER=\"icc\"" "-DFLAGS=\"-O3 -fast -ftree-vectorize -opt-prefetch -unroll-aggressive -ansi-alias -restrict -openmp -xCORE-AVX2 -qopt-report-phase=vec -qopt-report=5 -qopt-report-file=stdout\"" dgemm_final.c
+ifort -o matmul-final matmul.o dgemm_final.o -fopenmp -nofor_main -lm -lirng
+
+Begin optimization report for: square_dgemm(const int, const double *, const double *, double *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_final.c(86,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_final.c(87,9)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_final.c(91,13)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at dgemm_final.c(92,17)
+         <Peeled>
+         LOOP END
+
+         LOOP BEGIN at dgemm_final.c(92,17)
+            remark #15389: vectorization support: reference CA has unaligned access   [ dgemm_final.c(95,21) ]
+            remark #15388: vectorization support: reference CB has aligned access   [ dgemm_final.c(96,21) ]
+            remark #15389: vectorization support: reference CA has unaligned access   [ dgemm_final.c(100,25) ]
+            remark #15388: vectorization support: reference CB has aligned access   [ dgemm_final.c(104,25) ]
+            remark #15389: vectorization support: reference B has unaligned access   [ dgemm_final.c(104,25) ]
+            remark #15389: vectorization support: reference CC has unaligned access   [ dgemm_final.c(106,21) ]
+            remark #15381: vectorization support: unaligned access used inside loop body
+            remark #15415: vectorization support: gather was generated for the variable A: masked, strided by non-constant value   [ dgemm_final.c(100,42) ]
+            remark #15399: vectorization support: unroll factor set to 2
+            remark #15300: LOOP WAS VECTORIZED
+            remark #15442: entire loop may be executed in remainder
+            remark #15449: unmasked aligned unit stride stores: 1 
+            remark #15451: unmasked unaligned unit stride stores: 2 
+            remark #15452: unmasked strided loads: 1 
+            remark #15455: masked aligned unit stride stores: 1 
+            remark #15456: masked unaligned unit stride loads: 1 
+            remark #15457: masked unaligned unit stride stores: 1 
+            remark #15475: --- begin vector loop cost summary ---
+            remark #15476: scalar loop cost: 43 
+            remark #15477: vector loop cost: 23.500 
+            remark #15478: estimated potential speedup: 1.630 
+            remark #15479: lightweight vector operations: 30 
+            remark #15480: medium-overhead vector operations: 2 
+            remark #15481: heavy-overhead vector operations: 1 
+            remark #15488: --- end vector loop cost summary ---
+         LOOP END
+
+         LOOP BEGIN at dgemm_final.c(92,17)
+         <Remainder>
+         LOOP END
+
+         LOOP BEGIN at dgemm_final.c(92,17)
+         <Peeled>
+         LOOP END
+
+         LOOP BEGIN at dgemm_final.c(92,17)
+            remark #15389: vectorization support: reference CA has unaligned access   [ dgemm_final.c(95,21) ]
+            remark #15388: vectorization support: reference CB has aligned access   [ dgemm_final.c(96,21) ]
+            remark #15388: vectorization support: reference CB has aligned access   [ dgemm_final.c(104,25) ]
+            remark #15389: vectorization support: reference B has unaligned access   [ dgemm_final.c(104,25) ]
+            remark #15389: vectorization support: reference CC has unaligned access   [ dgemm_final.c(106,21) ]
+            remark #15381: vectorization support: unaligned access used inside loop body
+            remark #15399: vectorization support: unroll factor set to 2
+            remark #15300: LOOP WAS VECTORIZED
+            remark #15442: entire loop may be executed in remainder
+            remark #15449: unmasked aligned unit stride stores: 1 
+            remark #15451: unmasked unaligned unit stride stores: 2 
+            remark #15455: masked aligned unit stride stores: 1 
+            remark #15456: masked unaligned unit stride loads: 1 
+            remark #15475: --- begin vector loop cost summary ---
+            remark #15476: scalar loop cost: 28 
+            remark #15477: vector loop cost: 6.370 
+            remark #15478: estimated potential speedup: 2.970 
+            remark #15479: lightweight vector operations: 21 
+            remark #15480: medium-overhead vector operations: 1 
+            remark #15481: heavy-overhead vector operations: 1 
+            remark #15488: --- end vector loop cost summary ---
+         LOOP END
+
+         LOOP BEGIN at dgemm_final.c(92,17)
+         <Remainder>
+            remark #15389: vectorization support: reference CA has unaligned access   [ dgemm_final.c(95,21) ]
+            remark #15389: vectorization support: reference CB has unaligned access   [ dgemm_final.c(96,21) ]
+            remark #15389: vectorization support: reference CB has unaligned access   [ dgemm_final.c(104,25) ]
+            remark #15389: vectorization support: reference B has unaligned access   [ dgemm_final.c(104,25) ]
+            remark #15389: vectorization support: reference CC has unaligned access   [ dgemm_final.c(106,21) ]
+            remark #15381: vectorization support: unaligned access used inside loop body
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_final.c(113,5)
+   remark #15344: loop was not vectorized: vector dependence prevents vectorization
+   remark #15346: vector dependence: assumed FLOW dependence between mc.4943 line 59 and mc.4943 line 63
+   remark #15346: vector dependence: assumed ANTI dependence between mc.4943 line 63 and mc.4943 line 59
+
+   LOOP BEGIN at dgemm_final.c(114,9)
+      remark #15344: loop was not vectorized: vector dependence prevents vectorization
+      remark #15346: vector dependence: assumed FLOW dependence between mc.4943 line 59 and mc.4943 line 63
+      remark #15346: vector dependence: assumed ANTI dependence between mc.4943 line 63 and mc.4943 line 59
+
+      LOOP BEGIN at dgemm_final.c(115,13)
+         remark #15344: loop was not vectorized: vector dependence prevents vectorization
+         remark #15346: vector dependence: assumed FLOW dependence between mc.4943 line 59 and mc.4943 line 63
+         remark #15346: vector dependence: assumed ANTI dependence between mc.4943 line 63 and mc.4943 line 59
+
+         LOOP BEGIN at dgemm_final.c(18,5) inlined into dgemm_final.c(118,17)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization
+            remark #15346: vector dependence: assumed FLOW dependence between mc.4943 line 59 and mc.4943 line 63
+            remark #15346: vector dependence: assumed ANTI dependence between mc.4943 line 63 and mc.4943 line 59
+
+            LOOP BEGIN at dgemm_final.c(39,9) inlined into dgemm_final.c(118,17)
+               remark #15344: loop was not vectorized: vector dependence prevents vectorization
+               remark #15346: vector dependence: assumed FLOW dependence between mc.4943 line 59 and mc.4943 line 63
+               remark #15346: vector dependence: assumed ANTI dependence between mc.4943 line 63 and mc.4943 line 59
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_final.c(128,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_final.c(129,9)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_final.c(133,13)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at dgemm_final.c(134,17)
+            remark #15389: vectorization support: reference C has unaligned access   [ dgemm_final.c(138,25) ]
+            remark #15389: vectorization support: reference CC has unaligned access   [ dgemm_final.c(138,25) ]
+            remark #15381: vectorization support: unaligned access used inside loop body
+            remark #15399: vectorization support: unroll factor set to 2
+            remark #15300: LOOP WAS VECTORIZED
+            remark #15456: masked unaligned unit stride loads: 1 
+            remark #15457: masked unaligned unit stride stores: 1 
+            remark #15475: --- begin vector loop cost summary ---
+            remark #15476: scalar loop cost: 15 
+            remark #15477: vector loop cost: 3.370 
+            remark #15478: estimated potential speedup: 4.220 
+            remark #15479: lightweight vector operations: 13 
+            remark #15481: heavy-overhead vector operations: 1 
+            remark #15488: --- end vector loop cost summary ---
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+rm dgemm_final.o
