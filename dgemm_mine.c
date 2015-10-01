@@ -71,9 +71,9 @@ void square_dgemm(const int lda,
 
     // The working arrays for copy optimization
     // All 3 should fit into L2 cache!!
-    double A_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
-    double B_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
-    double C_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
+    static double A_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
+    static double B_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
+    static double C_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
 
     const int n_blocks = lda / BLOCK_SIZE + (lda % BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
