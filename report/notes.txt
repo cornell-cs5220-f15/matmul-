@@ -10,3 +10,12 @@ Use restrict keyword properly
 
 Programming 512 bit vector or use ftree-vectorize
 march for cluster?
+
+Describe compiler flags in detail
+    -O3 -fast -opt-prefetch -unroll-aggressive -parallel -openmp -ansi-alias -restrict -xHost
+
+reports looked at:
+    vec
+    par
+    ipo
+    hlo

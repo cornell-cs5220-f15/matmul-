@@ -4,6 +4,7 @@
 \usepackage{graphicx}
 \usepackage{float}
 \usepackage{url}
+\graphicspath{{./times/}}
 \topmargin0.0cm
 \headheight0.0cm
 \headsep0.0cm
@@ -11,16 +12,6 @@
 \textheight23.0cm
 \textwidth16.5cm
 \footskip1.0cm
-\theoremstyle{plain}
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}
-\newtheorem{lemma}{Lemma}
-\newtheorem{proposition}{Proposition}
-\newtheorem*{surfacecor}{Corollary 1}
-\newtheorem{conjecture}{Conjecture} 
-\newtheorem{question}{Question} 
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
 
 \begin{document}
 \title{CS 5220\\ Project 1 - Matrix Multiplication}
@@ -28,25 +19,40 @@
 \maketitle
 
 \section{Introduction}
-\textbf{D}ouble Precision \textbf{GE}neral \textbf{M}atrix \textbf{M}ultiplication (DGEMM) is an important operation in problems in scientific and engineering computing applications. DGEMM takes 2 dense square double precision matrices $A$ and $B$ stored in column major format and returns $A \times B$ where '$\times$' represents matrix multiplication. This document describes an optimized DGEMM implementation and details the design decisions used to improve performance. 
+\textbf{D}ouble Precision \textbf{GE}neral \textbf{M}atrix \textbf{M}ultiplication (DGEMM) is an important operation in problems in scientific and engineering computing applications. DGEMM takes 2 dense square double precision matrices $A$ and $B$ stored in column major format and returns,
+	\begin{equation} 
+		A \times B = C
+	\end{equation}
+	
+	where '$\times$' represents matrix multiplication. This document describes an optimized DGEMM implementation and details the design decisions used to improve performance. 
 
 \section{Implementation Overview}
-
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.6]{growth_final.pdf}
 \caption{Performance comparison: Intel MKL, our implementation and the naive implementation}
 \end{figure}
+\newpage
+Our DGEMM implementation has 2 distinct modes of operation. On square matrices with leading dimension $<$ \texttt{BLOCK\_THRESHOLD}, our DGEMM uses tight loops with copy optimization. (Section \ref{sec:copy_opt}). \texttt{BLOCK\_THRESHOLD} was picked to be 1000 elements. The L2 cache of the  Intel Xeon E5-2620 v3 processor is 15MB and we are able to fit both $A$ and $B$ in the cache. \\
+
+On matrices with the leading dimension $>$ \texttt{BLOCK\_THRESHOLD}, we switch to a blocked matrix multiplication. Each block has $32 \times 32$ elements. Prior to blocking, the matrices we perform copy optimization on $A$ and transpose and copy over data to a 64 byte aligned block obtained by Intel's \texttt{mm\_malloc}. Furthermore, we also copy over data from $B$ to an aligned block and create an aligned stored area for $C$. The newly allocation dynamic memory uses zero padding so that all block multiplication is similar. (Section \ref{sec:block}) \\
+
+On each block, we perform the naive matrix multiplication using tight loops. To make use of the aligned data, we provide hints to the compiler by adding the $\texttt{\_\_assume\_aligned}$ clause prior to the loop using the matrix data. \cite{vectorization} Furthermore, since $A$ is transposed due to copy optimization, the innermost loop of the block multiplication is performed with stride 1. 
+
 
 
 \newpage
 \section{Design Decisions}
+\subsection{Compiler Flags}\label{sec:comp_flags}
+\subsection{Copy Optimization}\label{sec:copy_opt}
+\subsection{Padded Blocking}\label{sec:block}
+\subsection{Memory Alignment}\label{sec:align}
 
 \newpage
 \section{Steps that did not work}
 
 \newpage
-\section{Previous Optimization Attempts}
+\section{Optimization Experiments}
 \subsection{Block Multiplication with Multiple Block Sizes}
 \subsubsection{Approach}
 Working off of \texttt{dgemm\_blocked.c}, we tried different block sizes to examine the performance changes. 
