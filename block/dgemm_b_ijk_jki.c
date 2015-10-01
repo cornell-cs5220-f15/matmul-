@@ -12,16 +12,16 @@ const char* dgemm_desc = "Simple blocked dgemm.";
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
 void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double *a, const double *b, double *C)
+                 const double *A, const double *B, double *C)
 {
   int i, j, k;
-  for (i = 0; i < M; ++i) {
-    for (j = 0; j < N; ++j) {
-      double cij = C[j*lda+i];
-      for (k = 0; k < K; ++k) {
-	cij += a[k*M+i] * b[j*K+k];
+  for (j = 0; j < N; ++j) {
+    for (k = 0; k < K; ++k) {
+      for (i = 0; i < M; ++i) {
+	double cij = C[j*lda+i];
+	cij += A[k*lda+i] * B[j*lda+k];
+	C[j*lda+i] = cij;
       }
-      C[j*lda+i] = cij;
     }
   }
 }
@@ -33,24 +33,8 @@ void do_block(const int lda,
   const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
   const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
   const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-      
-  double a[M * K];
-  double b[K * N];
-
-  for (int t = 0; t < M; ++t) {
-    for (int s = 0; s < K; ++s) {
-      a[t + s * M] = A[i + t + (k + s) * lda];
-    } 
-  }
-
-  for (int t = 0; t < K; ++t) {
-    for (int s = 0; s < N; ++s) {
-      b[t + s * K] = B[k + t + (j + s) * lda];
-    } 
-  }
-
   basic_dgemm(lda, M, N, K,
-	      a, b, C + i + j*lda);
+	      A + i + k*lda, B + k + j*lda, C + i + j*lda);
 }
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
