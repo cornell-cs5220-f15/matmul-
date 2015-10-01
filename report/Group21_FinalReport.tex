@@ -37,13 +37,35 @@ Our DGEMM implementation has 2 distinct modes of operation. On square matrices w
 
 On matrices with the leading dimension $>$ \texttt{BLOCK\_THRESHOLD}, we switch to a blocked matrix multiplication. Each block has $32 \times 32$ elements. Prior to blocking, the matrices we perform copy optimization on $A$ and transpose and copy over data to a 64 byte aligned block obtained by Intel's \texttt{mm\_malloc}. Furthermore, we also copy over data from $B$ to an aligned block and create an aligned stored area for $C$. The newly allocation dynamic memory uses zero padding so that all block multiplication is similar. (Section \ref{sec:block}) \\
 
-On each block, we perform the naive matrix multiplication using tight loops. To make use of the aligned data, we provide hints to the compiler by adding the $\texttt{\_\_assume\_aligned}$ clause prior to the loop using the matrix data. \cite{vectorization} Furthermore, since $A$ is transposed due to copy optimization, the innermost loop of the block multiplication is performed with stride 1. 
+On each block, we perform the naive matrix multiplication using tight loops. To make use of the aligned data, we provide hints to the compiler by adding the $\texttt{\_\_assume\_aligned}$ clause prior to the loop using the matrix data. \cite{vectorization} Furthermore, since $A$ is transposed due to copy optimization, the innermost loop of the block multiplication is performed with stride 1. \\
 
+The compiler flags play a major part in improving the DGEMM routine performance. The flags used in the final implementation are \texttt{-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict}. The makefile used is $\texttt{Makefile.in.icc}$. The design decisions of each compiler flag is described in Section \ref{sec:comp_flags}.
 
-
-\newpage
 \section{Design Decisions}
 \subsection{Compiler Flags}\label{sec:comp_flags}
+
+The final implementation uses the flags, \texttt{-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -axCORE-AVX2}.
+\subsubsection{Optimization Level 3}
+O3 optimization performs aggressive loop transformations such as Fusion, Block-Unroll-and-Jam, and collapsing IF statements. According to the Intel Developer zone, \cite{stepbystep} O3 is recommended for for applications that have loops that heavily use floating-point calculations and process large data sets.
+
+\subsubsection{Unrolling loops}
+The core matrix multiplication kernel performs a dot product with a stride of 1. This behavior is ideal for loop unrolling and is turned on by adding \texttt{-funroll-loops}. 
+
+\subsubsection{Interprocedural Optimization}
+The compiler flag \texttt{-ipo} turns on interprocedural optimization to improve performance of the program by letting the compiler analyze the entire program. \cite{ipo}
+
+\subsubsection{Processor Specification}
+The processor dispatch option \texttt{-axCORE-AVX2} enables the program to choose the most suitable code path for the Intel Xeon E5-2620 v3 processor. The \texttt{-xCORE-AVX2} flag enables processor specific code generation. \cite{comp_opt}
+
+
+\subsubsection{Precise Division}
+Using the \texttt{-no-prec-div} flag gives slightly less accurate results than full IEEE division. Compiler converts floating point division operations to multiplication by a reciprocal, improving multiplication performance. We also use the \texttt{-fast} flag which may result in slight reduction of accuracy but improvement in performance. 
+
+\subsubsection{Aliasing}
+
+Copy optimization on $A$ in the small matrix case and aligned dynamic memory allocation in the blocked case guarantees that no two pointers in a function point to the same memory location. By using the \texttt{-restrict} flag, we can tell the compiler to prevent alias checking during runtime. \cite{opt} We also use the \texttt{-ansi-alias} flag to tell the compiler that the program adheres to ISO C Standard aliasability rules.
+
+
 \subsection{Copy Optimization}\label{sec:copy_opt}
 \subsection{Padded Blocking}\label{sec:block}
 \subsection{Memory Alignment}\label{sec:align}
@@ -169,7 +191,7 @@ Memory Management for Optimal Performance on Intel\textsuperscript{\textregister
 \bibitem{manpages} 
 Manpage of ICC. (n.d.). Retrieved September 30, 2015, from \url{http://scv.bu.edu/computation/bladecenter/manpages/icc.html}
  
-\bibitem{opt} 
+\bibitem{opt_q} 
 Quick-Reference Guide to Optimization with Intel\textsuperscript{\textregistered} Compilers. (n.d.). Retrieved September 30, 2015, from \url{https://software.intel.com/sites/default/files/compiler_qrg12.pdf}
 
 \bibitem{reports}
@@ -180,6 +202,12 @@ Improving Performance with Interprocedural Optimization. (n.d.). Retrieved Septe
 
 \bibitem{stepbystep}
 Step by Step Performance Optimization with Intel\textsuperscript{\textregistered} C Compiler. (n.d.). Retrieved September 30, 2015, from \url{https://software.intel.com/en-us/articles/step-by-step-optimizing-with-intel-c-compiler}
+
+\bibitem{opt}
+A Guide to Vectorization with Intel\textsuperscript{\textregistered} C Compilers. (n.d.). Retrieved October 1, 2015, from \url{https://d3f8ykwhia686p.cloudfront.net/1live/intel/CompilerAutovectorizationGuide.pdf}
+
+\bibitem{comp_opt}
+Intel\textsuperscript{\textregistered} Compiler Options for Intel\textsuperscript{\textregistered} SSE and Intel\textsuperscript{\textregistered} AVX generation and processor-specific optimizations. (n.d.). Retrieved October 1, 2015, from \url{https://software.intel.com/en-us/articles/performance-tools-for-software-developers-intel-compiler-options-for-sse-gene\\ration-and-processor-specific-optimizations}
 
 
 
