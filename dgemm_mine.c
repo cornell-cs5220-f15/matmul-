@@ -38,8 +38,10 @@ const char* dgemm_desc =
 
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
+inline __attribute__((always_inline))
 void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double *A, const double *B, double *C)
+                 const double *restrict A, const double *restrict B,
+                 double *restrict C)
 {
     // Use SIMD extensions to parallelize computation across multiple
     // elements within a column in matrix A with the same element in
@@ -75,8 +77,10 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     }
 }
 
+inline __attribute__((always_inline))
 void do_block(const int lda,
-              const double *A, const double *B, double *C, double *D,
+              const double *restrict A, const double *restrict B,
+              double *restrict C, double *restrict D,
               const int i, const int j, const int k)
 {
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
@@ -116,7 +120,8 @@ void do_block(const int lda,
       memcpy(C_block + idx*lda, D_C + idx*BLOCK_SIZE, 8 * M);
 }
 
-void square_dgemm(const int M, const double *A, const double *B, double *C)
+void square_dgemm(const int M, const double *restrict A, const double *restrict B,
+                  double *restrict C)
 {
     // Scratchpad for copying blocks into cache-line-aligned (64B)
     // memory. We allocate enough memory for three identically sized
