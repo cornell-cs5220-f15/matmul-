@@ -43,32 +43,63 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
 {
   int p;
-  __m256d a0,b0,b1,b2,b3,c00,c01,c02,c03;
-  __m256d ab0,ab1,ab2,ab3;
-  c00 = _mm256_load_pd(C+0);
-  c01 = _mm256_load_pd(C+L0);
-  c02 = _mm256_load_pd(C+2*L0);
-  c03 = _mm256_load_pd(C+3*L0);
+  __m256d a0, a1;
+  __m256d b0, b1, b2, b3, b4, b5, b6, b7;
+  __m256d c0,c1,c2,c3;
+  c0 = _mm256_load_pd(C+0);
+  c1 = _mm256_load_pd(C+4);
+  c2 = _mm256_load_pd(C+8);
+  c3 = _mm256_load_pd(C+12);
 
-  for (p = 0; p < L0; p++){
-    a0 = _mm256_load_pd(A+4*p);
-    b0 = _mm256_broadcast_sd(B+p);
-    b1 = _mm256_broadcast_sd(B+p+L0);
-    b2 = _mm256_broadcast_sd(B+p+2*L0);
-    b3 = _mm256_broadcast_sd(B+p+3*L0);
-    ab0 = _mm256_mul_pd(a0,b0);
-    ab1 = _mm256_mul_pd(a0,b1);
-    ab2 = _mm256_mul_pd(a0,b2);
-    ab3 = _mm256_mul_pd(a0,b3);
-    c00 = _mm256_add_pd(c00,ab0);
-    c01 = _mm256_add_pd(c01,ab1);
-    c02 = _mm256_add_pd(c02,ab2);
-    c03 = _mm256_add_pd(c03,ab3);
+{
+    a0 = _mm256_load_pd(A);
+    b0 = _mm256_broadcast_sd(B);
+    b1 = _mm256_broadcast_sd(B+4);
+    b2 = _mm256_broadcast_sd(B+8);
+    b3 = _mm256_broadcast_sd(B+12);
+
+    c0 = _mm256_fmadd_pd(a0,b0,c0);
+    c1 = _mm256_fmadd_pd(a0,b1,c1);
+    c2 = _mm256_fmadd_pd(a0,b2,c2);
+    c3 = _mm256_fmadd_pd(a0,b3,c3);
+
+    a1 = _mm256_load_pd(A+4);
+    b4 = _mm256_broadcast_sd(B+1);
+    b5 = _mm256_broadcast_sd(B+5);
+    b6 = _mm256_broadcast_sd(B+9);
+    b7 = _mm256_broadcast_sd(B+13);
+
+    c0 = _mm256_fmadd_pd(a1,b4,c0);
+    c1 = _mm256_fmadd_pd(a1,b5,c1);
+    c2 = _mm256_fmadd_pd(a1,b6,c2);
+    c3 = _mm256_fmadd_pd(a1,b7,c3);
+
+    a0 = _mm256_load_pd(A+8);
+    b0 = _mm256_broadcast_sd(B+2);
+    b1 = _mm256_broadcast_sd(B+6);
+    b2 = _mm256_broadcast_sd(B+10);
+    b3 = _mm256_broadcast_sd(B+14);
+
+    c0 = _mm256_fmadd_pd(a0,b0,c0);
+    c1 = _mm256_fmadd_pd(a0,b1,c1);
+    c2 = _mm256_fmadd_pd(a0,b2,c2);
+    c3 = _mm256_fmadd_pd(a0,b3,c3);
+
+    a1 = _mm256_load_pd(A+12);
+    b4 = _mm256_broadcast_sd(B+3);
+    b5 = _mm256_broadcast_sd(B+7);
+    b6 = _mm256_broadcast_sd(B+11);
+    b7 = _mm256_broadcast_sd(B+15);
+
+    c0 = _mm256_fmadd_pd(a1,b4,c0);
+    c1 = _mm256_fmadd_pd(a1,b5,c1);
+    c2 = _mm256_fmadd_pd(a1,b6,c2);
+    c3 = _mm256_fmadd_pd(a1,b7,c3);
   }
-  _mm256_store_pd(C+0,c00);
-  _mm256_store_pd(C+L0,c01);
-  _mm256_store_pd(C+2*L0,c02);
-  _mm256_store_pd(C+3*L0,c03);
+  _mm256_store_pd(C,c0);
+  _mm256_store_pd(C+4,c1);
+  _mm256_store_pd(C+8,c2);
+  _mm256_store_pd(C+12,c3);
 }
 
 
