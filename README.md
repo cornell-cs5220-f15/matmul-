@@ -29,6 +29,10 @@ Lastly, we have written numerous experimental kernels along the way that have
 been deleted, augmented, or transformed over time. Feel free to explore our
 commit history to see the progression of our kernels.
 
+## Report ##
+Our midpoint progress report can be found in the [`checkin`](checkin).
+Similarly, our final report can be found in the [`report`](directory).
+
 ## Reproducing Results ##
 To build, run, and plot all the kernels in this directory, first log into the
 totient cluster. It's important to note that our kernels have only been tuned
