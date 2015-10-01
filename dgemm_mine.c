@@ -86,7 +86,6 @@ void square_dgemm(const int lda,
             const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
 
             memset(C_temp, 0, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-            realloc_block(lda, C + i + j*lda, C_temp, M, N);
 
             for (bk = 0; bk < n_blocks; ++bk) {
                 const int k = bk * BLOCK_SIZE;
