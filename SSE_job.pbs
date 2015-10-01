@@ -1,0 +1,8 @@
+#!/bin/sh -l
+
+#PBS -N SSE_job
+#PBS -j oe
+
+module load cs5220
+cd ~/CS5220/matmul_sheroze/matmul- 
+./matmul-blocked_SSE
