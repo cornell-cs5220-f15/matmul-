@@ -9,13 +9,13 @@ matrix A with a stride of $M$ where $M$ is the number of rows and columns of
 $A$ and $B$. This non-unit stride vastly reduced how effectively we could
 operate on matrix $A$. First, the large stride has poor spatial locality which
 can lead to poor caching. Similarly, operating on non-contiguous elements of
-$A$ makes vectorization hard or impossible.
+$A$ makes vectorization hard or even impossible.
 
 To solve this problem, we used a copy optimization in which we simply
-transposed $A$ to a new array in row-major order. This allowed us to access
+transposed $A$ into a new array in row-major order. This allowed us to access
 both $A$ and $B$ in unit stride in the innermost loop.
 
-Our use of copy optimizations was the most successful approach that we found
+Our use of copy optimizations was one of the most effective approaches we found
 for increasing performance. This alone boosted our performance above all other
 implementations except for MKL and OpenBLAS, as shown in \figref{copy}.
 

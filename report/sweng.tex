@@ -15,7 +15,7 @@ that indirectly has a large impact on the quality of kernels written.
 \subsection{Helper Functions and Unit Tests}
 Matrix multiplications involve a lot of low-level pointer arithmetic, and in a
 programming language like C, erroneous pointer arithmetic or invalid memory
-access can be \emph{very difficult} to debug. Moreover, matrix multiplication
+access can be \emph{very difficult} to debug. Moreover, optimized matrix multiplication
 involves operations on a combination of row-major and column-major matrices
 using various complex access patterns involving many nested layers of blocking
 transposing and copying which greatly increase the likelihood of incorrect
@@ -47,7 +47,7 @@ common errors that take a significant amount of time to debug allowing us to
 spend more time focused on development and optimization.
 
 \paragraph{Improved Build System}
-In order to create, build, and run a kernel using the original matmul build
+In order to create, build, and run a kernel using the original \ttt{matmul-} build
 system, one has to write the kernel's code, modify a Makefile to include the
 new kernel, and create a portable patch script to run the kernel on the
 cluster. Given a small number of kernels, this system is adequate. However,
@@ -60,7 +60,7 @@ leading to less informed optimization decisions and unexplored possibilities.
 
 To eliminate this overhead, we first enhanced the Makefiles. We added a bit of
 Makefile logic to eliminate the need to update a Makefile with the name of
-every kernel to build. Instead, the makefile automatically detects all the
+every kernel to build. Instead, the Makefile automatically detects all the
 files of the form \ttt{dgemm\_*.[cf]} and targets them for building and
 running. Moreover, we created a single portable batch script that runs the
 kernel specified as a command line argument. We then modified our Makefile to
