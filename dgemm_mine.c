@@ -177,7 +177,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
 	// change indexing
 	row_to_block(M,nblock, A, bA);
-	row_to_block(M,nblock, B, bB);
+	row_to_block_transpose(M,nblock, B, bB);
 	row_to_block(M,nblock, C, bC);
 
 
