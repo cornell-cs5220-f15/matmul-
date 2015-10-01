@@ -27,15 +27,20 @@
 \author{Sheroze Sheriffdeen(mss385)\\ Weici Hu(wh343)\\  Qinyu Wang(qw78)}
 \maketitle
 
-\section{Overview}
+\section{Introduction}
+\textbf{D}ouble Precision \textbf{GE}neral \textbf{M}atrix \textbf{M}ultiplication (DGEMM) is an important operation in problems in scientific and engineering computing applications. DGEMM takes 2 dense square double precision matrices $A$ and $B$ stored in column major format and returns $A \times B$ where '$\times$' represents matrix multiplication. This document describes an optimized DGEMM implementation and details the design decisions used to improve performance. 
+
+\section{Implementation Overview}
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{growth_final.pdf}
+\caption{Performance comparison: Intel MKL, our implementation and the naive implementation}
+\end{figure}
 
 
-In this project, we tried several methods to fine-tune square matrix multiplication.
-Based on the \texttt{dgemm\_blocked.c}, we tried unrolling inner loop multiplication, modifying loop sequence to take advantage of SSE, experimenting with different optimization flags, multiple blocks sizes and copy optimizations. 
-
-The next section reflects our various optimization attempts and their results. 
 \newpage
-\section{Final Optimization}
+\section{Design Decisions}
 
 \newpage
 \section{Steps that did not work}

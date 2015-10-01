@@ -7,7 +7,7 @@
 
 #define ALIGNMENT ((int) 64)
 
-const char* dgemm_desc = "Basic, three-loop dgemm with copy optimization";
+const char* dgemm_desc = "We all have our DGEMMs, but this DGEMM is mine";
 
 /*
   A, B, and C are all BLOCK_SIZE * BLOCK_SIZE
