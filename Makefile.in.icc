@@ -7,7 +7,9 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3
+#
+# Try with more flags.  We refer to : https://github.com/kenlimmj/matmul-/blob/master/Group016_KennethLim_XinyiWang_WenjiaGu.md
+OPTFLAGS = -O3 -fast -unroll-aggressive -opt-prefetch 
 CFLAGS = -std=gnu99 
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main
