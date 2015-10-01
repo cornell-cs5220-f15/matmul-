@@ -25,7 +25,7 @@ void basic_dgemm_copied(const int M, const int N, const int K,
     for (k = 0; k < K; ++k) {
         for (j = 0; j < N; ++j) {
             for (i = 0; i < M; ++i) {
-                C[j*M+i] = A[k*M+i] * B[j*K+k];
+                C[j*M+i] += A[k*M+i] * B[j*K+k];
             }
 
         }
