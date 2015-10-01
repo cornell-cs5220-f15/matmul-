@@ -1,13 +1,13 @@
 # Versions to build
-BUILDS= group21_blocked group21 blas mkl mine
+BUILDS=mine basic blocked f2c blas mkl
 
 # C and Fortran compilers
 CC=icc
 FC=ifort 
 LD=ifort
-#
+
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3 -fast -funroll-loops -ipo -xCORE-AVX2 -axCORE-AVX2 -no-prec-div -ansi-alias -restrict -qopt-report-phase=ipo -qopt-report=3 -qopt-report-file=stdout -opt-prefetch 
+OPTFLAGS = -O3
 CFLAGS = -std=gnu99 
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main

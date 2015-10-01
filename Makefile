@@ -76,7 +76,7 @@ plot:
 
 .PHONY:	clean realclean 
 clean:
-	rm -f matmul-* *.o
+	( rm -f matmul-* *.o ; rm -f *.optrpt )
 
 realclean: clean
 	rm -f *~ timing-*.csv timing.pdf
