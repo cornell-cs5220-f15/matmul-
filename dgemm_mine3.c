@@ -32,10 +32,6 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #define N1 L2/L1
 #define N0 L1/L0
 
-
-#include <stdlib.h>
-#include <stdio.h>
-
 //Fast kernel for 4x4 row major matrix multiplication.
 //(It was for column major layout at the beginning, C = A*B assuming col major,
 // but I switched the order of the arguments
@@ -43,7 +39,7 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 
 inline void MMult4by4VRegAC(double* restrict const B, double* restrict const A, double* restrict C)
 {
-    double *cj1, *cj2, *cj3, *cj4,
+    double *cj1, *cj2, *cj3, *cj4;
     double *bj1, *bj2, *bj3, *bj4;
     __m256d a0,a1,a2,a3,b0,b1,b2,b3,c00,c01,c02,c03;
     __m256d b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15;
