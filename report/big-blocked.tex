@@ -9,12 +9,12 @@ cache locality, we created the \ttt{big\_blocked} kernel: a kernel that uses
 copy optimization and a blocked data access pattern. Concretely, the
 \ttt{big\_blocked} kernel performs a blocked matrix multiplication in which a
 block $A_{ik}$ of $A$ is multiplied by a block $B_{kj}$ of $B$ to produce a
-block $C_{ij}$ of $C$. Before each block multiplication. $A_{ik}$ is copied
+block $C_{ij}$ of $C$. Before each block multiplication, $A_{ik}$ is copied
 into a buffer in row-major order.
 
 We performed a parametric sweep on the block size of the \ttt{big\_blocked}
 kernel to decide on an optimal block size. The results of the sweep can be
-found in \figref{block-sweep}. A block size of 128 was selected.
+found in \figref{block-sweep}. A block size of \todo{???} was selected.
 
 \begin{figure}[h]
   \centering
