@@ -15,22 +15,17 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #define L2 L2_BLOCK_SIZE
 #endif
 
+//L1 fits into registers, we have a fast kernel for that part
+//right now the same as L1 blocks. This many blocking levels tend to slow
+//the computation (don't know exactly why.)
 #ifndef L1_BLOCK_SIZE
 #define L1_BLOCK_SIZE ((int) 8)
 #define L1 L1_BLOCK_SIZE
 #endif
 
-//L0 fits into registers, we have a fast kernel for that part
-//right now the same as L1 blocks. This many blocking levels tend to slow
-//the computation (don't know exactly why.)
-#ifndef L0_BLOCK_SIZE
-#define L0_BLOCK_SIZE ((int) 8)
-#define L0 L0_BLOCK_SIZE
-#endif
 
 #define N2 L3/L2
 #define N1 L2/L1
-#define N0 L1/L0
 
 //Fast kernel for 4x4 row major matrix multiplication.
 //(It was for column major layout at the beginning, C = A*B assuming col major,
@@ -44,16 +39,16 @@ inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, 
     __m256d a0,a1,a2,a3,b0,b1,b2,b3,c00,c01,c02,c03;
     __m256d b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15;
     const double *ak1, *ak2, *ak3, *ak4;
-    for (int j = 0; j < 8; j+=4) {
-        cj1 = C + j*8;
-        cj2 = cj1 + 8;
-        cj3 = cj2 + 8;
-        cj4 = cj3 + 8;
-        bj1 = B + j*8;
-        bj2 = bj1 + 8;
-        bj3 = bj2 + 8;
-        bj4 = bj3 + 8;
-        for (int k = 0; k < 8; k+=4) {
+    for (int j = 0; j < L1; j+=4) {
+        cj1 = C + j*L1;
+        cj2 = cj1 + L1;
+        cj3 = cj2 + L1;
+        cj4 = cj3 + L1;
+        bj1 = B + j*L1;
+        bj2 = bj1 + L1;
+        bj3 = bj2 + L1;
+        bj4 = bj3 + L1;
+        for (int k = 0; k < L1; k+=4) {
             b0 = _mm256_broadcast_sd(bj1++);
             b1 = _mm256_broadcast_sd(bj2++);
             b2 = _mm256_broadcast_sd(bj3++);
@@ -74,11 +69,11 @@ inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, 
             b14 = _mm256_broadcast_sd(bj3++);
             b15 = _mm256_broadcast_sd(bj4++);
 
-            ak1 =  A  + k*8;
-            ak2 =  ak1 + 8;
-            ak3 =  ak2 + 8;
-            ak4 =  ak3 + 8;
-            for (int i = 0; i < 8; i+=4) {
+            ak1 =  A  + k*L1;
+            ak2 =  ak1 + L1;
+            ak3 =  ak2 + L1;
+            ak4 =  ak3 + L1;
+            for (int i = 0; i < L1; i+=4) {
                 a0 = _mm256_load_pd(ak1+i);
                 a1 = _mm256_load_pd(ak2+i);
                 a2 = _mm256_load_pd(ak3+i);
