@@ -13,6 +13,7 @@ void test_cm_copy_into(void);
 int main(void) {
     test_cm_copy();
     test_rm_copy();
+    test_cm_copy_into();
 
     printf("+----------------+\n");
     printf("| ALL TESTS PASS |\n");

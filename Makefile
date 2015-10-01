@@ -38,7 +38,7 @@ matmul-compiler: $(OBJS) dgemm_compiler.o
 # ---
 # Rules to build the tests
 
-tests: indexing_test transpose_test copy_test
+tests: indexing_test transpose_test copy_test clear_test
 
 indexing_test: indexing_test.c indexing.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
@@ -49,6 +49,9 @@ transpose_test: transpose_test.c transpose.o indexing.o
 copy_test: copy_test.c copy.o indexing.o
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
+clear_test: clear_test.c clear.o indexing.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
 # --
 # Rules to build object files
 
@@ -56,7 +59,7 @@ matmul.o: matmul.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
 
 %.o: %.f
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
@@ -74,7 +77,7 @@ dgemm_big_blocked_%.o: dgemm_big_blocked.c
 	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
 
 dgemm_padded_blocked_%.o: dgemm_padded_blocked.c
-	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
+	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
 
 # ---
 # Rules for building timing CSV outputs

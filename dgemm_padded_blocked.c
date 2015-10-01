@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "clear.h"
 #include "copy.h"
 #include "indexing.h"
 #include "transpose.h"
@@ -28,15 +29,15 @@ void basic_dgemm(const int lda,
                        double* C) {
     int i, j, k;
 
-    // clear A_ and B_
-    memset(A_, 0, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-    memset(B_, 0, BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-
     // transpose A into A_
     cm_transpose_into(A, lda, lda, M, K, A_, BLOCK_SIZE, BLOCK_SIZE);
 
     // copy B into B_
     cm_copy_into(B, lda, lda, K, N, B_, BLOCK_SIZE, BLOCK_SIZE);
+
+    // clear remainder of A_ and B_
+    rm_clear_but(A_, BLOCK_SIZE, BLOCK_SIZE, M, K);
+    cm_clear_but(B_, BLOCK_SIZE, BLOCK_SIZE, K, N);
 
     for (j = 0; j < BLOCK_SIZE; ++j) {
         for (i = 0; i < BLOCK_SIZE; ++i) {
