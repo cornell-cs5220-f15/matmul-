@@ -33,12 +33,15 @@ OPTFLAGS = -O3
 
 # Crazy compiler black magic. Tread carefully.
 # https://software.intel.com/sites/default/files/compiler_qrg12.pdf
-EXPERIMENTAL_OPT_FLAGS = \
-	-xCORE-AVX2 \
+OPTFLAGS2 = \
 	-fast \
+	-xCORE-AVX2 \
 	-no-prec-div \
 	-ipo \
 	-qopt-report=5 \
+
+OPTFLAGS3 = \
+	$(OPTFLAGS2) \
 	-unroll-aggresive \
 	-opt-prefetch=4 \
 	# -ansi-alias \

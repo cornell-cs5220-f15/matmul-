@@ -56,10 +56,10 @@ clear_test: clear_test.c clear.o indexing.o
 # Rules to build object files
 
 matmul.o: matmul.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $<
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(OPTFLAGS3) $(PGO_FLAG) $(CPPFLAGS) $<
 
 %.o: %.f
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
@@ -76,8 +76,11 @@ dgemm_veclib.o: dgemm_blas.c
 dgemm_padded_blocked.o: dgemm_padded_blocked.c
 	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
 
+dgemm_padded_blocked_v2.o: dgemm_padded_blocked_v2.c
+	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
+
 dgemm_big_blocked_%.o: dgemm_big_blocked.c
-	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
+	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(OPTFLAGS3) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
 
 dgemm_padded_blocked_%.o: dgemm_padded_blocked.c
 	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
