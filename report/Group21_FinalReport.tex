@@ -19,7 +19,7 @@
 \maketitle
 
 \section{Introduction}
-\textbf{D}ouble Precision \textbf{GE}neral \textbf{M}atrix \textbf{M}ultiplication (DGEMM) is an important operation in problems in scientific and engineering computing applications. DGEMM takes 2 dense square double precision matrices $A$ and $B$ stored in column major format and returns,
+\textbf{D}ouble Precision \textbf{GE}neral \textbf{M}atrix \textbf{M}ultiplication (DGEMM) is an important operation in problems that arise in scientific and engineering computing applications. Our DGEMM function takes 2 dense square double precision matrices $A$ and $B$ stored in column major format and returns,
 	\begin{equation} 
 		A \times B = C
 	\end{equation}
@@ -30,16 +30,28 @@
 \begin{figure}[H]
 \centering
 \includegraphics[scale=0.6]{growth_final.pdf}
-\caption{Performance comparison: Intel MKL, our implementation and the naive implementation}
+\caption{Performance comparison: Intel MKL vs our implementation vs the naive implementation}
 \end{figure}
 \newpage
-Our DGEMM implementation has 2 distinct modes of operation. On square matrices with leading dimension $<$ \texttt{BLOCK\_THRESHOLD}, our DGEMM uses tight loops with copy optimization. (Section \ref{sec:copy_opt}). \texttt{BLOCK\_THRESHOLD} was picked to be 1000 elements. The L2 cache of the  Intel Xeon E5-2620 v3 processor is 15MB and we are able to fit both $A$ and $B$ in the cache. \\
+Our DGEMM implementation has 2 distinct modes of operation: hybrid between tight loops and blocking. On square matrices with leading dimension $<$ \texttt{BLOCK\_THRESHOLD}, our DGEMM uses tight loops with copy optimization. (Section \ref{sec:copy_opt}). \texttt{BLOCK\_THRESHOLD} was picked to be 400 elements. After this threshold, the blocked approach performs better. \\
 
-On matrices with the leading dimension $>$ \texttt{BLOCK\_THRESHOLD}, we switch to a blocked matrix multiplication. Each block has $32 \times 32$ elements. Prior to blocking, the matrices we perform copy optimization on $A$ and transpose and copy over data to a 64 byte aligned block obtained by Intel's \texttt{mm\_malloc}. Furthermore, we also copy over data from $B$ to an aligned block and create an aligned stored area for $C$. The newly allocation dynamic memory uses zero padding so that all block multiplication is similar. (Section \ref{sec:block}) \\
+On matrices with the leading dimension $>$ \texttt{BLOCK\_THRESHOLD}, we switch to a blocked matrix multiplication. Each block has $32 \times 32$ elements. Prior to blocking the matrices, we perform copy optimization on $A$ (transpose and copy over data to a 64 byte aligned block obtained by Intel's \texttt{mm\_malloc}). Furthermore, we also copy over data from $B$ to an aligned block and also create an aligned storage area for $C$. The newly allocation dynamic memory uses zero padding so that all block multiplication is similar. (Section \ref{sec:block}) \\
 
 On each block, we perform the naive matrix multiplication using tight loops. To make use of the aligned data, we provide hints to the compiler by adding the $\texttt{\_\_assume\_aligned}$ clause prior to the loop using the matrix data. \cite{vectorization} Furthermore, since $A$ is transposed due to copy optimization, the innermost loop of the block multiplication is performed with stride 1. \\
 
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{pure_vs_hybrid.pdf}
+\caption{Performance comparison: final implementation (hybrid) vs only blocking}
+\end{figure}
+
 The compiler flags play a major part in improving the DGEMM routine performance. The flags used in the final implementation are \texttt{-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict}. The makefile used is $\texttt{Makefile.in.icc}$. The design decisions of each compiler flag is described in Section \ref{sec:comp_flags}.
+
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{growth_to_stage1.pdf}
+\caption{Performance comparison: final implementation vs stage 1 implementation}
+\end{figure}
 
 \section{Design Decisions}
 \subsection{Compiler Flags}\label{sec:comp_flags}
@@ -49,7 +61,7 @@ The final implementation uses the flags, \texttt{-O3 -fast -funroll-loops -ipo -
 O3 optimization performs aggressive loop transformations such as Fusion, Block-Unroll-and-Jam, and collapsing IF statements. According to the Intel Developer zone, \cite{stepbystep} O3 is recommended for for applications that have loops that heavily use floating-point calculations and process large data sets.
 
 \subsubsection{Unrolling loops}
-The core matrix multiplication kernel performs a dot product with a stride of 1. This behavior is ideal for loop unrolling and is turned on by adding \texttt{-funroll-loops}. 
+The core matrix multiplication kernel performs a dot product with a stride of 1. This behavior is ideal for loop unrolling and is turned on by adding \texttt{-funroll-loops}. Results from manually unrolling loops are described in Section \ref{sec:prev_unroll}.
 
 \subsubsection{Interprocedural Optimization}
 The compiler flag \texttt{-ipo} turns on interprocedural optimization to improve performance of the program by letting the compiler analyze the entire program. \cite{ipo}
@@ -58,7 +70,7 @@ The compiler flag \texttt{-ipo} turns on interprocedural optimization to improve
 The processor dispatch option \texttt{-axCORE-AVX2} enables the program to choose the most suitable code path for the Intel Xeon E5-2620 v3 processor. The \texttt{-xCORE-AVX2} flag enables processor specific code generation. \cite{comp_opt}
 
 
-\subsubsection{Precise Division}
+\subsubsection{Accuracy and Precise Division}
 Using the \texttt{-no-prec-div} flag gives slightly less accurate results than full IEEE division. Compiler converts floating point division operations to multiplication by a reciprocal, improving multiplication performance. We also use the \texttt{-fast} flag which may result in slight reduction of accuracy but improvement in performance. 
 
 \subsubsection{Aliasing}
@@ -81,16 +93,38 @@ In the naive implementation, the innermost loop walks over one of the matrices w
 To prevent this behavior, we can switch the storage of $A$ from column-major to row-major. This also improves multiplication for all matrix sizes since the innermost loop has stride 1. The experimentation results for copy optimization are described in Section \ref{sec:prev_copy}.
 
 \subsection{Padded Blocking}\label{sec:block}
-In the initial blocking attempt in \texttt{dgemm\_blocked.c} and our initial matrix multiplication attempt, (Section \ref{sec:prev_block}), we have extra logic to handle cases where the block size may not be square. Removing this additional logic can improve performance of multiplication since there is less branching logic for blocking. During copy optimization and copying to initially setup multiplication, we allocate matrices padded to the block sizes. Since the padding is done with zeros, the result of the final multiplication is unchanged. Refer to the \texttt{dgemm\_group21.c:padded\_transpose} function for the implementation of padding. 
+In \texttt{dgemm\_blocked.c} and our initial matrix multiplication attempt, (Section \ref{sec:prev_block}), we have extra logic to handle cases where the block size may not be square. Removing this additional logic can improve performance of multiplication since there is less branching logic for blocking. In the setup phase, we allocate matrices padded to the block sizes. Since the padding is done with zeros, the result of the final multiplication is unchanged. Refer to the \texttt{dgemm\_group21.c:padded\_transpose} function for the implementation of padding. \\
+
+Furthermore, the block size was picked to ensure that the blocks of $A$ and $B$ both fit in the L1 cache of the processor. The L1 cache of the Intel Xeon E5-2620 v3 has the ability to hold 6 x 32KB data. Then, to fit both $A$ and $B$ blocks, we have to satisfy, 2 * \texttt{BLOCK\_SIZE} * \texttt{BLOCK\_SIZE} * 8B = 192KB. Then block sizes $< 100$ would fit in the L1 cache. Our experiments in Section \ref{sec:prev_block} guided us to pick 32 as the \texttt{BLOCK\_SIZE}.
+
 
 \subsection{Memory Alignment}\label{sec:align}
-To increase the efficient of data loads (in the case of reading $A$ and $B$ elements) and stores (writing back to $C$), it is useful to force the compiler make the dynamically allocated memory blocks aligned on specific byte boundaries. \cite{vectorization} In the blocked approach of the final implementation, we reallocate memory for $A, B,$ and $C$ aligned to 64 byte boundaries using \texttt{\_mm\_malloc}. S
+To increase the efficient of data loads (in the case of reading elements of $A$ and $B$) and stores (writing back to $C$), it is useful to force the compiler to make the dynamically allocated memory blocks aligned on specific byte boundaries. \cite{vectorization} In the blocked approach of the final implementation, we reallocate memory for $A, B,$ and $C$ aligned to 64 byte boundaries using \texttt{\_mm\_malloc}. To tell the compiler about the alignment of the matrices, in the innermost loop of the multiplication of a block, we use the clause \texttt{\_\_assume\_aligned}. \cite{vectorization}
 
-\newpage
-\section{Steps that did not work}
+\section{Unsuccessful Optimization Attempts}
 \subsection{Fitting to L2 cache}
+The L2 cache of the Xeon processor can hold 6 x 256KB data. Then, we should be able to increase the block size by $\sqrt(8)$ and notice an improvement in performance. Our experiments showed that the performance decreases when we increase the \texttt{BLOCK\_SIZE} to 128.  
 
-\newpage
+\begin{figure}[H]
+\centering
+\includegraphics[scale=0.6]{128_32.pdf}
+\caption{Performance comparison: \texttt{BLOCK\_SIZE} 128 vs 32}
+\end{figure}
+
+We believe that this performance decrease occurs due to blocks not fitting in the L1 cache.
+
+\subsection{Blocking approach in smaller matrices}
+We adopted a hybrid multiplication approach since on smaller matrices, the blocked approach performs worse than tight loops with copy optimization. 
+
+\begin{figure}[H]
+\centering
+\label{blocked_spiky}
+\includegraphics[scale=0.6]{blocked_small.pdf}
+\caption{Performance comparison: Tight loops with copy optimization vs blocked approach}
+\end{figure}
+
+We believe that on smaller matrix sizes, the overhead of aligned memory reallocation and blocking reduces performance compared to tight loops with copy optimization. Also, in figure \ref{blocked_spiky}, we see significant drops in performances in matrix sizes 129, 229, 257 and 321. The matrices with leading dimension $< 300$ would fit in the L2 cache and the blocking approach should perform as well as the tight loops. But the zig zag pattern we see  show, on average, lower performance than the tight loops approach.  We were unable to diagnose the cause of the zig-zag pattern in the performance. 
+
 \section{Optimization Experiments}
 \subsection{Block Multiplication with Multiple Block Sizes} \label{sec:prev_block}
 \subsubsection{Approach}
@@ -112,7 +146,7 @@ In addition, we attempted block sizes that are not a multiple of 2. Figure \ref{
 \end{figure} 
 
 
-\subsection{Block Multiplication with Manual Loop Unrolling}
+\subsection{Block Multiplication with Manual Loop Unrolling} \label{sec:prev_unroll}
 \subsubsection{Approach}
 In this approach, we manually unrolled 4 computations in the inner most loop of the matrix multiplication of a block. 
 \subsubsection{Results}
