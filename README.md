@@ -3,18 +3,25 @@ This repository contains the source code for Group 6's implementation of a
 double-precision floating point matrix multiplication kernel.
 
 ## Kernels ##
-| **Kernel**                   | **Description**                                                                                                  |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| `dgemm_big_blocked.c`        | Blocked matmul with large block size. `A` gets transposed in dynamically allocated blocks.                       |
-| `dgemm_padded_blocked.c`     | Padded blocked matmul with small fixed-size blocks. `A` gets transposed, `B` gets copied.                        |
-| `dgemm_3_level_blocking.c`   | Three-tiered blocked matmul.                                                                                     |
-| `dgemm_annotated.c`          | Naive matmul with compiler annotations (e.g. restrict)                                                           |
-| `dgemm_basic.c`              | Naive matmul                                                                                                     |
-| `dgemm_blas.c`               | BLAS matmul.                                                                                                     |
-| `dgemm_blocked.c`            | Blocked matmul.                                                                                                  |
-| `dgemm_compiler.c`           |                                                                                                                  |
-| `dgemm_copyopt.c`            | Naive matmul where `A` is initially transposed.                                                                  |
-| `dgemm_f2c.f`                | Fortran matmul                                                                                                   |
+After many iterations of optimization and experimentation, we have developed
+the following matrix multiplication kernels. Each has its own advantages and
+disadvantages. Some are fast on certain inputs, some are slow on certain
+inputs, some are simple, some are complex, etc.
+
+| **Kernel**                    | **Description**                                                                                                                        |
+| ----------------------------  | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `dgemm_padded_blocked.c`      | Padded blocked matmul with small fixed-size blocks. `A` gets transposed, `B` gets copied.                                              |
+| `dgemm_padded_if.c`           | Padded blocked matmul with small fixed-size blocks. `A` gets transposed, `B` gets copied. If statement avoids superfluous computation. |
+| `dgemm_3_level_blocking.c`    | Three-tiered blocked matmul.                                                                                                           |
+| `dgemm_3_level_blocking_V2.c` | Three-tiered blocked matmul with further optimizations.                                                                                |
+| `dgemm_big_blocked.c`         | Blocked matmul with large block size. `A` gets transposed in dynamically allocated blocks.                                             |
+
+Additionally, we have a few very simple kernels that we use for reference.
+
+| **Kernel**          | **Description**                                        |
+| ------------------- | ------------------------------------------------------ |
+| `dgemm_annotated.c` | Naive matmul with compiler annotations (e.g. restrict) |
+| `dgemm_copyopt.c`   | Naive matmul where `A` is initially transposed.        |
 
 ## Resources ##
 -  **Compiler Optimization**
