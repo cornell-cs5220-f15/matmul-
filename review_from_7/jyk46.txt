@@ -1,0 +1,13 @@
+Group 8
+
+Things to learn 
+1) Very detailed explanation of the type of optimization involving the vectorization with SIMD extensions. Also,more importantly, their careful implementation of it helps increasing the computational speed by 3 times.
+2) Loop Ordering is performed in a detailed way. The graphs showing the varation of speed with different loop orders is very helpful.  
+
+Suggestions
+1) For the blocking plot (Figure 2), block size and the level of blocking has not been mentioned. Performing different levels of blocking and varying the block sizes are important parameters that are worth exploring.
+2) Copy optimization will help reducing the dips at the powers of 2 in Figure 4. 
+3) It will also be insightful to perform the optimization which combines the optimal loop ordering with copy optimization and vectorization with SIMD extension.  
+
+Additional Comment
+The report is written in a very organized way. 

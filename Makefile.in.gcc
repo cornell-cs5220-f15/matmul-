@@ -7,8 +7,8 @@ FC=gfortran
 LD=gcc
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3 
-CFLAGS = -std=gnu99 
+OPTFLAGS = -O3
+CFLAGS = -std=gnu99
 FFLAGS =
 LDFLAGS = -fopenmp
 
@@ -16,7 +16,7 @@ LDFLAGS = -fopenmp
 CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
-LIBS = -lm 
+LIBS = -lm
 OBJS = matmul.o
 
 # Libraries and include files for BLAS
