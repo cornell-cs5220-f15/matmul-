@@ -17,7 +17,7 @@ const char* dgemm_desc = "AVX + copy + padded + blocked dgemm.";
   and ldc is the leading dimension of matrix C.
 */
 void dgemm_4x4(const int mult_a, const int lda, const int ldb, const int ldc,
-                 const double *A, const double *B, double *C)
+                 const double * restrict A, const double * restrict B, double * restrict C)
 {
 	//A, B, C are pointers to the relative positions where the blocks begin
 
@@ -34,6 +34,7 @@ void dgemm_4x4(const int mult_a, const int lda, const int ldb, const int ldc,
 	//temp variables to store dot products
 	__m256d ctemp_0, ctemp_1, ctemp_2, ctemp_3;
 
+	//k is the row of B and the column of A
 	for (int k = 0; k < mult_a; ++k)	{
 		a_k = _mm256_load_pd(A + k*lda);
 
@@ -61,7 +62,7 @@ void dgemm_4x4(const int mult_a, const int lda, const int ldb, const int ldc,
 }
 
 
-void copy_and_pad(const int M, const double* X, const int M_padded, double* X_aligned)	{
+void copy_and_pad(const int M, const double* restrict X, const int M_padded, double* restrict X_aligned)	{
 	//copies matrix to a new location with zero padding
 	for (int i = 0; i < M_padded; ++i)	{
 		for (int j = 0; j < M_padded; ++j)	{
@@ -76,7 +77,7 @@ void copy_and_pad(const int M, const double* X, const int M_padded, double* X_al
 }
 
 
-void copy_unpad(const int M, double* X, const int M_padded, double* X_padded)	{
+void copy_unpad(const int M, double* restrict X, const int M_padded, double* restrict X_padded)	{
 	for (int i = 0; i < M; ++i)	{
 		for (int j = 0; j < M; ++j)	{
 			X[j + i*M] = X_padded[j + i*M_padded];
@@ -85,24 +86,25 @@ void copy_unpad(const int M, double* X, const int M_padded, double* X_padded)	{
 }
 
 
-void tile_copy( const int lda, const int tile_height, const double* Xrel, const int j_offset,
-		const int i_offset, const int tile_width, double* X_tile)
+void tile_copy( const int lda, const double* restrict Xrel, const int j_offset,
+		const int i_offset, const int tile_width, const int tile_height, double* restrict X_tile)
 {
 	//Xrel is a relative pointer into X, at offset given by j_offset and i_offset
 	for (int i = 0; i < tile_height; ++i)	{
 		for (int j = 0; j < tile_width; ++j)	{
 			if ((j_offset + j < lda) && (i_offset + i < lda))	{
-				X_tile[ j + i*tile_width] = Xrel[ j + i*lda];
+				X_tile[j + i*tile_width] = Xrel[j + i*lda];
 			} else	{
-				X_tile[ j + i*tile_width] = 0;
+				X_tile[j + i*tile_width] = 0;
 			}
 		}
 	}
 }
 
 
-void do_block(const int lda, const int lda_old, const double* A, 
-		const double* B, double* C, const int j, const int k )
+//In the inputs to this function, B and C are already aligned/padded, but A is not.
+void do_block(const int lda, const int lda_old, const double* restrict A, 
+		const double* restrict B, double* restrict C, const int j, const int k )
 {
 	//const int M = (i+BLOCK_SIZE > lda ? lda-i : BLOCK_SIZE);
 	const int K = (k+BLOCK_SIZE > lda ? lda-k : BLOCK_SIZE);
@@ -128,9 +130,11 @@ void do_block(const int lda, const int lda_old, const double* A,
 
 			//copying (4-by-K) tile into contiguous, aligned memory
 			if (bj == 0) {
-				tile_copy(lda_old, K, A + A_col_offset + bi, bi, k, REGISTER_SIZE, A_aligned + bi*K);
+				tile_copy(lda_old, A + A_col_offset + bi, bi, k, 
+						REGISTER_SIZE, K, A_aligned + bi*K);
 			}
-			dgemm_4x4(K, 4, lda, lda, A_aligned + bi*K, B + B_block_offset + bj*lda, C + C_col_offset + bi + bj*lda);
+			dgemm_4x4(K, REGISTER_SIZE, lda, lda, 
+					A_aligned + bi*K, B + B_block_offset + bj*lda, C + C_col_offset + bi + bj*lda);
 		}	
 	}
 	_mm_free(A_aligned);
