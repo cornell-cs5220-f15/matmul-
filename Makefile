@@ -56,7 +56,7 @@ clear_test: clear_test.c clear.o indexing.o
 # Rules to build object files
 
 matmul.o: matmul.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $<
 
 %.o: %.c
 	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
@@ -72,6 +72,9 @@ dgemm_mkl.o: dgemm_blas.c
 
 dgemm_veclib.o: dgemm_blas.c
 	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $<
+
+dgemm_padded_blocked.o: dgemm_padded_blocked.c
+	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
 
 dgemm_big_blocked_%.o: dgemm_big_blocked.c
 	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(EXPERIMENTAL_OPT_FLAGS) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*

@@ -1,7 +1,6 @@
 #include <stdlib.h>
-#include <xmmintrin.h>
 
-const char* dgemm_desc = "My awesome dgemm.";
+const char* dgemm_desc = "Copy optimization matmul where A gets transposed.";
 
 void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
@@ -19,8 +18,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
     // j = column
     // i = row
-    for (j = 0; j < M; ++j) {
-        for (i = 0; i < M; i++) {
+    for (i = 0; i < M; i++) {
+        for (j = 0; j < M; ++j) {
             double cij = C[j*M + i];
             for (k = 0; k < M; ++k) {
                 cij += D[i*M + k] * B[j*M + k];
@@ -28,4 +27,6 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
             C[j*M + i] = cij;
         }
     }
+
+    free(D);
 }

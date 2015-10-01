@@ -1,4 +1,4 @@
-const char* dgemm_desc = "My awesome dgemm.";
+const char* dgemm_desc = "Naive matmul with compiler annotations.";
 
 void square_dgemm(const int M,
                   const double* restrict A,
