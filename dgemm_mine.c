@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 16)
@@ -48,8 +49,6 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 }
 
 
-
-
 #include <stdlib.h>
 
 const char* dgemm_desc = "My very awesome dgemm.";
@@ -64,6 +63,7 @@ void square_dgemm_regs(const int M, const double *A, const double *B, double *C,
 
 void make_transpose(const int M, const double* restrict A, double* restrict out)
 {
+<<<<<<< HEAD
   int i, j;
   for (i = 0; i < M; ++i) {
     for (j = 0; j < M; ++j) {
