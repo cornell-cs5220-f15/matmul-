@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine mine64 naive
+BUILDS=mine64
 
 # C and Fortran compilers
 CC=icc
@@ -7,14 +7,14 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags
-OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -parallel -ansi-alias -xHost -axCORE-AVX2 -no-ipo
-CFLAGS = -std=gnu99 -fopenmp -pedantic -Wall -Wextra
+OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -parallel -ansi-alias -xHost -axCORE-AVX2
+CFLAGS = -std=gnu99 -fopenmp -pedantic -Wall
 FFLAGS =
 LDFLAGS = -openmp -nofor_main
 
 # Add -DEBUG_RUN to CPPFLAGS to cut down on the cases.
-# CPPFLAGS = "-DDEBUG_RUN -DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
-CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
+CPPFLAGS = "-DDEBUG_RUN -DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
+# CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm -lirng

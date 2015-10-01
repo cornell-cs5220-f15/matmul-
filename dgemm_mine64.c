@@ -3,101 +3,104 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
 
-const char* dgemm_desc = "avx copy-blocked dgemm.";
+const char* dgemm_desc = "Copy optimized, blocked dgemm using an AVX kernel";
 
 #ifndef MUL_BLOCK_SIZE
-  #define MUL_BLOCK_SIZE ((int) 4)
+  #define MUL_BLOCK_SIZE ((int) 8)
 #endif
 
 #ifndef MEM_BOUNDARY
   #define MEM_BOUNDARY ((int) 32)
 #endif
 
-inline void transpose_array(const int M, const double * restrict A, double * restrict B)
+void print_array(const int col_length,
+                 const int row_length,
+                 const bool is_row_major,
+                 const double * arr)
+{
+  int i, j;
+  if (is_row_major)
+  {
+    for (i = 0; i < col_length; i++) {
+      for (j = 0; j < row_length; j++)
+      {
+        printf("%f ", arr[i * col_length + j]);
+      }
+
+      printf("\n");
+    }
+  } else
+  {
+    for (i = 0; i < col_length; i++) {
+      for (j = 0; j < row_length; j++)
+      {
+        printf("%f ", arr[j * col_length + i]);
+      }
+
+      printf("\n");
+    }
+  }
+
+  printf("\n");
+}
+
+inline void transpose_array(const int col_length,
+                            const int row_length,
+                            const double * restrict A,
+                                  double * restrict B)
 {
   __assume_aligned(A, MEM_BOUNDARY);
   __assume_aligned(B, MEM_BOUNDARY);
 
   int row, col;
 
-  for (col = 0; col < M; col++)
+  for (col = 0; col < col_length; col++)
   {
-    for (row = 0; row < M; row++)
+    for (row = 0; row < row_length; row++)
     {
-      B[(row * M) + col] = A[(col * M) + row];
+      B[(row * row_length) + col] = A[(col * col_length) + row];
     }
   }
 }
 
-inline void transpose_4x4(const double * restrict A, double * restrict B)
-{
-  __assume_aligned(A, MEM_BOUNDARY);
-  __assume_aligned(B, MEM_BOUNDARY);
-
-  B[0] = A[0];
-  B[1] = A[4];
-  B[2] = A[8];
-  B[3] = A[12];
-
-  B[4] = A[1];
-  B[5] = A[5];
-  B[6] = A[9];
-  B[7] = A[13];
-
-  B[8] = A[2];
-  B[9] = A[6];
-  B[10] = A[10];
-  B[11] = A[14];
-
-  B[12] = A[3];
-  B[13] = A[7];
-  B[14] = A[11];
-  B[15] = A[15];
-}
-
 /**
  * Multiplies a 4 x P matrix by a P x 4 matrix using AVX instructions.
- * Requires that all matrix inputs be aligned to 32 bytes or shit hits the fan
- *
- * Broadcasts an element in a column of B into a ymm register, and multiplies
- * by a column of A. Doing this for all four columns of A gives the components
- * of the dot product, which are then summed to produce a column in C.
- *
- * e.g. for the first column of C:
- * A_11 B_11 + A_12 B_21 + A_13 B_31 + A_14 B_41 = C_11
- * A_21 B_11 + A_22 B_21 + A_23 B_31 + A_24 B_41 = C_21
- * A_31 B_11 + A_32 B_21 + A_33 B_31 + A_34 B_41 = C_31
- * A_41 B_11 + A_42 B_21 + A_43 B_31 + A_44 B_41 = C_41
- * ---- ----   ---- ----   ---- ----   ---- ----
- * ymm1 ymm4   ymm2 ymm5   ymm3 ymm6   ymm4 ymm7
- *
+ * Requires that all matrix inputs be aligned to 32 bytes or shit hits the fan *
  * @method dgemm_4P4
- * @param  A         4 x P matrix in column-order
+ * @param  A         4 x P matrix in row-order
  * @param  B         P x 4 matrix in column-order
  * @param  C         4 x 4 matrix in column-order
  */
-inline void dgemm_4P4(const double * restrict A, const double * restrict B, double * restrict C)
+inline void dgemm_4P4(const double * restrict A,
+                      const double * restrict B,
+                            double * restrict C,
+                            double * restrict A_transposed)
 {
   __assume_aligned(A, MEM_BOUNDARY);
   __assume_aligned(B, MEM_BOUNDARY);
   __assume_aligned(C, MEM_BOUNDARY);
+  __assume_aligned(A_transposed, MEM_BOUNDARY);
 
-  __m256d C_1 = _mm256_load_pd(C);
-  __m256d C_2 = _mm256_load_pd(C + 4);
-  __m256d C_3 = _mm256_load_pd(C + 8);
-  __m256d C_4 = _mm256_load_pd(C + 12);
+  transpose_array(4, MUL_BLOCK_SIZE, A, A_transposed);
+
+  __m256d C_1 = _mm256_load_pd(C + 0 * MUL_BLOCK_SIZE);
+  __m256d C_2 = _mm256_load_pd(C + 1 * MUL_BLOCK_SIZE);
+  __m256d C_3 = _mm256_load_pd(C + 2 * MUL_BLOCK_SIZE);
+  __m256d C_4 = _mm256_load_pd(C + 3 * MUL_BLOCK_SIZE);
 
   int i;
   for (i = 0; i < MUL_BLOCK_SIZE; i++)
   {
-    __m256d A_col = _mm256_load_pd(A + MUL_BLOCK_SIZE * i);
+    __m256d A_col = _mm256_load_pd(A_transposed + MUL_BLOCK_SIZE * i);
 
-    __m256d B_1 = _mm256_broadcast_sd(B + i);
-    __m256d B_2 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE + i);
+    __m256d B_1 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 0 + i);
+    __m256d B_2 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 1 + i);
     __m256d B_3 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 2 + i);
     __m256d B_4 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 3 + i);
 
+    // Calculate dot products
     __m256d DP_1 = _mm256_mul_pd(A_col, B_1);
     __m256d DP_2 = _mm256_mul_pd(A_col, B_2);
     __m256d DP_3 = _mm256_mul_pd(A_col, B_3);
@@ -109,41 +112,91 @@ inline void dgemm_4P4(const double * restrict A, const double * restrict B, doub
     C_4 = _mm256_add_pd(C_4, DP_4);
   }
 
-  _mm256_store_pd(C,      C_1);
-  _mm256_store_pd(C + 4,  C_2);
-  _mm256_store_pd(C + 8,  C_3);
-  _mm256_store_pd(C + 12, C_4);
+  _mm256_store_pd(C + 0 * MUL_BLOCK_SIZE, C_1);
+  _mm256_store_pd(C + 1 * MUL_BLOCK_SIZE, C_2);
+  _mm256_store_pd(C + 2 * MUL_BLOCK_SIZE, C_3);
+  _mm256_store_pd(C + 3 * MUL_BLOCK_SIZE, C_4);
 }
 
-inline void dgemm_8x8(const double * restrict A, const double * restrict B, double * restrict C)
+inline void dgemm_8x8(const double * restrict A,
+                      const double * restrict B,
+                            double * restrict C,
+                            double * restrict scratch_4P4)
 {
   __assume_aligned(A, MEM_BOUNDARY);
   __assume_aligned(B, MEM_BOUNDARY);
   __assume_aligned(C, MEM_BOUNDARY);
+  __assume_aligned(scratch_4P4, MEM_BOUNDARY);
 
-  // dgemm_4x4(A,      B,      C     );
-  // dgemm_4x4(A + 32, B,      C + 16);
-  // dgemm_4x4(A,      B + 32, C + 32);
-  // dgemm_4x4(A + 32, B + 32, C + 48);
-
-  // TODO: Convert the matrix back to correct layout
+  int i;
+  for (i = 0; i < 8; i++)
+  {
+    dgemm_4P4(A, B, C, scratch_4P4);
+    dgemm_4P4(A + 32, B, C + 16, scratch_4P4);
+    dgemm_4P4(A, B + 32, C + 32, scratch_4P4);
+    dgemm_4P4(A + 32, B + 32, C + 48, scratch_4P4);
+  }
 }
 
-void square_dgemm(const int M, const double *A, const double *B, double *C)
+// inline void dgemm_64x64(const double * restrict A,
+//                         const double * restrict B,
+//                               double * restrict C,
+//                               double * restrict scratch_4P4)
+// {
+//   __assume_aligned(A, MEM_BOUNDARY);
+//   __assume_aligned(B, MEM_BOUNDARY);
+//   __assume_aligned(C, MEM_BOUNDARY);
+//   __assume_aligned(scratch_4P4, MEM_BOUNDARY);
+//
+//   const int block_numel = 4 * MUL_BLOCK_SIZE;
+//   int i;
+//
+//   for (i = 0; i < MUL_BLOCK_SIZE; i++) {
+//     dgemm_4P4(A + 0  * block_numel, B + i * block_numel, C + 0  * 16, scratch_4P4);
+//     dgemm_4P4(A + 1  * block_numel, B + i * block_numel, C + 1  * 16, scratch_4P4);
+//     dgemm_4P4(A + 2  * block_numel, B + i * block_numel, C + 2  * 16, scratch_4P4);
+//     dgemm_4P4(A + 3  * block_numel, B + i * block_numel, C + 3  * 16, scratch_4P4);
+//     dgemm_4P4(A + 4  * block_numel, B + i * block_numel, C + 4  * 16, scratch_4P4);
+//     dgemm_4P4(A + 5  * block_numel, B + i * block_numel, C + 5  * 16, scratch_4P4);
+//     dgemm_4P4(A + 6  * block_numel, B + i * block_numel, C + 6  * 16, scratch_4P4);
+//     dgemm_4P4(A + 7  * block_numel, B + i * block_numel, C + 7  * 16, scratch_4P4);
+//     dgemm_4P4(A + 8  * block_numel, B + i * block_numel, C + 8  * 16, scratch_4P4);
+//     dgemm_4P4(A + 9  * block_numel, B + i * block_numel, C + 9  * 16, scratch_4P4);
+//     dgemm_4P4(A + 10 * block_numel, B + i * block_numel, C + 10 * 16, scratch_4P4);
+//     dgemm_4P4(A + 11 * block_numel, B + i * block_numel, C + 11 * 16, scratch_4P4);
+//     dgemm_4P4(A + 12 * block_numel, B + i * block_numel, C + 12 * 16, scratch_4P4);
+//     dgemm_4P4(A + 13 * block_numel, B + i * block_numel, C + 13 * 16, scratch_4P4);
+//     dgemm_4P4(A + 14 * block_numel, B + i * block_numel, C + 14 * 16, scratch_4P4);
+//     dgemm_4P4(A + 15 * block_numel, B + i * block_numel, C + 15 * 16, scratch_4P4);
+//   }
+// }
+
+void square_dgemm(const int     M,
+                  const double *A,
+                  const double *B,
+                        double *C)
 {
+    const int malloc_block_size = MUL_BLOCK_SIZE * MUL_BLOCK_SIZE * sizeof(double);
     const int n_blocks = M / MUL_BLOCK_SIZE + (M % MUL_BLOCK_SIZE? 1 : 0);
-    int blocked_row, blocked_col, blocked_k, row_start, col_start, k_start, row, col, k, col_size, row_size, k_size;
+
+    print_array(M, M, false, B);
+
+    int blocked_row, blocked_col, blocked_k;
+    int row, col, row_start, col_start, row_size, col_size;
+    int k, k_start, k_size;
+
+    // Preallocate holding space for the blocks
+    double * a_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
+    double * b_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
+    double * c_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
+
+    // Preallocate scratch arrays
+    double * scratch_4P4 = _mm_malloc(4 * MUL_BLOCK_SIZE * sizeof(double), MEM_BOUNDARY);
 
     // Create a copy of A that is transposed in row-major order
     // to get element at (col,row): a_transposed[row * M + col]
-    double *a_transposed = _mm_malloc(M * M * sizeof(double), MEM_BOUNDARY);
-    transpose_array(M, A, a_transposed);
-
-    int malloc_block_size = MUL_BLOCK_SIZE * MUL_BLOCK_SIZE * sizeof(double);
-
-    double* a_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
-    double* b_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
-    double* c_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
+    double * a_transposed = _mm_malloc(M * M * sizeof(double), MEM_BOUNDARY);
+    transpose_array(M, M, A, a_transposed);
 
     for (blocked_col = 0; blocked_col < n_blocks; blocked_col++)
     {
@@ -158,7 +211,6 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
   			// Reset C to zero
         c_block = memset(c_block, 0, malloc_block_size);
 
-        #pragma vector aligned
         for (blocked_k = 0; blocked_k < n_blocks; blocked_k++)
         {
         	// Reset A and B to zero
@@ -176,7 +228,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
             for (k = 0; k < k_size; k++)
             {
-              a_block[(k * MUL_BLOCK_SIZE) + row] = a_transposed[row_start_inner + k];
+              // a_block[(k * MUL_BLOCK_SIZE) + row] = a_transposed[row_start_inner + k];
+              a_block[(row * MUL_BLOCK_SIZE) + k] = a_transposed[row_start_inner + k];
             }
           }
 
@@ -191,8 +244,15 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
             }
           }
 
+          // printf("A:\n");
+          // print_array(MUL_BLOCK_SIZE, MUL_BLOCK_SIZE, true, a_block);
+
+          // printf("B:\n");
+          print_array(MUL_BLOCK_SIZE, MUL_BLOCK_SIZE, false, b_block);
+
           // Write into temporary array C assuming A is row-major and B is column-major
-          dgemm_4P4(a_block, b_block, c_block);
+          // dgemm_4P4(a_block, b_block, c_block, scratch_4P4);
+          dgemm_8x8(a_block, b_block, c_block, scratch_4P4);
         }
 
         // Write c_block into actual location in C
@@ -207,6 +267,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
     }
 
     // Clean up in order of initialization
+    _mm_free(a_transposed);
+    _mm_free(scratch_4P4);
     _mm_free(c_block);
     _mm_free(b_block);
     _mm_free(a_block);
