@@ -111,16 +111,16 @@ void do_block(const int M, const int nblock,
     BA_A=(bk*nblock+bi)*L1_BS*L1_BS;
     BA_B=(bj*nblock+bk)*L1_BS*L1_BS;
     BA_C=(bj*nblock+bi)*L1_BS*L1_BS;
-    for (k = 0; i < L1_BS; ++k) {
+    for (k = 0; k < L1_BS; ++k) {
         // finds sub_BA, tells compiler its aligned
         sub_BA_B=BA_B+L1_BS*k;
         __assume(sub_BA_B%8==0);
 
         for (i = 0; i < L1_BS; ++i){
 
-            __assume(sub_BA_C%8==0);
             sub_BA_C=BA_C+L1_BS*i;
             double aki = A[BA_A+i*L1_BS+k];
+            __assume(sub_BA_C%8==0);
             for (j = 0; j < L1_BS; ++j) {
                 // old kernel using block to row transpose
                 C[sub_BA_C+j]+= aki * B[sub_BA_B+j];
