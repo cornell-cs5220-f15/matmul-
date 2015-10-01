@@ -41,8 +41,8 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 // but I switched the order of the arguments
 // so now it reads C' = B' * A' if you think column major layout.)
 
-inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
-{ __attribute__((always_inline));;
+void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
+{
   __m256d a0, a1;
   __m256d b0, b1, b2, b3, b4, b5, b6, b7;
   __m256d c0,c1,c2,c3;
@@ -234,9 +234,9 @@ void from_contiguous3lvlBlock(const int M,
 //     }
 //
 // }
-inline void do_block_L2(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
+void do_block_L2(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
                   const int M, const int N, const int K) {
-    __attribute__((always_inline));
+
     int bi, bj, bk;
     const int ni = M / L1 + (M%L1? 1 : 0); // number of blocks in M rows
     const int nj = N / L1 + (N%L1? 1 : 0); // number of blocks in N cols
@@ -384,9 +384,9 @@ inline void do_block_L2(const double* restrict Ak, const double* restrict Bk, do
 //     KK = (K%L2) ? K%L2 : L2;
 //     do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, NN, KK);
 // }
-inline void do_block_L3(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
+void do_block_L3(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
                   const int M, const int N, const int K) {
-    __attribute__((always_inline));
+
     int bi, bj, bk;
     const int ni = M / L2 + (M%L2? 1 : 0); // number of blocks in M rows
     const int nj = N / L2 + (N%L2? 1 : 0); // number of blocks in N cols
