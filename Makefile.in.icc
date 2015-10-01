@@ -1,5 +1,6 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl
+BUILDS=mine basic blocked f2c blas mkl multiblock
+CSVS=copy256-align64-transpose-flags copy64-align64-transpose-flags basic mkl blas mine-no-prec-div
 
 # C and Fortran compilers
 CC=icc
@@ -7,8 +8,8 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3
-CFLAGS = -std=gnu99 
+OPTFLAGS = -O3 -restrict  -no-prec-div -xCORE-AVX2
+CFLAGS = -std=gnu99
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main
 
