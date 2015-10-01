@@ -6,12 +6,12 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #include <x86intrin.h>
 
 #ifndef L3_BLOCK_SIZE
-#define L3_BLOCK_SIZE ((int) 400)
+#define L3_BLOCK_SIZE ((int) 420)
 #define L3 L3_BLOCK_SIZE
 #endif
 
 #ifndef L2_BLOCK_SIZE
-#define L2_BLOCK_SIZE ((int) 40)
+#define L2_BLOCK_SIZE ((int) 60)
 #define L2 L2_BLOCK_SIZE
 #endif
 
@@ -41,7 +41,7 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 // but I switched the order of the arguments
 // so now it reads C' = B' * A' if you think column major layout.)
 
-void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
+inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
 {
   __m256d a0, a1;
   __m256d b0, b1, b2, b3, b4, b5, b6, b7;
