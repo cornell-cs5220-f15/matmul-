@@ -294,6 +294,96 @@ inline void do_block_L2(const double* restrict Ak, const double* restrict Bk, do
     }
 
 }
+// inline void do_block_L3(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
+//                   const int M, const int N, const int K) {
+//     __attribute__((always_inline));
+//     int bi, bj, bk;
+//     const int ni = M / L2 + (M%L2? 1 : 0); // number of blocks in M rows
+//     const int nj = N / L2 + (N%L2? 1 : 0); // number of blocks in N cols
+//     const int nk = K / L2 + (K%L2? 1 : 0); // number of blocks in K rows
+//
+//     int ind_Ak, ind_Bk, ind_Ck;
+//     int iA, iC, j, jB, k;
+//     int MM, NN, KK;
+//     MM = L2;
+//     NN = L2;
+//     int sizeOfBlock_C = L2 * L2;
+//     int sizeOfBlock_B = L2 * L2;
+//     for (bi = 0; bi < ni-1; bi++) {
+//         iA = bi * K * L2;
+//         iC = bi * N * L2;
+//         sizeOfBlock_B = L2 * L2;
+//         for (bj = 0; bj < nj-1; bj++) {
+//             j = bj * sizeOfBlock_C;
+//             jB = bj * K * L2;
+//             ind_Ck = iC+j;
+//             for (bk = 0; bk < nk-1; bk++) {
+//                 ind_Ak = iA + sizeOfBlock_C * bk;
+//                 ind_Bk = jB + sizeOfBlock_B * bk;
+//                     //multiply blocks: C_ij += A_ik * B_kj
+//                     //A is MM by KK
+//                     //B is KK by NN
+//                     //C is MM by NN
+//                 do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, L2, L2);
+//             }
+//             ind_Ak = iA + sizeOfBlock_C * bk;
+//             ind_Bk = jB + sizeOfBlock_B * bk;
+//             KK = (K%L2) ? K%L2 : L2;
+//             do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, L2, KK);
+//         }
+//         NN = N%L2 ? N%L2 : L2;
+//         sizeOfBlock_B = ( bj == nj-1 && N%L2 ? L2 * (N%L2) : L2 * L2);
+//         j = bj * sizeOfBlock_C;
+//         jB = bj * K * L2;
+//         ind_Ck = iC+j;
+//         for (bk = 0; bk < nk-1; bk++) {
+//             ind_Ak = iA + sizeOfBlock_C * bk;
+//             ind_Bk = jB + sizeOfBlock_B * bk;
+//             do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, NN, L2);
+//         }
+//         ind_Ak = iA + sizeOfBlock_C * bk;
+//         ind_Bk = jB + sizeOfBlock_B * bk;
+//         KK = (K%L2) ? K%L2 : L2;
+//         do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, NN, KK);
+//     }
+//     sizeOfBlock_C = M%L2 ? L2 * (M%L2) : L2 * L2;
+//     sizeOfBlock_B = L2*L2;
+//     MM = M%L2 ? M%L2 : L2;
+//     iA = bi * K * L2;
+//     iC = bi * N * L2;
+//     for (bj = 0; bj < nj-1; bj++) {
+//         j = bj * sizeOfBlock_C;
+//         jB = bj * K * L2;
+//         ind_Ck = iC+j;
+//         for (bk = 0; bk < nk-1; bk++) {
+//             ind_Ak = iA + sizeOfBlock_C * bk;
+//             ind_Bk = jB + sizeOfBlock_B * bk;
+//                 //multiply blocks: C_ij += A_ik * B_kj
+//                 //A is MM by KK
+//                 //B is KK by NN
+//                 //C is MM by NN
+//             do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, L2, L2);
+//         }
+//         ind_Ak = iA + sizeOfBlock_C * bk;
+//         ind_Bk = jB + sizeOfBlock_B * bk;
+//         KK = (K%L2) ? K%L2 : L2;
+//         do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, L2, KK);
+//     }
+//     NN = N%L2 ? N%L2 : L2;
+//     sizeOfBlock_B = (N%L2 ? L2 * (N%L2) : L2 * L2);
+//     j = bj * sizeOfBlock_C;
+//     jB = bj * K * L2;
+//     ind_Ck = iC+j;
+//     for (bk = 0; bk < nk-1; bk++) {
+//         ind_Ak = iA + sizeOfBlock_C * bk;
+//         ind_Bk = jB + sizeOfBlock_B * bk;
+//         do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, NN, L2);
+//     }
+//     ind_Ak = iA + sizeOfBlock_C * bk;
+//     ind_Bk = jB + sizeOfBlock_B * bk;
+//     KK = (K%L2) ? K%L2 : L2;
+//     do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, NN, KK);
+// }
 inline void do_block_L3(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
                   const int M, const int N, const int K) {
     __attribute__((always_inline));
@@ -305,113 +395,35 @@ inline void do_block_L3(const double* restrict Ak, const double* restrict Bk, do
     int ind_Ak, ind_Bk, ind_Ck;
     int iA, iC, j, jB, k;
     int MM, NN, KK;
-    MM = L2;
-    NN = L2;
-    int sizeOfBlock_C = L2 * L2;
-    int sizeOfBlock_B = L2 * L2;
-    for (bi = 0; bi < ni-1; bi++) {
+
+    for (bi = 0; bi < ni; bi++) {
         iA = bi * K * L2;
         iC = bi * N * L2;
-        sizeOfBlock_B = L2 * L2;
-        for (bj = 0; bj < nj-1; bj++) {
+        int sizeOfBlock_C = ( bi == ni-1 && M%L2 ? L2 * (M%L2) : L2 * L2);
+        MM = ( bi == ni-1 && M%L2) ? M%L2 : L2;
+        for (bj = 0; bj < nj; bj++) {
+            NN = ( bj == nj-1 && N%L2) ? N%L2 : L2;
             j = bj * sizeOfBlock_C;
             jB = bj * K * L2;
-            ind_Ck = iC+j;
-            for (bk = 0; bk < nk-1; bk++) {
-                ind_Ak = iA + sizeOfBlock_C * bk;
-                ind_Bk = jB + sizeOfBlock_B * bk;
+            int sizeOfBlock_B = ( bj == nj-1 && N%L2 ? L2 * (N%L2) : L2 * L2);
+            const int ind_Ck = iC+j;
+            for (bk = 0; bk < nk; bk++) {
+                const int ind_Ak = iA + sizeOfBlock_C * bk;
+                const int ind_Bk = jB + sizeOfBlock_B * bk;
+                KK = (bk == nk-1 && K%L2) ? K%L2 : L2;
                     //multiply blocks: C_ij += A_ik * B_kj
                     //A is MM by KK
                     //B is KK by NN
                     //C is MM by NN
-                do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, L2, L2);
+                    // printf("\t%d %d %d\n", ind_Ak, ind_Bk, ind_Ck);
+                    // printf("\t%d %d %d\n",ni, nj, nk);
+
+                do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, NN, KK);
             }
-            ind_Ak = iA + sizeOfBlock_C * bk;
-            ind_Bk = jB + sizeOfBlock_B * bk;
-            KK = (K%L2) ? K%L2 : L2;
-            do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, L2, KK);
         }
-        NN = N%L2 ? N%L2 : L2;
-        sizeOfBlock_B = ( bj == nj-1 && N%L2 ? L2 * (N%L2) : L2 * L2);
-        j = bj * sizeOfBlock_C;
-        jB = bj * K * L2;
-        ind_Ck = iC+j;
-        for (bk = 0; bk < nk-1; bk++) {
-            ind_Ak = iA + sizeOfBlock_C * bk;
-            ind_Bk = jB + sizeOfBlock_B * bk;
-            do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, NN, L2);
-        }
-        ind_Ak = iA + sizeOfBlock_C * bk;
-        ind_Bk = jB + sizeOfBlock_B * bk;
-        KK = (K%L2) ? K%L2 : L2;
-        do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, L2, NN, KK);
     }
-    sizeOfBlock_C = M%L2 ? L2 * (M%L2) : L2 * L2;
-    sizeOfBlock_B = L2*L2;
-    MM = M%L2 ? M%L2 : L2;
-    iA = bi * K * L2;
-    iC = bi * N * L2;
-    for (bj = 0; bj < nj-1; bj++) {
-        j = bj * sizeOfBlock_C;
-        jB = bj * K * L2;
-        ind_Ck = iC+j;
-        for (bk = 0; bk < nk-1; bk++) {
-            ind_Ak = iA + sizeOfBlock_C * bk;
-            ind_Bk = jB + sizeOfBlock_B * bk;
-                //multiply blocks: C_ij += A_ik * B_kj
-                //A is MM by KK
-                //B is KK by NN
-                //C is MM by NN
-            do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, L2, L2);
-        }
-        ind_Ak = iA + sizeOfBlock_C * bk;
-        ind_Bk = jB + sizeOfBlock_B * bk;
-        KK = (K%L2) ? K%L2 : L2;
-        do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, L2, KK);
-    }
-    NN = N%L2 ? N%L2 : L2;
-    sizeOfBlock_B = (N%L2 ? L2 * (N%L2) : L2 * L2);
-    j = bj * sizeOfBlock_C;
-    jB = bj * K * L2;
-    ind_Ck = iC+j;
-    for (bk = 0; bk < nk-1; bk++) {
-        ind_Ak = iA + sizeOfBlock_C * bk;
-        ind_Bk = jB + sizeOfBlock_B * bk;
-        do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, NN, L2);
-    }
-    ind_Ak = iA + sizeOfBlock_C * bk;
-    ind_Bk = jB + sizeOfBlock_B * bk;
-    KK = (K%L2) ? K%L2 : L2;
-    do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, NN, KK);
+
 }
-//     for (bi = 0; bi < ni; bi++) {
-//         iA = bi * K * L2;
-//         iC = bi * N * L2;
-//         int sizeOfBlock_C = ( bi == ni-1 && M%L2 ? L2 * (M%L2) : L2 * L2);
-//         MM = ( bi == ni-1 && M%L2) ? M%L2 : L2;
-//         for (bj = 0; bj < nj; bj++) {
-//             NN = ( bj == nj-1 && N%L2) ? N%L2 : L2;
-//             j = bj * sizeOfBlock_C;
-//             jB = bj * K * L2;
-//             int sizeOfBlock_B = ( bj == nj-1 && N%L2 ? L2 * (N%L2) : L2 * L2);
-//             const int ind_Ck = iC+j;
-//             for (bk = 0; bk < nk; bk++) {
-//                 const int ind_Ak = iA + sizeOfBlock_C * bk;
-//                 const int ind_Bk = jB + sizeOfBlock_B * bk;
-//                 KK = (bk == nk-1 && K%L2) ? K%L2 : L2;
-//                     //multiply blocks: C_ij += A_ik * B_kj
-//                     //A is MM by KK
-//                     //B is KK by NN
-//                     //C is MM by NN
-//                     // printf("\t%d %d %d\n", ind_Ak, ind_Bk, ind_Ck);
-//                     // printf("\t%d %d %d\n",ni, nj, nk);
-//
-//                 do_block_L2(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck, MM, NN, KK);
-//             }
-//         }
-//     }
-//
-// }
 
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C) {
     const int N = (M / L1 + (M%L1? 1 : 0)) * L1; // new size after padding with zeros
