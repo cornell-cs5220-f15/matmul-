@@ -6,7 +6,7 @@
 #endif
 
 #define ALIGNMENT ((int) 64)
-#define BLOCK_THRESHOLD ((int) 1000)
+#define BLOCK_THRESHOLD ((int) 1023)
 
 const char* dgemm_desc = "We all have our DGEMMs, but this DGEMM is mine";
 
