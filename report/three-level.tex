@@ -1,1 +1,26 @@
 \subsection{Three Tiered Blocks}
+We attempted to extend our previous blocking implementations with multiple
+levels of blocking. The original idea behind this method was to have 3 layers 
+of blocking that each corresponded to a level of caching. Based on the results 
+of the membench program, we estimated the L3 cache to be 15MB, the L2 cache to 
+be 256kB, and the L1 cache to be 64kB. Each of these caches could thus store 
+square matrices with a dimension of 1402, 181, and 45, respectively. Since 
+these weren't very nice numbers we decided to round down to neat powers of two 
+and set the block sizes at 1024, 128, and 32, respectively. While this 
+certainly yielded a performance boost over the basic version, this 
+implementation still fell well short of other kernels.
+
+A second attempt to optimize this method was by adding padding to the lowest 
+level of blocking to help create more uniform memory access patterns. In doing 
+this we also experimented with making the lowest level of blocking smaller to 
+prevent too many unnecessary zeros being calculated. This yielded some 
+performance boost, but nothing significant. We also played around with the 
+size of the two other blocking levels as well as only doing two levels of 
+blocking, but most of these attempts only hindered performance.
+
+Our final attempt to increase performance was to incorpate the results from 
+previous blocking attempts. These other attempts always found that big block 
+sizes, larger than 128, yielded the best results. For this reason we increased 
+the all the block sizes and only went down one level of blocking if the matrix 
+at the current blocking level was not a square. This yielded the best and most 
+consistent results of all the attempts.
