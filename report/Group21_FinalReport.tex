@@ -44,7 +44,7 @@ The compiler flags play a major part in improving the DGEMM routine performance.
 \section{Design Decisions}
 \subsection{Compiler Flags}\label{sec:comp_flags}
 
-The final implementation uses the flags, \texttt{-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -no-prec-div -ansi-alias -restrict -axCORE-AVX2}.
+The final implementation uses the flags, \texttt{-O3 -fast -funroll-loops -ipo -xCORE-AVX2 -axCORE-AVX2 -no-prec-div -ansi-alias -restrict -opt-prefetch}.
 \subsubsection{Optimization Level 3}
 O3 optimization performs aggressive loop transformations such as Fusion, Block-Unroll-and-Jam, and collapsing IF statements. According to the Intel Developer zone, \cite{stepbystep} O3 is recommended for for applications that have loops that heavily use floating-point calculations and process large data sets.
 
@@ -63,19 +63,36 @@ Using the \texttt{-no-prec-div} flag gives slightly less accurate results than f
 
 \subsubsection{Aliasing}
 
-Copy optimization on $A$ in the small matrix case and aligned dynamic memory allocation in the blocked case guarantees that no two pointers in a function point to the same memory location. By using the \texttt{-restrict} flag, we can tell the compiler to prevent alias checking during runtime. \cite{opt} We also use the \texttt{-ansi-alias} flag to tell the compiler that the program adheres to ISO C Standard aliasability rules.
+Copy optimization on $A$ in the small matrix case and aligned dynamic memory allocation in the blocked case guarantees that no two pointers in a function point to the same memory location. By using the \texttt{-restrict} flag, we can tell the compiler to prevent alias checking during runtime. \cite{opt} We also use the \texttt{-ansi-alias} flag to tell the compiler that the program adheres to ISO C Standard aliasability rules. Experimentation results are described in \ref{sec:prev_restrict}
+
+\subsubsection{Prefetching}
 
 
 \subsection{Copy Optimization}\label{sec:copy_opt}
+Consider the equation of an element of $C$,
+
+\begin{equation}
+	C_{ij} = \sum_k A_{ik} B_{kj}
+\end{equation}
+
+In the naive implementation, the innermost loop walks over one of the matrices with stride not equal to 1. In a matrix with size $2^N$, and using column-major storage, the addresses of the elements in a row are  separated by powers of 2. Since the L1 cache is direct-mapped, we run into large number of cache misses. \\
+
+
+To prevent this behavior, we can switch the storage of $A$ from column-major to row-major. This also improves multiplication for all matrix sizes since the innermost loop has stride 1. The experimentation results for copy optimization are described in Section \ref{sec:prev_copy}.
+
 \subsection{Padded Blocking}\label{sec:block}
+In the initial blocking attempt in \texttt{dgemm\_blocked.c} and our initial matrix multiplication attempt, (Section \ref{sec:prev_block}), we have extra logic to handle cases where the block size may not be square. Removing this additional logic can improve performance of multiplication since there is less branching logic for blocking. During copy optimization and copying to initially setup multiplication, we allocate matrices padded to the block sizes. Since the padding is done with zeros, the result of the final multiplication is unchanged. Refer to the \texttt{dgemm\_group21.c:padded\_transpose} function for the implementation of padding. 
+
 \subsection{Memory Alignment}\label{sec:align}
+To increase the efficient of data loads (in the case of reading $A$ and $B$ elements) and stores (writing back to $C$), it is useful to force the compiler make the dynamically allocated memory blocks aligned on specific byte boundaries. \cite{vectorization} In the blocked approach of the final implementation, we reallocate memory for $A, B,$ and $C$ aligned to 64 byte boundaries using \texttt{\_mm\_malloc}. S
 
 \newpage
 \section{Steps that did not work}
+\subsection{Fitting to L2 cache}
 
 \newpage
 \section{Optimization Experiments}
-\subsection{Block Multiplication with Multiple Block Sizes}
+\subsection{Block Multiplication with Multiple Block Sizes} \label{sec:prev_block}
 \subsubsection{Approach}
 Working off of \texttt{dgemm\_blocked.c}, we tried different block sizes to examine the performance changes. 
 \subsubsection{Results}
@@ -136,7 +153,7 @@ The current block multiplication in the innermost loop does not have unit stride
     \label{basic_copy_opt}
 \end{figure} 
 
-\subsection{Copy Optimization}
+\subsection{Copy Optimization} \label{sec:prev_copy}
 \subsubsection{Approach}
 In the basic version of dgemm, we see drops near matrix sizes that are a multiple of 2. This is caused by conflict misses due to associative caches. To prevent this, we attempted a copy optimization over the basic dgemm implementation.
 \subsubsection{Results}
@@ -158,7 +175,7 @@ We use \texttt{-03} and \texttt{-02} optimization flags when we compile the copy
 \end{figure}
  
 
-\subsection{Restrict Keyword}
+\subsection{Restrict Keyword} \label{sec:prev_restrict}
 
 \subsubsection{Approach}
 Telling the compiler that our matrix pointers will not be aliasing is another approach suggested on the writeup. 
