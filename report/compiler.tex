@@ -47,19 +47,28 @@ We experimented with the following \icc{} flags.
     built to optimize the frequently executed code paths documented in the
     profiles.
 
-  \todo{fill out when you have cluster access}
-  \item \ttt{-unroll-aggresive}
-  \item \ttt{-opt-prefetch=4}
-  \item \ttt{-fno-alias}
-  \item \ttt{-parallel}
-  \item \ttt{-align}
-  \item \ttt{-restrict}
+  \item \ttt{-unroll-aggresive}:
+    The \ttt{-unroll-aggresive} flag informs the compiler to perform aggressive
+    loop unrolling which can reduce loop overheads at the cost of increased
+    binary sizes.
+
+  \item \ttt{-fno-alias}:
+    The \ttt{-fno-alias} flag informs the compiler to assume that pointers are
+    never aliased. We did not use this flag to compile our code because in
+    general, we cannot assume that matrices are not aliased.
+
+  \item \ttt{-align}:
+    The \ttt{-align} flag informs the compiler to naturally align variables and
+    arrays whenever possible which helps vector instruction performance.
+
+  \item \ttt{-restrict}:
+    The \texttt{-restrict} flag enables the \ttt{restrict} annotation.
 \end{itemize}
 
 We compiled the naive matrix multiplication with all these \icc{} flags
-enabled, yet the performance is negligible at best, as shown by the line titled
-\ttt{compiler} in \figref{compiler}. We hypothesize that the compiler flags may
-be more beneficial when used to compile less naive implementations.
+enabled, yet the performance is only marginally improved, as shown by the line
+titled \ttt{compiler} in \figref{compiler}. Notably, compiler flags do have a
+greater impact on more complex kernels.
 
 \subsubsection{Compiler Annotations}
 We explored two \icc{} annotations.
@@ -80,12 +89,10 @@ We explored two \icc{} annotations.
 \end{itemize}
 
 We compiled the naive matrix multiplication with all pointer arguments
-annotated with \ttt{restrict}. This increased the performance of the naive
-matrix multiplication to that of the Fortran implementation, as shown by the
-line labelled \ttt{annotated} in \figref{compiler}. We did not yet experiment
-with aligning data structures.
+annotated with \ttt{restrict}. This considerably increased the performance of
+the naive matrix multiplication, as shown by the line labelled \ttt{annotated}
+in \figref{compiler}.
 
-\todo{update this}
 \begin{figure}[h]
   \centering
   \includegraphics[width=\textwidth]{img/timing_compiler.pdf}
