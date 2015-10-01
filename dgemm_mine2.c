@@ -41,7 +41,7 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 // but I switched the order of the arguments
 // so now it reads C' = B' * A' if you think column major layout.)
 
-inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
+inline void MMult4by4VRegAC(const double* restrict const B, const double* restrict const A, double* restrict C)
 {
   __m256d a0, a1, ab0;
   __m256d b0, b1, b2, b3, b4, b5, b6, b7;
