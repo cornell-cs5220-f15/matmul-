@@ -102,6 +102,8 @@ void diff_dgemm(const int M, const double *A, const double *B, double *C)
     FILE* fp_our  = fopen("dump_our.txt", "w");
     FILE* fp_ref  = fopen("dump_ref.txt", "w");
     FILE* fp_diff = fopen("dump_diff.txt", "w");
+    FILE* fp_a = fopen("dump_A.txt", "w");
+    FILE* fp_b = fopen("dump_B.txt", "w");
     matrix_clear(C);
     square_dgemm(M, A, B, C);
     for (int i = 0; i < M; ++i) {
@@ -116,14 +118,20 @@ void diff_dgemm(const int M, const double *A, const double *B, double *C)
             fprintf(fp_our,  " %g", C[j*M+i]);
             fprintf(fp_ref,  " %g", dotprod);
             fprintf(fp_diff, " % 0.0e", C[j*M+i]-dotprod);
+            fprintf(fp_a, " %g", A[j*M+i]);
+            fprintf(fp_b, " %g", B[j*M+i]);
         }
         fprintf(fp_our, "\n");
         fprintf(fp_ref, "\n");
         fprintf(fp_diff, "\n");
+        fprintf(fp_a, "\n");
+        fprintf(fp_b, "\n");
     }
     fclose(fp_diff);
     fclose(fp_ref);
     fclose(fp_our);
+    fclose(fp_a);
+    fclose(fp_b);
 }
 
 /* --
