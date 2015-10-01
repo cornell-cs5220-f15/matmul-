@@ -6,7 +6,6 @@ double-precision floating point matrix multiplication kernel.
 | **Kernel**                   | **Description**                                                                                                  |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `dgemm_big_blocked.c`        | Blocked matmul with large block size. `A` gets transposed in dynamically allocated blocks.                       |
-| `dgemm_big_blocked_v2.c`     | Blocked matmul with large block size. `A` gets transposed in dynamically allocated blocks. Fewer copies than v1. |
 | `dgemm_padded_blocked.c`     | Padded blocked matmul with small fixed-size blocks. `A` gets transposed, `B` gets copied.                        |
 | `dgemm_3_level_blocking.c`   | Three-tiered blocked matmul.                                                                                     |
 | `dgemm_annotated.c`          | Naive matmul with compiler annotations (e.g. restrict)                                                           |
