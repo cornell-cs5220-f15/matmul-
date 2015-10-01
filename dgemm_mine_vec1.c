@@ -1,47 +1,72 @@
 const char* dgemm_desc = "My awesome dgemm.";
 #include <stdlib.h>
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 32)
-#define START_BLOCK_SIZE 1200
+#define BLOCK_SIZE ((int) 64)
+#define BLOCK_SIZE_HALF ((int) 32)
 #endif
 
 #include <mmintrin.h>
 #include <xmmintrin.h>  // SSE
 
-
+typedef union
+{
+  __m128d v;
+  double d[2];
+} d2v;
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B, double* restrict C)
 {
-    
-    double* restrict smallA = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-    double* restrict smallB = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-    int i, j, k;
-    for(k=0;k<K;++k){//smallA = A'
-        for(i=0;i<M;++i){
-            smallA[i*BLOCK_SIZE+k]=A[k*lda+i];
-        }
-    }
+	
+	d2v* restrict avec = (d2v*) malloc(BLOCK_SIZE * BLOCK_SIZE_HALF * sizeof(d2v));
+	d2v* restrict bvec = (d2v*) malloc(BLOCK_SIZE * BLOCK_SIZE_HALF * sizeof(d2v));
+	int i, j, k;
+	int ood = K%2; 
+	for(k=0;k<K;++k){//smallA = A'
+		int wb=k%2;
+		for(i=0;i<M;++i){
+			avec[i*BLOCK_SIZE_HALF+k/2].d[wb]=A[k*lda+i];
+		}
+	}
+	if(ood){
+		//printf("%d\n",K);
+		for(i=0;i<M;++i){
+			avec[i*BLOCK_SIZE_HALF+(K-1)/2].d[1]=0;
+		}
+	}
 
-    for(j=0;j<N;++j){
-        for(k=0;k<K;++k){
-            smallB[j*BLOCK_SIZE+k]=B[j*lda+k];
-        }
-    }
-    __assume_aligned(smallA,256);
-    __assume_aligned(smallB,256);
+	for(j=0;j<N;++j){
+		for(k=0;k<K-1;k+=2){
+			bvec[j*BLOCK_SIZE_HALF+k/2].d[0]=B[j*lda+k];
+			bvec[j*BLOCK_SIZE_HALF+k/2].d[1]=B[j*lda+k+1];
+		}
+	}
+	
+	if(ood){
+		for(j=0;j<N;++j){
+			bvec[j*BLOCK_SIZE_HALF+(K-1)/2].d[0]=B[j*lda+K-1];
+			bvec[j*BLOCK_SIZE_HALF+(K-1)/2].d[1]=0;
+		}
+	}
+
+	__assume_aligned(avec,512);
+	__assume_aligned(bvec,512);
     
     for (j = 0; j < N; ++j) {
          for (i = 0; i < M; ++i){
             double cij = C[j*lda+i];
-            for (k = 0; k < K; k++) {
-                #pragma vector always 
-                cij += smallA[i*BLOCK_SIZE+k] * smallB[j*BLOCK_SIZE+k];
+			d2v cvec;
+			cvec.v =_mm_setzero_pd();;
+            for (k = 0; k < K; k+=2) {
+				#pragma vector always 
+                cvec.v += avec[i*BLOCK_SIZE_HALF+k/2].v * bvec[j*BLOCK_SIZE_HALF+k/2].v;
             }
-            C[j*lda+i] = cij;
+            C[j*lda+i] = cij+cvec.d[0]+cvec.d[1];
         }
     }
-    free(smallA);
-    free(smallB);
+
+	free(avec);
+	free(bvec);
+
 }
 
 void do_block(const int lda,
@@ -56,18 +81,6 @@ void do_block(const int lda,
 }
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
-	if((M<START_BLOCK_SIZE)){
-		int i, j, k;
-		for (i = 0; i < M; ++i) {
-			for (j = 0; j < M; ++j) {
-				double cij = C[j*M+i];
-				for (k = 0; k < M; ++k)
-					cij += A[k*M+i] * B[j*M+k];
-				C[j*M+i] = cij;
-			}
-		}
-		return;
-	}
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
     for (bi = 0; bi < n_blocks; ++bi) {
