@@ -245,7 +245,6 @@ inline void do_block_L2(const double* restrict Ak, const double* restrict Bk, do
     int iA, iC, j, jB, k;
     int MM, NN, KK;
 
-    sizeOfBlock_C = ( bi == ni-1 && M%L1 ? L1 * (M%L1) : L1 * L1);
     int sizeOfBlock_C = L1 * L1;
     int sizeOfBlock_B = L1 * L1;
     for (bi = 0; bi < ni-1; bi++) {
@@ -258,17 +257,22 @@ inline void do_block_L2(const double* restrict Ak, const double* restrict Bk, do
             for (bk = 0; bk < nk; bk++) {
                 const int ind_Ak = iA + sizeOfBlock_C * bk;
                 const int ind_Bk = jB + sizeOfBlock_B * bk;
-                MMult4by4VRegAC_basic(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
+                MMult4by4VRegAC(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
             }
         }
+        j = bj * sizeOfBlock_C;
+        jB = bj * K * L1;
         sizeOfBlock_B = ( N%L1 ? L1 * (N%L1) : L1 * L1);
+        const int ind_Ck = iC+j;
         for (bk = 0; bk < nk; bk++) {
             const int ind_Ak = iA + sizeOfBlock_C * bk;
             const int ind_Bk = jB + sizeOfBlock_B * bk;
-            MMult4by4VRegAC_basic(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
+            MMult4by4VRegAC(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
         }
     }
     sizeOfBlock_C = M%L1 ? L1 * (M%L1) : L1 * L1;
+    iA = bi * K * L1;
+    iC = bi * N * L1;
     for (bj = 0; bj < nj-1; bj++) {
         j = bj * sizeOfBlock_C;
         jB = bj * K * L1;
@@ -276,10 +280,11 @@ inline void do_block_L2(const double* restrict Ak, const double* restrict Bk, do
         for (bk = 0; bk < nk; bk++) {
             const int ind_Ak = iA + sizeOfBlock_C * bk;
             const int ind_Bk = jB + sizeOfBlock_B * bk;
-            MMult4by4VRegAC_basic(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
+            MMult4by4VRegAC(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
         }
     }
     sizeOfBlock_B = ( N%L1 ? L1 * (N%L1) : L1 * L1);
+    const int ind_Ck = iC+j;
     for (bk = 0; bk < nk; bk++) {
         const int ind_Ak = iA + sizeOfBlock_C * bk;
         const int ind_Bk = jB + sizeOfBlock_B * bk;
