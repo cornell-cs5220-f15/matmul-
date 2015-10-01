@@ -6,12 +6,12 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 #include <x86intrin.h>
 
 #ifndef L3_BLOCK_SIZE
-#define L3_BLOCK_SIZE ((int) 96)
+#define L3_BLOCK_SIZE ((int) 400)
 #define L3 L3_BLOCK_SIZE
 #endif
 
 #ifndef L2_BLOCK_SIZE
-#define L2_BLOCK_SIZE ((int) 32)
+#define L2_BLOCK_SIZE ((int) 40)
 #define L2 L2_BLOCK_SIZE
 #endif
 
@@ -40,8 +40,9 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 //(It was for column major layout at the beginning, C = A*B assuming col major,
 // but I switched the order of the arguments
 // so now it reads C' = B' * A' if you think column major layout.)
-void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
-{
+
+inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
+{ __attribute__((always_inline));
   __m256d a0, a1;
   __m256d b0, b1, b2, b3, b4, b5, b6, b7;
   __m256d c0,c1,c2,c3;
@@ -232,7 +233,7 @@ void do_block_L1(const double* restrict Ak, const double* restrict Bk, double* r
     }
 
 }
-void do_block_L2(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
+inline void do_block_L2(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
                   const int M, const int N, const int K) {
     // printf("\tA_%dx%d B_%dx%d C_%dx%d\n",M, K, K, N, M, N);
     int bi, bj, bk;
@@ -255,12 +256,12 @@ void do_block_L2(const double* restrict Ak, const double* restrict Bk, double* r
             for (bk = 0; bk < nk; bk++) {
                 const int ind_Ak = iA + sizeOfBlock_C * bk;
                 const int ind_Bk = jB + sizeOfBlock_B * bk;
-                do_block_L1(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
+                MMult4by4VRegAC(Ak + ind_Ak, Bk + ind_Bk, Ck + ind_Ck);
             }
         }
     }
 }
-void do_block_L3(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
+inline void do_block_L3(const double* restrict Ak, const double* restrict Bk, double* restrict Ck,
                   const int M, const int N, const int K) {
     // printf("A_%dx%d B_%dx%d C_%dx%d\n",M, K, K, N, M, N);
     int bi, bj, bk;
