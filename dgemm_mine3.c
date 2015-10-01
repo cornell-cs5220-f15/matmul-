@@ -41,13 +41,14 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 // but I switched the order of the arguments
 // so now it reads C' = B' * A' if you think column major layout.)
 
-inline void MMult4by4VRegAC(const double* restrict const B, const double* restrict const A, double* restrict C)
+inline void MMult4by4VRegAC(double* restrict const B, double* restrict const A, double* restrict C)
 {
-    double *cj1, *cj2, *cj3, *cj4, *bj1, *bj2, *bj3, *bj4;
+    double *cj1, *cj2, *cj3, *cj4,
+    double *bj1, *bj2, *bj3, *bj4;
     __m256d a0,a1,a2,a3,b0,b1,b2,b3,c00,c01,c02,c03;
     __m256d b4,b5,b6,b7,b8,b9,b10,b11,b12,b13,b14,b15;
     double *ak1, *ak2, *ak3, *ak4;
-    for (int j = 0; j < 8; i+=4) {
+    for (int j = 0; j < 8; j+=4) {
         cj1 = C + j*8;
         cj2 = cj1 + 8;
         cj3 = cj2 + 8;
@@ -56,7 +57,7 @@ inline void MMult4by4VRegAC(const double* restrict const B, const double* restri
         bj2 = bj1 + 8;
         bj3 = bj2 + 8;
         bj4 = bj3 + 8;
-        for (int k = 0; k < 8; i+=4) {
+        for (int k = 0; k < 8; k+=4) {
             b0 = _mm256_broadcast_sd(bj1++);
             b1 = _mm256_broadcast_sd(bj2++);
             b2 = _mm256_broadcast_sd(bj3++);
