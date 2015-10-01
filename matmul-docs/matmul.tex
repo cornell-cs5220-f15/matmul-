@@ -1,5 +1,6 @@
 \documentclass[12pt]{article}
 \linespread{1.465}
+
 \usepackage{amsmath}
 \usepackage{multicol}
 \usepackage{graphicx}
@@ -14,36 +15,49 @@
 
 \begin{document}
 
-\noindent
-
-\setlength{\parindent}{0cm}
+%\noindent
+\setlength{\parindent}{24pt}
 
 
 \section*{Project 1 - Matrix Multiplication}
 Team 27 \--- David Eckman, Bryce Evans, Batu Inal
 
-\subsection*{Motivation}
+\section{Motivation}
 
-Our assignment was to enhance the performance (GFlops/s) of matrix multiplication ($C = AB$ for $M x M$ square matrices) by improving various parameters such as arithmetic intensity, memory access, and cache efficiency.
+Our assignment was to enhance the performance (GFlops/s) of matrix multiplication ($C = AB$ for $M \times M$ square matrices) by improving parameters such as arithmetic intensity, memory access, and cache efficiency.
 
-\subsection*{Methods}
+\section{Methods}
 
-In our analysis for the task, we considered five main modifications: (1) changing the order of loops for matrix multiplication both within and among blocks; (2) changing the block size relative to cache, (3) copying and restructuring matrices in memory, (4) different compiler flags, (5) using the restrict keyword to achieve strong optimizations by the compiler and combinations thereof. We have also included a section where we discuss our failed attempts to achieve better performance.
+In our analysis for the task, we considered five main modifications: (1) changing the order of loops for matrix multiplication both within and among blocks; (2) using the restrict keyword to achieve strong optimizations by the compiler, (3) using different compiler flags, (4) changing the block size relative to cache, (5) copying and restructuring matrices in memory, and combinations thereof. We conclude with a discussion of our failed attempts to achieve better performance.
 
-\subsubsection{Changing the Order of Loops}
+\subsection{Changing the Order of Loops}
 
-The matrix multiplication algorithm that involves blocking using three nested loops to determine the order of updates both within and among blocks. We tested all orderings of the loops for complete verification. For all combinations, we also tried various optimization flags and block sizes, but found these variables to be independent and have no noticeable significance our selection of the best ordering. Graph 1.1 shows the performance of the ordering which we found to be the most effective at increasing flop rate: k-j-i for both the outer and inner sets of loops. This was an increase of over 100\% over the worst case ordering of k-j-i for both loops, as shown in Graph 1.1.
+The basic matrix multiplication algorithm uses three nested loops to determine the order of updates.
+We tested all six orderings of the loops for complete verification. 
+Figure \ref{fig:LoopOrders} shows the performance of the orderings for the basic algorithm.
+
+We observed that the performance of the loop orders were consistently paired by which index was in the inner loop.
+Orderings with index j in the inner loop performed the worst while orderings with index i in the inner loop performed far better.
+The reason for the performance differences among these ordering has to do with the memory access patterns they create and how that agrees with the storage of the matrices in memory.
 
 \begin{center}
-\includegraphics[width16cm]{•}
-
+\begin{figure}[h]
+\includegraphics[width=6in]{timing_basiclooporders_comparison.pdf}
+	\caption{Performance for various loop orders.}
+	\label{fig:LoopOrders}
+\end{figure}
 \end{center}
-Graph 1.1: Gflops/s vs Dimension for various loop orders
 
+Given the matrices are in column major order and we are optimizing on reducing cache thrashing, it is important that we keep the columns in memory for as long as possible.
+This includes using a column entirely while in memory and not needing to reload it later.
+The update formula $C[j*lda+i] \mathrel{+}= A[k*lda+i] * B[j*lda+k] (c_{i,j} \mathrel{+}= a_{i,k} * b_{kj})$ illustrates how the order of the indices affect the access patterns.
+By putting \texttt{i} in the innermost loop, we fix element $i,j$ of \texttt{B} and pass through column $j$ of $C$ and column $k$ of $A$.
+This access pattern is the most favorable because of the column major alignment in memory.
+When $j$ is in the innermost loop, we would fix the $i,k$ element of $A$ and pass through row $i$ of $C$ and row $k$ of $B$. This would be the least desirable access pattern.
 
-Given the matrices are in column major order and we are optimizing on reducing cache thrashing, it is important that we keep the columns in memory for as long as possible. This includes using a column entirely while in memory and not needing to reload it later. The update formula $C[j*lda+i] \mathrel{+}= A[k*lda+i] * B[j*lda+k] (c_{i,j} \mathrel{+}= a_{i,k} * b_{kj})$ illustrates how the order of the indices affect the access patterns. By putting \texttt{i} in the innermost loop, we fix element $i,j$ of \texttt{B} and pass through column $j$ of $C$ and column $k$ of $A$. This access pattern is the most favorable because of the column major alignment in memory. When $j$ is in the innermost loop, we would fix the $i,k$ element of $A$ and pass through row $i$ of $C$ and row $k$ of $B$. This would be the least desirable access pattern.
+While theoretically index $j$ should be on the outer most loop because it controls column changes the most.  
 
-Note: While we found very little performance difference between $k$, $j$, $i$, and $j$, $k$, $i$, the former was slightly faster and we have not yet determined why. While theoretically index $j$ should be on the outer most loop because it controls column changes the most, our hypothesis is that the cache is not large enough to keep two entire columns and so these columns are occasionally lost from cache and require a reload.   
+In the block matrix multiplication algorithms we test later, we chose to use the j-k-i loop ordering both within and among the blocks.
 
 \subsubsection{Compiler Flags}
 
@@ -81,7 +95,7 @@ The restrict keyword allows for strong optimizations by the compiler. By using r
 For the second method, our approach was to partition the matrices into smaller square matrices (blocks) and multiply them. By using this approach we aimed to improve our arithmetic intensity by performing many multiplication operations with the same data. We also aimed to improve our memory access patterns by choosing the block size so that a block each from matrices $A$, $B$, and $C$ could fit into our L1 or L2 cache.
 
 \begin{center}
-\includegraphics[width16cm]{•}
+%\includegraphics[width=5in]{}
 
 Diagram 2.1: Matrix multiplication instantiated from smaller blocks.
 \end{center}
