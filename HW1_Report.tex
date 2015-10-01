@@ -97,20 +97,20 @@ The first three lines of Figure \ref{fig:progression} show the improvement gaine
 	\label{fig:progression}
 \end{figure}
 
-\section{Copy Optimization}
+\subsection{Copy Optimization}
 Copy optimization improves spatial locality and reduces cache conflicts by copying fixed size blocks and storing them elsewhere for the computation. Due to the additional data storage, it primarily optimizes code for large matrix computations. We used copy optimization on matrix A, since we realized that the pattern of iteration over matrix A would be much more cache-efficient if it was stored in row-major rather than column-major order.
 
 We first tried copying the entire input matrix A into a row-major format before iterating over it in blocks. The results of this optimization are the fourth line on Figure \ref{fig:progression}. As an alternative, to improve spatial locality for the block iterations, we tried copying each large block of matrix A to a row-major format before splitting it into small blocks. This did improve performance compared to transposing the entire input matrix at once, as shown on the last line of Figure \ref{fig:progression}.
 
-\section{Compiler Hints}
+\subsection{Compiler Hints}
 C contains some special keywords that can be used to provide hints to the compiler about the layout of memory and allow it to use more aggressive optimizations. We tested the \texttt{restrict} keyword, which specifies that the memory region referenced by a pointer will not overlap with a memory region referenced by any other pointer in scope. This keyword could be applied to all pointers to matrices A, B, and C, since they are allocated in distinct sections of memory and the pointers are never used for any matrix other than their own.
 
 The fifth line on Figure \ref{fig:progression} shows the results of adding the \texttt{restrict} keyword to all applicable pointers in our code that implemented the copy optimization with initial transposing. Unfortunately, this seemed to make little difference, but we kept it in future iterations of the code (such as the copy optimization at the large-block level).
 
-\section{Index Order}
+\subsection{Index Order}
 After implementing copy optimization, we tested all index orders for loops in the smallest blocked matrix multiplication routine (\texttt{dgemm\_basic}). We found that the default i,j,k ordering was already optimal for the code and blocking, as it was written.
 
-\section{Block Size Tuning}
+\subsection{Block Size Tuning}
 Although our calculations showed that block sizes of 36x36 and 103x103 should be optimal for the cache sizes of the cluster's Xeon boards, we experimented with a few other block sizes both smaller and larger than these, after implementing the copy optimization.
 
 The results of different small- and large-block sizes for the implementation that copies matrix A at the large-block level are shown in Figure \ref{fig:l2blocking}. Surprisingly, it appears that the largest two block sizes, 64x64 for the small blocks and 256x256 for the large blocks, resulted in the best performance.
@@ -124,7 +124,7 @@ The results of different small- and large-block sizes for the implementation tha
 \end{figure}
 
 
-\section{SSE Directives}
+\subsection{SSE Directives}
 
 We hoped to be able to use SSE instructions to force matrix C to be written without being cached, since caching C does not improve performance and only takes up cache space that could be used by A and B. We tested a set of Intel intrinsic functions that are documented to use non-temporal storage instructions. We modified \texttt{dgemm\_basic} as follows:
 
@@ -159,7 +159,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
   As can be seen in Figure \ref{fig:sse}, the timings for the modified SSE code were actually worse when compared to the basic blocked dgemm\_mine code. 
 
 
-\section{Compiler Flags}
+\subsection{Compiler Flags}
 Compiler flags that were found to improve performance were for this code are listed as follows: \\
 \begin{itemize}
 \item -O2: Maximizes speed, enables vectorization. Basic optimize flag. 
