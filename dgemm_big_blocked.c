@@ -4,7 +4,7 @@
 #include "indexing.h"
 #include "transpose.h"
 
-const char* dgemm_desc = "mjw297 dgemm.";
+const char* dgemm_desc = "Large blocked matmul with A tranposed in blocks.";
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 1024)
@@ -24,13 +24,11 @@ void basic_dgemm(const int lda,
                        double* C) {
     int i, j, k;
     double *A_ = cm_transpose(A, lda, lda, M, K);
-    // double *B_ = cm_copy(B, lda, lda, K, N);
 
     for (j = 0; j < N; ++j) {
         for (i = 0; i < M; ++i) {
             double cij = C[cm(lda, lda, i, j)];
             for (k = 0; k < K; ++k) {
-                // cij += A_[rm(M, K, i, k)] * B_[cm(K, N, k, j)];
                 cij += A_[rm(M, K, i, k)] * B[cm(lda, lda, k, j)];
             }
             C[cm(lda, lda, i, j)] = cij;
