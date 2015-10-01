@@ -73,17 +73,11 @@ dgemm_mkl.o: dgemm_blas.c
 dgemm_veclib.o: dgemm_blas.c
 	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $<
 
-dgemm_padded_blocked.o: dgemm_padded_blocked.c
-	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
-
-dgemm_padded_blocked_v2.o: dgemm_padded_blocked_v2.c
-	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $<
-
 dgemm_big_blocked_%.o: dgemm_big_blocked.c
 	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(OPTFLAGS3) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
 
 dgemm_padded_blocked_%.o: dgemm_padded_blocked.c
-	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
+	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(OPTFLAGS3) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
 
 # ---
 # Rules for building timing CSV outputs
