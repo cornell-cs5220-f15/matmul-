@@ -43,7 +43,7 @@ const char* dgemm_desc = "My 3 level blocked dgemm.";
 
 inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, double* restrict C)
 {
-  __m256d a0, a1;
+  __m256d a0, a1, ab0;
   __m256d b0, b1, b2, b3, b4, b5, b6, b7;
   __m256d c0,c1,c2,c3;
   c0 = _mm256_load_pd(C+0);
@@ -59,7 +59,9 @@ inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, 
     b3 = _mm256_broadcast_sd(B+12);
 
     c0 = _mm256_fmadd_pd(a0,b0,c0);
-    c1 = _mm256_fmadd_pd(a0,b1,c1);
+    ab0 = _mm256_mul_pd(a0,b1);
+    c1 = _mm256_add_pd(c1,ab0);
+    // c1 = _mm256_fmadd_pd(a0,b1,c1);
     c2 = _mm256_fmadd_pd(a0,b2,c2);
     c3 = _mm256_fmadd_pd(a0,b3,c3);
 
@@ -70,7 +72,9 @@ inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, 
     b7 = _mm256_broadcast_sd(B+13);
 
     c0 = _mm256_fmadd_pd(a1,b4,c0);
-    c1 = _mm256_fmadd_pd(a1,b5,c1);
+    ab0 = _mm256_mul_pd(a1,b5);
+    c1 = _mm256_add_pd(c1,ab0);
+    //c1 = _mm256_fmadd_pd(a1,b5,c1);
     c2 = _mm256_fmadd_pd(a1,b6,c2);
     c3 = _mm256_fmadd_pd(a1,b7,c3);
 
@@ -81,7 +85,9 @@ inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, 
     b3 = _mm256_broadcast_sd(B+14);
 
     c0 = _mm256_fmadd_pd(a0,b0,c0);
-    c1 = _mm256_fmadd_pd(a0,b1,c1);
+    ab0 = _mm256_mul_pd(a0,b1);
+    c1 = _mm256_add_pd(c1,ab0);
+    // c1 = _mm256_fmadd_pd(a0,b1,c1);
     c2 = _mm256_fmadd_pd(a0,b2,c2);
     c3 = _mm256_fmadd_pd(a0,b3,c3);
 
@@ -92,7 +98,9 @@ inline void MMult4by4VRegAC(const double* restrict B, const double* restrict A, 
     b7 = _mm256_broadcast_sd(B+15);
 
     c0 = _mm256_fmadd_pd(a1,b4,c0);
-    c1 = _mm256_fmadd_pd(a1,b5,c1);
+    ab0 = _mm256_mul_pd(a1,b5);
+    c1 = _mm256_add_pd(c1,ab0);
+    //c1 = _mm256_fmadd_pd(a1,b5,c1);
     c2 = _mm256_fmadd_pd(a1,b6,c2);
     c3 = _mm256_fmadd_pd(a1,b7,c3);
   }
