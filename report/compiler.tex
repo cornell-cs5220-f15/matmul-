@@ -46,6 +46,14 @@ We experimented with the following \icc{} flags.
     frequently executed code paths. A binary compiled with \ttt{-prof-use} is
     built to optimize the frequently executed code paths documented in the
     profiles.
+
+  \todo{fill out when you have cluster access}
+  \item \ttt{-unroll-aggresive}
+  \item \ttt{-opt-prefetch=4}
+  \item \ttt{-fno-alias}
+  \item \ttt{-parallel}
+  \item \ttt{-align}
+  \item \ttt{-restrict}
 \end{itemize}
 
 We compiled the naive matrix multiplication with all these \icc{} flags
@@ -77,6 +85,7 @@ matrix multiplication to that of the Fortran implementation, as shown by the
 line labelled \ttt{annotated} in \figref{compiler}. We did not yet experiment
 with aligning data structures.
 
+\todo{update this}
 \begin{figure}[h]
   \centering
   \includegraphics[width=\textwidth]{img/timing_compiler.pdf}
