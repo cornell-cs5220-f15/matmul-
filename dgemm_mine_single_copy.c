@@ -78,7 +78,6 @@ void store_copy(const int lda, const int n_blocks,
         const int is_j_edge = (j == n_blocks - 1);
         const int K = (is_j_edge && edge_size) ? edge_size : BLOCK_SIZE;
 
-        #pragma simd
         for (i = 0; i < n_blocks; ++i) {
             const int is_i_edge = (i == n_blocks - 1);
             const int M = (is_i_edge && edge_size) ? edge_size : BLOCK_SIZE;
