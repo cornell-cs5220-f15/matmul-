@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl mine_tuned
+BUILDS=mine basic blocked f2c blas mkl mine_tuned mine_tuned_2
 
 # C and Fortran compilers
 CC=icc
