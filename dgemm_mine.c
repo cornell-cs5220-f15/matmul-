@@ -102,31 +102,36 @@ void do_block(const int M, const int nblock,
               const double * restrict A, const double * restrict B, double * restrict C,
               const int bi, const int bj, const int bk)
 {
-        int i, j, k, BA_A, BA_B, sub_BA_A, sub_BA_B, BA_C, sub_BA_C;
+	int i, j, k, BA_A, BA_B, sub_BA_A, sub_BA_B, BA_C, sub_BA_C;
     __assume_aligned(A, 64);
     __assume_aligned(B, 64);
     __assume_aligned(C, 64);
 
-        // BA stands for block adress
+	// BA stands for block adress 
     BA_A=(bk*nblock+bi)*L1_BS*L1_BS;
     BA_B=(bj*nblock+bk)*L1_BS*L1_BS;
     BA_C=(bj*nblock+bi)*L1_BS*L1_BS;
-    for (k = 0; k < L1_BS; ++k) {
-        // finds sub_BA, tells compiler its aligned
-        sub_BA_B=BA_B+L1_BS*k;
-        __assume(sub_BA_B%8==0);
+    for (i = 0; i < L1_BS; ++i) {
+	// finds sub_BA, tells compiler its aligned
+	sub_BA_A=BA_A+L1_BS*i;
+	__assume(sub_BA_A%8==0);	
+	//same for C                
+    	sub_BA_C=BA_C+L1_BS*i;
+        __assume(sub_BA_C%8==0);
 
-        for (i = 0; i < L1_BS; ++i){
+	for (j = 0; j < L1_BS; ++j){
+	    sub_BA_B=BA_B+L1_BS*j;
+            __assume(sub_BA_B%8==0);
 
-            sub_BA_C=BA_C+L1_BS*i;
-            double aki = A[BA_A+i*L1_BS+k];
-            __assume(sub_BA_C%8==0);
-            for (j = 0; j < L1_BS; ++j) {
-                // old kernel using block to row transpose
-                C[sub_BA_C+j]+= aki * B[sub_BA_B+j];
-                //without transpose:
-                //cij += A[((bk*nblock+bi))*L1_BS*L1_BS+L1_BS*i+k] * B[((bj*nblock)+bk)*L1_BS*L1_BS+L1_BS*k+j];
-                }
+	    double cij = C[sub_BA_C+j];
+	
+            for (k = 0; k < L1_BS; ++k) {
+		// new kernel using block to rogitw transpose	
+                cij += A[sub_BA_A+k] * B[sub_BA_B+k];
+       		//without transpose: 
+       		//cij += A[((bk*nblock+bi))*L1_BS*L1_BS+L1_BS*i+k] * B[((bj*nblock)+bk)*L1_BS*L1_BS+L1_BS*k+j];
+		}
+	 C[sub_BA_C+j]= cij;
         }
     }
 }
