@@ -41,9 +41,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                 // registers for a given output element since we need to
                 // store back to the output matrix for every iteration
                 // here.
-                double cij = C[j*lda+i];
-                cij += A[k*lda+i] * B[j*lda+k];
-                C[j*lda+i] = cij;
+                C[j*lda+i] += A[k*lda+i] * B[j*lda+k];
             }
         }
     }

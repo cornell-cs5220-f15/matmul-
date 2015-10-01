@@ -1,31 +1,20 @@
 //========================================================================
-// dgemm_mine.c
+// dgemm_copy.c
 //========================================================================
-// DGEMM blocked implementation with AVX extensions, copy optimization,
-// and alternate loop ordering. This is the culmination of the three
-// primary optimizations explored for this assignment. In order to
-// facilitate vector loads/stores for any matrix dimension, we must
-// choose a block size that is evenly divisible by the SIMD width
-// (256b = 4 doubles). In addition, we still want the blocks to be sized
-// such that the memory footprint for every iteration fits entirely in
-// the L1 cache.
-//
-// If the block size is set to be evenly divisible by the SIMD width, we
-// can use copy optimization to ensure 256b-alignment of all columns
-// across all blocks for any matrix dimension, obviating the need for the
-// less efficient masked or unaligned vector loads/stores. We always
-// enough space in the scratchpad to hold entire blocks for all three
-// matrices so that for the corner cases when the remaining data does not
-// fill up the entire block, we can still do vector loads/stores on trash
-// values as long as we do not write these results back to the output
-// matrix.
+// DGEMM blocked implementation with copy optimization. In order to
+// reduce conflict misses in the cache, we copy data from the blocks we
+// need for each iteration into a contiguous cache-line-aligned
+// scratchpad in memory. Ideally, we want the blocks to be sized such
+// that the memory footprint for every iteration fits entirely in the L1
+// cache. First-order calculations show that with a 32KB L1 cache, we are
+// able to fit 4096 64b words without any conflicts, meaning we can fit
+// three MxM blocks where M = floor( sqrt( 4096 / 3 ) ) = 36.
 
-#include <immintrin.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 
-const char* dgemm_desc =
-    "Blocked dgemm with AVX extensions, copy optimization, and alternate loop ordering.";
+const char* dgemm_desc = "Blocked dgemm with copy optimization (block_size=36).";
 
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 128)
@@ -78,7 +67,6 @@ void store_copy(const int lda, const int n_blocks,
         const int is_j_edge = (j == n_blocks - 1);
         const int K = (is_j_edge && edge_size) ? edge_size : BLOCK_SIZE;
 
-        #pragma simd
         for (i = 0; i < n_blocks; ++i) {
             const int is_i_edge = (i == n_blocks - 1);
             const int M = (is_i_edge && edge_size) ? edge_size : BLOCK_SIZE;
@@ -106,38 +94,13 @@ inline __attribute__((always_inline))
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double *A, const double *B, double *C)
 {
-    // Use SIMD extensions to parallelize computation across multiple
-    // elements within a column in matrix A with the same element in
-    // matrix B. Essentially parallelizes the outer loop for column
-    // traversal in order to compute multiple elements in the same column
-    // of the output matrix. The number of outer loop iterations required
-    // to compute all rows is the number of elements (doubles) in a
-    // column divided by the number of doubles supported by a SIMD
-    // operation (256b -> 4 doubles).
     int i, j, k;
-    int num_wide_ops = (M + 3) / 4; // ceil(M/4)
-    for (j = 0; j < N; ++j) {
-        for (k = 0; k < K; ++k) {
-//            #pragma simd vectorlength(4) linear(i:1)
-//            #pragma prefetch A
-            for (i = 0; i < num_wide_ops; ++i) {
-                // Load partial products in result matrix. We can use a
-                // vector load to efficiently load 4 doubles at once with a
-                // unit-stride. If the block size is set to be evenly
-                // divisible by the SIMD width, we can use copy optimization
-                // to ensure all vector loads/stores are properly aligned.
-                double       *cij_vec_addr = C + (j * lda) + (i * 4);
-                __m256d       cij_vec      = _mm256_load_pd(cij_vec_addr);
-                const double *aik_vec_addr = A + (k * lda) + (i * 4);
-                __m256d       aik_vec      = _mm256_load_pd(aik_vec_addr);
-                double        bkj          = B[j*lda+k];
-                __m256d       bkj_vec      = _mm256_set1_pd(bkj);
-
-                cij_vec = _mm256_fmadd_pd(aik_vec, bkj_vec, cij_vec);
-
-                // Store partial products back into result matrix
-                _mm256_store_pd(cij_vec_addr, cij_vec);
-            }
+    for (i = 0; i < M; ++i) {
+        for (j = 0; j < N; ++j) {
+            double cij = C[j*lda+i];
+            for (k = 0; k < K; ++k)
+                cij += A[k*lda+i] * B[j*lda+k];
+            C[j*lda+i] = cij;
         }
     }
 }
@@ -175,12 +138,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
     const int n_blocks  = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     const int copy_size = n_blocks * n_blocks * BLOCK_SIZE * BLOCK_SIZE;
 
-//    double *A_copy, *B_copy, *C_copy;
-//    posix_memalign((void**)&A_copy, 64, copy_size * sizeof(double));
-//    posix_memalign((void**)&B_copy, 64, copy_size * sizeof(double));
-//    posix_memalign((void**)&C_copy, 64, copy_size * sizeof(double));
-    double *D;
-    posix_memalign((void**)&D, 64, 3 * copy_size * sizeof(double));
+    double *D = (double*) malloc(3 * copy_size * sizeof(double));
     double *A_copy = D;
     double *B_copy = D + copy_size;
     double *C_copy = D + 2 * copy_size;
@@ -196,12 +154,12 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
     // Divide and conquer computation into blocks
     int bi, bj, bk;
-    for (bj = 0; bj < n_blocks; ++bj) {
-        const int j = bj * BLOCK_SIZE;
-        for (bk = 0; bk < n_blocks; ++bk) {
-            const int k = bk * BLOCK_SIZE;
-            for (bi = 0; bi < n_blocks; ++bi) {
-                const int i = bi * BLOCK_SIZE;
+    for (bi = 0; bi < n_blocks; ++bi) {
+        const int i = bi * BLOCK_SIZE;
+        for (bj = 0; bj < n_blocks; ++bj) {
+            const int j = bj * BLOCK_SIZE;
+            for (bk = 0; bk < n_blocks; ++bk) {
+                const int k = bk * BLOCK_SIZE;
                 do_block(M, n_blocks, A_copy, B_copy, C_copy, i, j, k);
             }
         }
