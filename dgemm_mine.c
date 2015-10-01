@@ -1,7 +1,5 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
-#define L2_CACHE_SIZE 256 * 1024
-
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 96) // Multiples of 8 bytes!
 #endif
@@ -36,6 +34,9 @@ void sublock_dgemm(const double *restrict A,
             // C[j*BLOCK_SIZE + 13] += A[k*BLOCK_SIZE + 13] * bkj;
             // C[j*BLOCK_SIZE + 14] += A[k*BLOCK_SIZE + 14] * bkj;
             // C[j*BLOCK_SIZE + 15] += A[k*BLOCK_SIZE + 15] * bkj;
+            // for (i = 0; i < SUBBLOCK_SIZE; ++i) {
+            //     C[j*BLOCK_SIZE + i] += A[k*BLOCK_SIZE + i] * bkj;
+            // }
         }
     }
 }
@@ -88,18 +89,9 @@ void square_dgemm(const int lda,
 {
 
     // The working arrays for copy optimization
-    __attribute__ ((aligned (64))) double A_temp[BLOCK_SIZE * BLOCK_SIZE];
-    __attribute__ ((aligned (64))) double B_temp[BLOCK_SIZE * BLOCK_SIZE];
-    __attribute__ ((aligned (64))) double C_temp[BLOCK_SIZE * BLOCK_SIZE];
-
-    // double* A_temp = _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double), 64);
-    // double* B_temp = _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double), 64);
-    // double* C_temp = _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double), 64);
-
-    // double* temp = _mm_malloc(L2_CACHE_SIZE, 64);
-    // double* A_temp = temp;
-    // double* B_temp = temp + (BLOCK_SIZE * BLOCK_SIZE);
-    // double* C_temp = temp + (2 * BLOCK_SIZE * BLOCK_SIZE);
+    double A_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
+    double B_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
+    double C_temp[BLOCK_SIZE * BLOCK_SIZE] __attribute__ ((aligned (64)));
 
     const int n_blocks = lda / BLOCK_SIZE + (lda % BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
@@ -124,17 +116,12 @@ void square_dgemm(const int lda,
 
                 // copy results back into main C array
                 int ci, cj;
-                for (cj = 0; cj < N; ++cj) {
-                    for (ci = 0; ci < M; ++ci) {
+                for (ci = 0; ci < M; ++ci) {
+                    for (cj = 0; cj < N; ++cj) {
                         C[(j + cj)*lda + (i+ci)] = C_temp[cj*BLOCK_SIZE + ci];
                     }
                 }
             }
         }
     }
-
-    // _mm_free(A_temp);
-    // _mm_free(B_temp);
-    // _mm_free(C_temp);
-    // _mm_free(temp);
 }
