@@ -5,7 +5,7 @@
 const char* dgemm_desc = "naive copy-blocked dgemm.";
 
 #ifndef BLOCK_SIZE
-  #define BLOCK_SIZE ((int) 4)
+  #define BLOCK_SIZE ((int) 64)
 #endif
 
 #ifndef MEM_BOUNDARY

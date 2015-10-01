@@ -7,36 +7,38 @@
 
 const char* dgemm_desc = "Copy optimized, blocked dgemm using an AVX kernel";
 
-#ifndef MUL_BLOCK_SIZE
-  #define MUL_BLOCK_SIZE ((int) 8)
+#ifndef INS_SIZE
+  #define INS_SIZE ((int) 4)
 #endif
 
 #ifndef MEM_BOUNDARY
   #define MEM_BOUNDARY ((int) 32)
 #endif
 
-void print_array(const int col_length,
-                 const int row_length,
-                 const bool is_row_major,
+void print_array(int num_rows,
+                 int num_cols,
+                 bool is_row_major,
                  const double * arr)
 {
   int i, j;
   if (is_row_major)
   {
-    for (i = 0; i < col_length; i++) {
-      for (j = 0; j < row_length; j++)
+    for (i = 0; i < num_rows; i++) {
+      for (j = 0; j < num_cols; j++)
       {
-        printf("%f ", arr[i * col_length + j]);
+        // printf("%02d, %f ", i * num_cols + j, arr[i * num_cols + j]);
+        printf("%f ", arr[i * num_cols + j]);
       }
 
       printf("\n");
     }
   } else
   {
-    for (i = 0; i < col_length; i++) {
-      for (j = 0; j < row_length; j++)
+    for (i = 0; i < num_rows; i++) {
+      for (j = 0; j < num_cols; j++)
       {
-        printf("%f ", arr[j * col_length + i]);
+        // printf("%02d, %f ", j * num_rows + i, arr[j * num_rows + i]);
+        printf("%f ", arr[j * num_rows + i]);
       }
 
       printf("\n");
@@ -46,24 +48,24 @@ void print_array(const int col_length,
   printf("\n");
 }
 
-inline void transpose_array(const int col_length,
-                            const int row_length,
-                            const double * restrict A,
-                                  double * restrict B)
-{
-  __assume_aligned(A, MEM_BOUNDARY);
-  __assume_aligned(B, MEM_BOUNDARY);
-
-  int row, col;
-
-  for (col = 0; col < col_length; col++)
-  {
-    for (row = 0; row < row_length; row++)
-    {
-      B[(row * row_length) + col] = A[(col * col_length) + row];
-    }
-  }
-}
+// inline void transpose_array(const int num_rows,
+//                             const int num_cols,
+//                             const double * restrict A,
+//                                   double * restrict B)
+// {
+//   __assume_aligned(A, MEM_BOUNDARY);
+//   __assume_aligned(B, MEM_BOUNDARY);
+//
+//   int row, col;
+//
+//   for (col = 0; col < num_rows; col++)
+//   {
+//     for (row = 0; row < num_cols; row++)
+//     {
+//       B[(row * num_rows) + col] = A[(col * num_rows) + row];
+//     }
+//   }
+// }
 
 /**
  * Multiplies a 4 x P matrix by a P x 4 matrix using AVX instructions.
@@ -73,32 +75,34 @@ inline void transpose_array(const int col_length,
  * @param  B         P x 4 matrix in column-order
  * @param  C         4 x 4 matrix in column-order
  */
-inline void dgemm_4P4(const double * restrict A,
+inline void dgemm_4P4(const int M,
+                      const int row_offset,
+                      const int col_offset,
+                      const int block_numel,
+                      const double * restrict A,
                       const double * restrict B,
-                            double * restrict C,
-                            double * restrict A_transposed)
+                            double * restrict C)
 {
   __assume_aligned(A, MEM_BOUNDARY);
   __assume_aligned(B, MEM_BOUNDARY);
   __assume_aligned(C, MEM_BOUNDARY);
-  __assume_aligned(A_transposed, MEM_BOUNDARY);
 
-  transpose_array(4, MUL_BLOCK_SIZE, A, A_transposed);
+  const int offset = (col_offset * INS_SIZE) + (row_offset * block_numel);
 
-  __m256d C_1 = _mm256_load_pd(C + 0 * MUL_BLOCK_SIZE);
-  __m256d C_2 = _mm256_load_pd(C + 1 * MUL_BLOCK_SIZE);
-  __m256d C_3 = _mm256_load_pd(C + 2 * MUL_BLOCK_SIZE);
-  __m256d C_4 = _mm256_load_pd(C + 3 * MUL_BLOCK_SIZE);
+  __m256d C_1 = _mm256_load_pd(C + offset + (0 * M));
+  __m256d C_2 = _mm256_load_pd(C + offset + (1 * M));
+  __m256d C_3 = _mm256_load_pd(C + offset + (2 * M));
+  __m256d C_4 = _mm256_load_pd(C + offset + (3 * M));
 
   int i;
-  for (i = 0; i < MUL_BLOCK_SIZE; i++)
+  for (i = 0; i < M; i++)
   {
-    __m256d A_col = _mm256_load_pd(A_transposed + MUL_BLOCK_SIZE * i);
+    __m256d A_col = _mm256_load_pd(A + INS_SIZE * i);
 
-    __m256d B_1 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 0 + i);
-    __m256d B_2 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 1 + i);
-    __m256d B_3 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 2 + i);
-    __m256d B_4 = _mm256_broadcast_sd(B + MUL_BLOCK_SIZE * 3 + i);
+    __m256d B_1 = _mm256_broadcast_sd(B + M * 0 + i);
+    __m256d B_2 = _mm256_broadcast_sd(B + M * 1 + i);
+    __m256d B_3 = _mm256_broadcast_sd(B + M * 2 + i);
+    __m256d B_4 = _mm256_broadcast_sd(B + M * 3 + i);
 
     // Calculate dot products
     __m256d DP_1 = _mm256_mul_pd(A_col, B_1);
@@ -112,31 +116,33 @@ inline void dgemm_4P4(const double * restrict A,
     C_4 = _mm256_add_pd(C_4, DP_4);
   }
 
-  _mm256_store_pd(C + 0 * MUL_BLOCK_SIZE, C_1);
-  _mm256_store_pd(C + 1 * MUL_BLOCK_SIZE, C_2);
-  _mm256_store_pd(C + 2 * MUL_BLOCK_SIZE, C_3);
-  _mm256_store_pd(C + 3 * MUL_BLOCK_SIZE, C_4);
+  _mm256_store_pd(C + offset + (0 * M), C_1);
+  _mm256_store_pd(C + offset + (1 * M), C_2);
+  _mm256_store_pd(C + offset + (2 * M), C_3);
+  _mm256_store_pd(C + offset + (3 * M), C_4);
+
+  print_array(M, M, false, C);
 }
 
-inline void dgemm_8x8(const double * restrict A,
-                      const double * restrict B,
-                            double * restrict C,
-                            double * restrict scratch_4P4)
-{
-  __assume_aligned(A, MEM_BOUNDARY);
-  __assume_aligned(B, MEM_BOUNDARY);
-  __assume_aligned(C, MEM_BOUNDARY);
-  __assume_aligned(scratch_4P4, MEM_BOUNDARY);
-
-  int i;
-  for (i = 0; i < 8; i++)
-  {
-    dgemm_4P4(A, B, C, scratch_4P4);
-    dgemm_4P4(A + 32, B, C + 16, scratch_4P4);
-    dgemm_4P4(A, B + 32, C + 32, scratch_4P4);
-    dgemm_4P4(A + 32, B + 32, C + 48, scratch_4P4);
-  }
-}
+// inline void dgemm_8x8(const double * restrict A,
+//                       const double * restrict B,
+//                             double * restrict C,
+//                             double * restrict scratch_4P4)
+// {
+//   __assume_aligned(A, MEM_BOUNDARY);
+//   __assume_aligned(B, MEM_BOUNDARY);
+//   __assume_aligned(C, MEM_BOUNDARY);
+//   __assume_aligned(scratch_4P4, MEM_BOUNDARY);
+//
+//   int i;
+//   for (i = 0; i < 8; i++)
+//   {
+//     dgemm_4P4(A, B, C, scratch_4P4);
+//     dgemm_4P4(A + 32, B, C + 16, scratch_4P4);
+//     dgemm_4P4(A, B + 32, C + 32, scratch_4P4);
+//     dgemm_4P4(A + 32, B + 32, C + 48, scratch_4P4);
+//   }
+// }
 
 // inline void dgemm_64x64(const double * restrict A,
 //                         const double * restrict B,
@@ -148,10 +154,10 @@ inline void dgemm_8x8(const double * restrict A,
 //   __assume_aligned(C, MEM_BOUNDARY);
 //   __assume_aligned(scratch_4P4, MEM_BOUNDARY);
 //
-//   const int block_numel = 4 * MUL_BLOCK_SIZE;
+//   const int block_numel = 4 * INS_SIZE;
 //   int i;
 //
-//   for (i = 0; i < MUL_BLOCK_SIZE; i++) {
+//   for (i = 0; i < INS_SIZE; i++) {
 //     dgemm_4P4(A + 0  * block_numel, B + i * block_numel, C + 0  * 16, scratch_4P4);
 //     dgemm_4P4(A + 1  * block_numel, B + i * block_numel, C + 1  * 16, scratch_4P4);
 //     dgemm_4P4(A + 2  * block_numel, B + i * block_numel, C + 2  * 16, scratch_4P4);
@@ -171,105 +177,87 @@ inline void dgemm_8x8(const double * restrict A,
 //   }
 // }
 
-void square_dgemm(const int     M,
-                  const double *A,
-                  const double *B,
-                        double *C)
+void square_dgemm(const int      M,
+                  const double * A,
+                  const double * B,
+                        double * C)
 {
-    const int malloc_block_size = MUL_BLOCK_SIZE * MUL_BLOCK_SIZE * sizeof(double);
-    const int n_blocks = M / MUL_BLOCK_SIZE + (M % MUL_BLOCK_SIZE? 1 : 0);
+  setbuf(stdout, NULL);
 
-    print_array(M, M, false, B);
+  const int n_blocks = M / INS_SIZE + (M % INS_SIZE ? 1 : 0);
 
-    int blocked_row, blocked_col, blocked_k;
-    int row, col, row_start, col_start, row_size, col_size;
-    int k, k_start, k_size;
+  const int block_numel = INS_SIZE * M;
+  const int block_size = block_numel * sizeof(double);
+  const int input_size = M * M * sizeof(double);
 
-    // Preallocate holding space for the blocks
-    double * a_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
-    double * b_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
-    double * c_block = _mm_malloc(malloc_block_size, MEM_BOUNDARY);
+  // Preallocate caches for A and B
+  double * a_aligned = _mm_malloc(input_size, MEM_BOUNDARY);
+  double * b_aligned = _mm_malloc(input_size, MEM_BOUNDARY);
 
-    // Preallocate scratch arrays
-    double * scratch_4P4 = _mm_malloc(4 * MUL_BLOCK_SIZE * sizeof(double), MEM_BOUNDARY);
+  // Preallocate holding space for the blocks
+  double * a_block = _mm_malloc(block_size, MEM_BOUNDARY);
+  double * b_block = _mm_malloc(block_size, MEM_BOUNDARY);
+  double * c_block = _mm_malloc(block_size, MEM_BOUNDARY);
 
-    // Create a copy of A that is transposed in row-major order
-    // to get element at (col,row): a_transposed[row * M + col]
-    double * a_transposed = _mm_malloc(M * M * sizeof(double), MEM_BOUNDARY);
-    transpose_array(M, M, A, a_transposed);
+  // Copy A and B to their memory aligned substitues
+  memcpy(a_aligned, A, input_size);
+  memcpy(b_aligned, B, input_size);
 
-    for (blocked_col = 0; blocked_col < n_blocks; blocked_col++)
+  int i;
+  // Iterate over the rows of A
+  for (i = 0; i < n_blocks; i++)
+  {
+    // Copy out 4 rows of A into a_block in column-major.
+    // Since A is in column major, we read 4 entries for the current block (i * INS_SIZE)
+    // into a ymm register, then skip to the next column (j)
+    int j;
+    for (j = 0; j < block_numel; j+=INS_SIZE)
     {
-      col_start = blocked_col * MUL_BLOCK_SIZE;
-      col_size = ((col_start + MUL_BLOCK_SIZE) > M) ? (M - col_start) : MUL_BLOCK_SIZE;
-
-      for (blocked_row = 0; blocked_row < n_blocks; blocked_row++)
-      {
-        row_start = blocked_row * MUL_BLOCK_SIZE;
-        row_size = ((row_start + MUL_BLOCK_SIZE) > M) ? (M - row_start) : MUL_BLOCK_SIZE;
-
-  			// Reset C to zero
-        c_block = memset(c_block, 0, malloc_block_size);
-
-        for (blocked_k = 0; blocked_k < n_blocks; blocked_k++)
-        {
-        	// Reset A and B to zero
-          a_block = memset(a_block, 0, malloc_block_size);
-          b_block = memset(b_block, 0, malloc_block_size);
-
-          // C = A[blocked_k, blocked_row] * B[blocked_col, blocked_k]
-          k_start = blocked_k * MUL_BLOCK_SIZE;
-          k_size = ((k_start + MUL_BLOCK_SIZE) > M) ? (M - k_start) : MUL_BLOCK_SIZE;
-
-          // Copying A into a contiguous block of memory
-          for (row = 0; row < row_size; row++)
-          {
-          	int row_start_inner = ((row_start + row) * M) + k_start;
-
-            for (k = 0; k < k_size; k++)
-            {
-              // a_block[(k * MUL_BLOCK_SIZE) + row] = a_transposed[row_start_inner + k];
-              a_block[(row * MUL_BLOCK_SIZE) + k] = a_transposed[row_start_inner + k];
-            }
-          }
-
-          // Copying B into a contiguous block of memory
-          for (col = 0; col < col_size; col++)
-          {
-          	int col_start_inner = ((col_start + col)*M) + k_start;
-
-            for (k = 0; k < k_size; k++)
-            {
-              b_block[(col * MUL_BLOCK_SIZE) + k] =  B[col_start_inner + k];
-            }
-          }
-
-          // printf("A:\n");
-          // print_array(MUL_BLOCK_SIZE, MUL_BLOCK_SIZE, true, a_block);
-
-          // printf("B:\n");
-          print_array(MUL_BLOCK_SIZE, MUL_BLOCK_SIZE, false, b_block);
-
-          // Write into temporary array C assuming A is row-major and B is column-major
-          // dgemm_4P4(a_block, b_block, c_block, scratch_4P4);
-          dgemm_8x8(a_block, b_block, c_block, scratch_4P4);
-        }
-
-        // Write c_block into actual location in C
-        for (col = 0; col < col_size; col++)
-        {
-          for (row = 0; row < row_size; row++)
-          {
-            C[((col_start + col) * M) + row_start + row] = c_block[col * MUL_BLOCK_SIZE + row];
-          }
-        }
-      }
+      _mm256_store_pd(a_block + j, _mm256_load_pd(a_aligned + (i * INS_SIZE) + j));
     }
 
-    // Clean up in order of initialization
-    _mm_free(a_transposed);
-    _mm_free(scratch_4P4);
-    _mm_free(c_block);
-    _mm_free(b_block);
-    _mm_free(a_block);
+    // printf("A_block:\n");
+    // print_array(4, M, false, a_block);
+    // printf("\n");
+
+    // Iterate over the columns of B
+    for (j = 0; j < n_blocks; j++)
+    {
+      // Copy out 4 columns of B into b_block in column-major
+      // Since B is in column major, we read 4 entries for the current block (j * block_numel)
+      // into a ymm register in sequence.
+      int k;
+      for (k = 0; k < block_numel; k+=INS_SIZE)
+      {
+        _mm256_store_pd(b_block + k, _mm256_load_pd(b_aligned + (j * block_numel) + k));
+      }
+
+      // printf("B_block:\n");
+      // print_array(M, 4, false, b_block);
+      // printf("\n");
+
+      // Multiply and update C
+      dgemm_4P4(M, j, i, block_numel, a_block, b_block,  C);
+    }
+  }
+
+  printf("A:\n");
+  print_array(M, M, false, A);
+  printf("\n");
+
+  printf("B:\n");
+  print_array(M, M, false, B);
+  printf("\n");
+
+  printf("C:\n");
+  print_array(M, M, false, C);
+  printf("\n");
+
+  // Clean up in order of initialization
+  _mm_free(c_block);
+  _mm_free(b_block);
+  _mm_free(a_block);
+
+  _mm_free(b_aligned);
+  _mm_free(a_aligned);
 }

@@ -6,4 +6,4 @@
 
 module load cs5220
 cd $PBS_O_WORKDIR
-./matmul-mine64
+valgrind --leak-check=full ./matmul-mine64
