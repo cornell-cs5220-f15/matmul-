@@ -6,10 +6,10 @@
 #include "indexing.h"
 #include "transpose.h"
 
-const char* dgemm_desc = "mjw297 dgemm.";
+const char* dgemm_desc = "Padded blocked matmul.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 64)
+#define BLOCK_SIZE ((int) 128)
 #endif
 
 double A_[BLOCK_SIZE * BLOCK_SIZE];
