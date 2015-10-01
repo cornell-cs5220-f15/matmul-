@@ -1,4 +1,52 @@
 \section{Software Engineering}\label{sec:sweng}
+The development of an efficient matrix multiplication kernel is a complicated
+task that involves a lot of rapid prototyping, and the efficiency with which we
+can develop kernels is limited by how easy it is to write correct code and by
+the overhead of creating, modifying, and running kernels. In this section, we
+describe a couple of the software engineering principles we adhered to that
+increased the overall productivity of kernel development. Concretely, we
+discuss our use of helper functions and unit tests as well as our improvements
+to the build system.
+
+While not directly related to kernel optimization, we feel that our
+organization and principled software development is a significant achievement
+that indirectly has a large impact on the quality of kernels written.
+
+\subsection{Helper Functions and Unit Tests}
+Matrix multiplications involve a lot of low-level pointer arithmetic, and in a
+programming language like C, erroneous pointer arithmetic or invalid memory
+access can be \emph{very difficult} to debug. Moreover, matrix multiplication
+involves operations on a combination of row-major and column-major matrices
+using various complex access patterns involving many nested layers of blocking
+transposing and copying which greatly increase the likelihood of incorrect
+code. To combat the likelihood of programming error and reduce the time spent
+debugging, we developed a modular set of universal helper functions accompanied
+with a set of unit tests.
+
+For example, one unavoidable part of matrix multiplication is array indexing.
+We store all two-dimensional matrices as one-dimensional C arrays which means
+that indexing a matrix involves computing an offset. This offset computation
+depends on whether the array is stored in row-major  or column-major order.
+Things get even more complicated when indexing into a matrix that is embedded
+in a larger matrix or when transposing matrices converting them from
+column-major to row-major.
+
+Rather than manually inlining the index calculations, we instead developed two
+helper functions that compute array offsets for column-major and row-major
+matrices. Thus, if we want to access the $i,j$\textsuperscript{th} element of a
+column-major matrix $A$, we don't have to struggle to choose between \ttt{A[j +
+N*i]}, \ttt{A[i + N*j]}, \ttt{A[j + M*i]}, or \ttt{A[i + M*j]}. Instead, we
+write \ttt{A[cm(N, M, i, j)]}. Similarly, we access row-major arrays using
+\ttt{A[rm(N, M, i, j)]}.
+
+We have written similar helper functions for transposing, copying, and clearing
+arrays and subarrays. Each helper function is verified with a set of unit
+tests, and each function is inlined to avoid any cost of function calls.
+Overall, this modularity and verification has greatly reduced a large number of
+common errors that take a significant amount of time to debug allowing us to
+spend more time focused on development and optimization.
+
+\paragraph{Enhanced Makefiles}
 \todo{
   Discuss the use of helper functions and test cases, the modification of the
   Makefile, and the use of a single runner pbs file. Argue that this was
