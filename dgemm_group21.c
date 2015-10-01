@@ -6,6 +6,7 @@
 #endif
 
 #define ALIGNMENT ((int) 64)
+#define BLOCK_THRESHOLD ((int) 1000)
 
 const char* dgemm_desc = "We all have our DGEMMs, but this DGEMM is mine";
 
@@ -17,17 +18,17 @@ void basic_dgemm(const int lda, const double *A, const double *B, double *C)
 {
     int i, j, k;
     int jlda, ilda;
-    __assume_aligned(A, 64);
-    __assume_aligned(B, 64);
-    __assume_aligned(C, 64);
+    __assume_aligned(A, ALIGNMENT);
+    __assume_aligned(B, ALIGNMENT);
+    __assume_aligned(C, ALIGNMENT);
     for (j = 0; j < BLOCK_SIZE; ++j) {
         jlda = j*lda;
-        __assume_aligned(C, 64);
+        __assume_aligned(C, ALIGNMENT);
         for (i = 0; i < BLOCK_SIZE; ++i) {
             ilda = i*lda;
             double cij = C[jlda+i];
-            __assume_aligned(A, 64);
-            __assume_aligned(B, 64);
+            __assume_aligned(A, ALIGNMENT);
+            __assume_aligned(B, ALIGNMENT);
             for (k = 0; k < BLOCK_SIZE; ++k) {
                 cij += A[ilda+k] * B[jlda+k];
             }
@@ -46,7 +47,7 @@ void do_block(const int lda,
 double* padded_transpose(const double* A, const int M) {
     int i,j;
     const int M_padded = M + (ALIGNMENT - M%ALIGNMENT) * (M%ALIGNMENT > 0);
-    double* A_copy = (double*) _mm_malloc( sizeof(double) * M_padded * M_padded, 64 );
+    double* A_copy = (double*) _mm_malloc( sizeof(double) * M_padded * M_padded, ALIGNMENT );
 
     for(i = 0; i<M; i++) {
         for(j = 0; j<M; j++) {
@@ -66,7 +67,7 @@ double* padded_transpose(const double* A, const int M) {
 double* padded_copy(const double* A, const int M) {
     int i,j;
     const int M_padded = M + (ALIGNMENT - M%ALIGNMENT) * (M%ALIGNMENT > 0);
-    double* A_copy = (double*) _mm_malloc( sizeof(double) * M_padded * M_padded, 64 );
+    double* A_copy = (double*) _mm_malloc( sizeof(double) * M_padded * M_padded, ALIGNMENT );
 
     for(i = 0; i<M; i++) {
         for(j = 0; j<M; j++) {
@@ -91,7 +92,7 @@ void square_dgemm(const int M,
         return;
     }
 
-    if( M <= 1023 ) {
+    if( M <= BLOCK_THRESHOLD ) {
         double *A_copy;
 
         A_copy = (double*) malloc( sizeof(double) * M * M );
