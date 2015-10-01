@@ -37,7 +37,6 @@
 *.xdy
 *.tdo
 
-*.csv
 *.o*
 
 dump_*.txt
