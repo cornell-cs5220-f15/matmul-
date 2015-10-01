@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl OPT2
+BUILDS=mine basic blocked f2c blas mkl OPT2 BGenMult4
 
 # C and Fortran compilers
 CC=icc
