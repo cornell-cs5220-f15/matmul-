@@ -7,7 +7,7 @@
 const char* dgemm_desc = "Large blocked matmul with A tranposed in blocks.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 1024)
+#define BLOCK_SIZE ((int) 128)
 #endif
 
 /*
