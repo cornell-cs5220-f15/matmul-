@@ -8,10 +8,10 @@
 const char* dgemm_desc = "mjw297 dgemm.";
 
 #ifndef BLOCK_SIZE_L1
-#define BLOCK_SIZE_L1 ((int) 128)
+#define BLOCK_SIZE_L1 ((int) 256)
 #endif
 #ifndef BLOCK_SIZE_L2
-#define BLOCK_SIZE_L2 ((int) 256)
+#define BLOCK_SIZE_L2 ((int) 512)
 #endif
 #ifndef BLOCK_SIZE_L3
 #define BLOCK_SIZE_L3 ((int) 1024)
