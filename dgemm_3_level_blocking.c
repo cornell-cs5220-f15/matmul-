@@ -5,16 +5,16 @@
 #include "indexing.h"
 #include "transpose.h"
 
-const char* dgemm_desc = "mjw297 dgemm.";
+const char* dgemm_desc = "3-level blocking dgemm.";
 
 #ifndef BLOCK_SIZE_L1
-#define BLOCK_SIZE_L1 ((int) 32)
+#define BLOCK_SIZE_L1 ((int) 256)
 #endif
 #ifndef BLOCK_SIZE_L2
-#define BLOCK_SIZE_L2 ((int) 128)
+#define BLOCK_SIZE_L2 ((int) 512)
 #endif
 #ifndef BLOCK_SIZE_L3
-#define BLOCK_SIZE_L3 ((int) 512)
+#define BLOCK_SIZE_L3 ((int) 1024)
 #endif
 
 /*

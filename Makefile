@@ -64,6 +64,9 @@ matmul.o: matmul.c
 %.o: %.f
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
 
+dgemm_basic.o: dgemm_basic.c
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) $<
+
 dgemm_blas.o: dgemm_blas.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCBLAS) $<
 
