@@ -1,7 +1,7 @@
 const char* dgemm_desc = "Simple blocked dgemm.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 128)
+#define BLOCK_SIZE ((int) 16)
 #endif
 
 /*
@@ -12,29 +12,22 @@ const char* dgemm_desc = "Simple blocked dgemm.";
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
 void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double *restrict A, const double *restrict B, double *restrict C)
+                 const double *A, const double *B, double *C)
 {
     int i, j, k;
-		for (j = 0; j < N; ++j) { 
+    for (i = 0; i < M; ++i) {
+        for (j = 0; j < N; ++j) {
+            double cij = C[j*lda+i];
             for (k = 0; k < K; ++k) {
-				/*for (i = 0; (i+3) < M; i+=4) {
-					C[j*lda+i] += A[k*lda+i] * B[j*lda+k];
-					C[j*lda+(i+1)] += A[k*lda+(i+1)] * B[j*lda+k];
-					C[j*lda+(i+2)] += A[k*lda+(i+2)] * B[j*lda+k];
-					C[j*lda+(i+3)] += A[k*lda+(i+3)] * B[j*lda+k];
-				}
-				for (; i < M; ++i){
-					C[j*lda+i] += A[k*lda+i] * B[j*lda+k];
-				}*/
-				for (i = 0; i < M; ++i){
-					C[j*lda+i] += A[k*lda+i] * B[j*lda+k];
-				}
-			}
-		}
+                cij += A[k*lda+i] * B[j*lda+k];
+            }
+            C[j*lda+i] = cij;
+        }
+    }
 }
 
 void do_block(const int lda,
-              const double *restrict A, const double *restrict B, double *restrict C,
+              const double *A, const double *B, double *C,
               const int i, const int j, const int k)
 {
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
@@ -44,19 +37,19 @@ void do_block(const int lda,
                 A + i + k*lda, B + k + j*lda, C + i + j*lda);
 }
 
-void square_dgemm(const int M, const double *restrict A, const double *restrict B, double *restrict C)
+void square_dgemm(const int M, const double *A, const double *B, double *C)
 {
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
-
-	for (bj = 0; bj < n_blocks; ++bj) {
-	const int j = bj * BLOCK_SIZE;
-		for (bk = 0; bk < n_blocks; ++bk) {
-		const int k = bk * BLOCK_SIZE;
-			for (bi = 0; bi < n_blocks; ++bi) {
-				const int i = bi * BLOCK_SIZE;
+    for (bi = 0; bi < n_blocks; ++bi) {
+        const int i = bi * BLOCK_SIZE;
+        for (bj = 0; bj < n_blocks; ++bj) {
+            const int j = bj * BLOCK_SIZE;
+            for (bk = 0; bk < n_blocks; ++bk) {
+                const int k = bk * BLOCK_SIZE;
                 do_block(M, A, B, C, i, j, k);
             }
         }
     }
 }
+
