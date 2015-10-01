@@ -10,7 +10,7 @@ LD=gcc
 OPTFLAGS = -O3 
 CFLAGS = -std=gnu99 
 FFLAGS =
-LDFLAGS = -fopenmp
+LDFLAGS = -fopenmp -lgfortran
 
 # Add -DDEBUG_RUN to CPPFLAGS to cut down on the cases.
 CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
