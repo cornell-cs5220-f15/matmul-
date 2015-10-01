@@ -6,9 +6,12 @@
 \section{Overview}
 Matrix multiplication is a ubiquitous linear algebra building block that can be
 used to solve a wide variety of problems, and its popularity is an impetus for
-its optimization. In this paper, we present our progress on writing an
-optimized matrix multiplication kernel. In \secref{opt}, we review the
-optimizations we used and attempted, as well as the motivation for these
-optimizations and their results. In \secref{composing}, we discuss the process
-of composing our optimizations into a single optimized matrix multiplication
-kernel. In \secref{future}, we discuss future work and proposed optimizations.
+its optimization. In this paper, we present the development of a set of
+optimized matrix multiplication kernels, as well as lend insights into which
+optimizations are effective and why. In \secref{opt}, we review our initial
+optimization experiments, as well as the motivation for these optimizations and
+their results. In \secref{sweng}, we discuss various software engineering
+principles we used to streamline kernel development. In \secref{kernels} and
+\secref{eval}, we present and evaluate our set of fully optimized kernels.
+Finally, in \secref{future} and \secref{conc}, we discuss future work and
+conclude.
