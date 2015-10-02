@@ -32,15 +32,19 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define FREE alloc_if(0) free_if(1)
 #define REUSE alloc_if(0) free_if(0)
 
-#pragma offload_attribute (push, target(mic))
-    double * restrict A_KERNEL = NULL;
-    double * restrict B_KERNEL = NULL;
-    double * restrict C_KERNEL = NULL;
-#pragma offload_attribute (pop)
+// #pragma offload_attribute (push, target(mic))
+//     double * restrict A_KERNEL = NULL;
+//     double * restrict B_KERNEL = NULL;
+//     double * restrict C_KERNEL = NULL;
+// #pragma offload_attribute (pop)
 
-double * restrict A_KERNEL = NULL;
-double * restrict B_KERNEL = NULL;
-double * restrict C_KERNEL = NULL;
+// double * restrict A_KERNEL = NULL;
+// double * restrict B_KERNEL = NULL;
+// double * restrict C_KERNEL = NULL;
+
+double * restrict A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+double * restrict B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+double * restrict C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
 
 // more convenient access; column major
 #define A(i, j) A[(j)*M + (i)]
@@ -233,15 +237,15 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
        return;
     }
 
-    A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-    B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-    C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
+    // A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    // B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    // C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
 
-    #pragma offload_attribute (push, target(mic))
-        A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-        B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-        C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
-    #pragma offload_attribute (pop)
+    // #pragma offload_attribute (push, target(mic))
+    //     A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    //     B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    //     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
+    // #pragma offload_attribute (pop)
 
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
@@ -257,13 +261,13 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
         }
     }
 
-    #pragma offload_attribute (push, target(mic))
-        _mm_free(A_KERNEL);
-        _mm_free(B_KERNEL);
-        _mm_free(C_KERNEL);
-    #pragma offload_attribute (pop)
+    // #pragma offload_attribute (push, target(mic))
+    //     _mm_free(A_KERNEL);
+    //     _mm_free(B_KERNEL);
+    //     _mm_free(C_KERNEL);
+    // #pragma offload_attribute (pop)
 
-    _mm_free(A_KERNEL); A_KERNEL = NULL;
-    _mm_free(B_KERNEL); B_KERNEL = NULL;
-    _mm_free(C_KERNEL); C_KERNEL = NULL;
+    // _mm_free(A_KERNEL); A_KERNEL = NULL;
+    // _mm_free(B_KERNEL); B_KERNEL = NULL;
+    // _mm_free(C_KERNEL); C_KERNEL = NULL;
 }
