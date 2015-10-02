@@ -32,6 +32,10 @@ commit history to see the progression of our kernels.
 Our midpoint progress report can be found in the [`checkin`](checkin).
 Similarly, our final report can be found in the [`report`](report).
 
+## Timings ##
+The timing results of our four fully optimized kernels can be found in the
+[`timings`](timings) directory.
+
 ## Reproducing Results ##
 To build, run, and plot all the kernels in this directory, first log into the
 totient cluster. It's important to note that our kernels have only been tuned
