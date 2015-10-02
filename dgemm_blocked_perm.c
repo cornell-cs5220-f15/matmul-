@@ -32,6 +32,12 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define FREE alloc_if(0) free_if(1)
 #define REUSE alloc_if(0) free_if(0)
 
+#pragma offload_attribute (push, target(mic))
+    double * restrict A_KERNEL = NULL;
+    double * restrict B_KERNEL = NULL;
+    double * restrict C_KERNEL = NULL;
+#pragma offload_attribute (pop)
+
 double * restrict A_KERNEL = NULL;
 double * restrict B_KERNEL = NULL;
 double * restrict C_KERNEL = NULL;
