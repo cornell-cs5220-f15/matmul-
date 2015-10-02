@@ -20,7 +20,7 @@ all:	$(DRIVERS)
 matmul-%: $(OBJS) dgemm_%.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
-matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o fdgemm.o
+matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) 
 
 matmul-blas: $(OBJS) dgemm_blas.o
