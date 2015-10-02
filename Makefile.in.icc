@@ -10,7 +10,8 @@ LD=ifort
 OPTFLAGS = -O3
 CFLAGS = -std=gnu99 
 FFLAGS = 
-LDFLAGS = -fopenmp -nofor_main
+LDFLAGS := -fopenmp -nofor_main
+LDFLAGS += -O3, -funroll-loops -ftree-vectorize -vec -ipo -xHost -no-prec-div -ansi-alias -axCORE-AVX2 -restrict
 
 # Add -DDEBUG_RUN to CPPFLAGS to cut down on the cases.
 CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
