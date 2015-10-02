@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas
+BUILDS=mine basic blocked f2c blas mjw
 
 # C and Fortran compilers
 CC=gcc
@@ -7,8 +7,8 @@ FC=gfortran
 LD=gcc
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3 
-CFLAGS = -std=gnu99 
+OPTFLAGS = -O3
+CFLAGS = -std=gnu99
 FFLAGS =
 LDFLAGS = -fopenmp
 
@@ -16,8 +16,8 @@ LDFLAGS = -fopenmp
 CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
-LIBS = -lm 
-OBJS = matmul.o
+LIBS = -lm
+OBJS = matmul.o indexing.o transpose.o copy.o
 
 # Libraries and include files for BLAS
 LIBBLAS=-lopenblas

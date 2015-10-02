@@ -21,7 +21,7 @@ matmul-%: $(OBJS) dgemm_%.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o fdgemm.o
-	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) 
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 matmul-blas: $(OBJS) dgemm_blas.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBBLAS)
@@ -32,26 +32,55 @@ matmul-mkl: $(OBJS) dgemm_mkl.o
 matmul-veclib: $(OBJS) dgemm_veclib.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) -framework Accelerate
 
+matmul-compiler: $(OBJS) dgemm_compiler.o
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
+
+# ---
+# Rules to build the tests
+
+tests: indexing_test transpose_test copy_test clear_test
+
+indexing_test: indexing_test.c indexing.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+transpose_test: transpose_test.c transpose.o indexing.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+copy_test: copy_test.c copy.o indexing.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+clear_test: clear_test.c clear.o indexing.o
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
 # --
 # Rules to build object files
 
 matmul.o: matmul.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(OPTFLAGS) $<
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) $<
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(OPTFLAGS3) $(PGO_FLAG) $(CPPFLAGS) $<
 
 %.o: %.f
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
 
+dgemm_basic.o: dgemm_basic.c
+	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) $<
+
 dgemm_blas.o: dgemm_blas.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCBLAS) $< 
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCBLAS) $<
 
 dgemm_mkl.o: dgemm_blas.c
-	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(INCMKL) $< 
+	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(INCMKL) $<
 
 dgemm_veclib.o: dgemm_blas.c
-	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $< 
+	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $<
+
+dgemm_big_blocked_%.o: dgemm_big_blocked.c
+	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(OPTFLAGS3) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
+
+dgemm_padded_blocked_%.o: dgemm_padded_blocked.c
+	$(CC) -o $@ -c $(CFLAGS) $(OPTFLAGS) $(OPTFLAGS3) $(PGO_FLAG) $(CPPFLAGS) $< -DBLOCK_SIZE=$*
 
 # ---
 # Rules for building timing CSV outputs
@@ -63,7 +92,7 @@ run-local:
 	( for build in $(BUILDS) ; do ./matmul-$$build ; done )
 
 timing-%.csv: matmul-%
-	qsub job-$*.pbs
+	qsub runner.pbs -N $* -vARG1=$<
 
 # ---
 #  Rules for plotting
@@ -73,11 +102,17 @@ plot:
 	python plotter.py $(BUILDS)
 
 # ---
+#  Rules for cleaning
 
-.PHONY:	clean realclean 
+.PHONY:	clean realclean
 clean:
 	rm -f matmul-* *.o
 
 realclean: clean
 	rm -f *~ timing-*.csv timing.pdf
+
+# ---
+#  Rules for printing
+
+print-%: ; @echo $*=$($*)
 

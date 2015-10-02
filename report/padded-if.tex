@@ -1,0 +1,18 @@
+\subsection{Dynamic Padded Blocks}
+\figref{padded-sweep} shows that the performance of the \ttt{padded\_blocked}
+kernel performs very well when the matrix size is a multiple of the block size.
+On the other hand, the kernel performs poorly when matrix size is just over a
+multiple of the block size. This is consistent with our intuition. When the
+matrix size is just over a multiple of the block size, the final set of blocks
+in the multiplication are mostly empty, so the algorithm performs superfluous
+computation.
+
+The \ttt{padded\_if} kernel is a hybrid between the \ttt{padded\_blocked} and
+\ttt{big\_blocked} kernel. When multiplying two blocks of size
+$\ttt{BLOCK\_SIZE} \times \ttt{BLOCK\_SIZE}$, the kernel uses the optimized
+multiplication from the \ttt{padded\_blocked} kernel. However, when the size of
+the blocks being multiplied are smaller than $\ttt{BLOCK\_SIZE} \times
+\ttt{BLOCK\_SIZE}$, the kernel uses the unoptimized multiplication from the
+\ttt{big\_blocked} kernel. Thus, the \ttt{padded\_if} kernel does not perform
+superfluous computation, but it does have some overhead in dispatching between
+two different loops.

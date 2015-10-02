@@ -1,12 +1,14 @@
 #!/bin/sh -l
 
 #PBS -l walltime=0:30:00
-#PBS -N matmul-blas
+#PBS -l nodes=1:ppn=24
+#PBS -n
+#PBS -p 1023
 #PBS -j oe
 
 module load cs5220
 module load openblas
+export OMP_NUM_THREADS=1
+export MKL_NUM_THREADS=1
 cd $PBS_O_WORKDIR
-export OPENBLAS_NUM_THREADS=1
-./matmul-blas
-
+$ARG1

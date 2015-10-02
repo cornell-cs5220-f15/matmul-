@@ -1,15 +1,65 @@
-# Versions to build
-BUILDS=mine basic blocked f2c blas mkl
+# Versions to build.
+#
+# BUILDS is defined in a such a way that if you create a file called dgemm_*.c
+# or dgemm_*.f, it will be built and runnable. All you need to do is create the
+# file; you don't need to modify a Makefile, you don't have to add a pbs
+# script, etc.
+BUILDS := $(wildcard dgemm_*.[cf])          # dgemm_f2c_desc.c, dgemm_basic.c ...
+BUILDS := $(basename $(BUILDS))             # dgemm_f2c_desc, dgemm_basic ...
+BUILDS := $(subst dgemm_,,$(BUILDS))        # f2c_desc, basic, ...
+BUILDS := $(filter-out f2c_desc, $(BUILDS)) # basic, ...
+BUILDS := mkl $(BUILDS)                     # mkl, basic, ...
+
+# Feel free to comment out any of the following.
+BUILDS := $(filter-out mkl, $(BUILDS))
+BUILDS := $(filter-out blas, $(BUILDS))
+BUILDS := $(filter-out annotated, $(BUILDS))
+BUILDS := $(filter-out compiler, $(BUILDS))
+BUILDS := $(filter-out basic, $(BUILDS))
+BUILDS := $(filter-out blocked, $(BUILDS))
+BUILDS := $(filter-out f2c, $(BUILDS))
+BUILDS := $(filter-out copyopt, $(BUILDS))
+
+# If you want to only build or run a subset of the build rules, you can do so
+# by uncommenting out the following line and entering in the files you wish to
+# build.
+# BUILDS =
+# BUILDS := $(BUILDS) $(shell echo padded_blocked_{8,16,32,64,128,256,512,1024})
+# BUILDS := $(BUILDS) $(shell echo big_blocked_{8,16,32,64,128,256,512,1024})
 
 # C and Fortran compilers
 CC=icc
-FC=ifort 
+FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
 OPTFLAGS = -O3
-CFLAGS = -std=gnu99 
-FFLAGS = 
+
+# Crazy compiler black magic. Tread carefully.
+# https://software.intel.com/sites/default/files/compiler_qrg12.pdf
+OPTFLAGS2 = \
+	-fast \
+	-xCORE-AVX2 \
+	-no-prec-div \
+	-ipo \
+	-qopt-report=5 \
+
+OPTFLAGS3 = \
+	$(OPTFLAGS2) \
+	-unroll-aggresive \
+	-align \
+	-restrict \
+	# -opt-prefetch=4 \
+	# -ansi-alias \
+	# -fno-alias \
+
+# Profile Guided Optimization.
+PGO_FLAG = \
+	# -prof-gen \
+	# -prog-use \
+
+CFLAGS = -std=gnu99
+FFLAGS =
 LDFLAGS = -fopenmp -nofor_main
 
 # Add -DDEBUG_RUN to CPPFLAGS to cut down on the cases.
@@ -17,7 +67,7 @@ CPPFLAGS = "-DCOMPILER=\"$(CC)\"" "-DFLAGS=\"$(OPTFLAGS)\""
 
 # Compile a C version (using basic_dgemm.c, in this case):
 LIBS = -lm -lirng
-OBJS = matmul.o
+OBJS = matmul.o indexing.o transpose.o copy.o clear.o
 
 # Libraries and include files for BLAS
 LIBBLAS=-lopenblas
@@ -26,4 +76,3 @@ INCBLAS=
 # Libraries and include files for BLAS
 LIBMKL=-lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
 INCMKL=
-

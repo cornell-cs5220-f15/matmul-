@@ -1,7 +1,9 @@
-const char* dgemm_desc = "Basic, three-loop dgemm.";
+const char* dgemm_desc = "Naive matmul with compiler annotations.";
 
 void square_dgemm(const int M,
-                  const double *A, const double *B, double *C)
+                  const double* restrict A,
+                  const double* restrict B,
+                  double* restrict C)
 {
     int i, j, k;
     for (i = 0; i < M; ++i) {
