@@ -44,10 +44,10 @@ double *C_KERNEL = NULL;
 
 // assumes zmm08-15 already have the rows of B, and that zmm00-07 can be clobbered
 inline void row8x8(uint row, double * restrict A, double * restrict C,
-                   __m512 zmm00, __m512 zmm01, __m512 zmm02, __m512 zmm03,
-                   __m512 zmm04, __m512 zmm05, __m512 zmm06, __m512 zmm07,
-                   __m512 zmm08, __m512 zmm09, __m512 zmm10, __m512 zmm11,
-                   __m512 zmm12, __m512 zmm13, __m512 zmm14, __m512 zmm15) {
+                   __m512d zmm00, __m512d zmm01, __m512d zmm02, __m512d zmm03,
+                   __m512d zmm04, __m512d zmm05, __m512d zmm06, __m512d zmm07,
+                   __m512d zmm08, __m512d zmm09, __m512d zmm10, __m512d zmm11,
+                   __m512d zmm12, __m512d zmm13, __m512d zmm14, __m512d zmm15) {
 
     __assume_aligned(A, BYTE_ALIGN);// unsure if this is necessary with an inline being called
     __assume_aligned(C, BYTE_ALIGN);// by an inline, but shouldn't cause too much of a ruckus
@@ -87,8 +87,8 @@ inline void vectorized8x8(double * restrict A, double * restrict B, double * res
     // adapted from:
     //     https://software.intel.com/en-us/articles/benefits-of-intel-avx-for-small-matrices
 
-    __m512 zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,// these will store A
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15;// these will store B
+    __m512d zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,// these will store A
+            zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15;// these will store B
 
     // Read in the 8 rows of Matrix B into zmm registers
     zmm08 = _mm512_load_pd((double *) (B + 0*8)); zmm09 = _mm512_load_pd((double *) (B + 1*8));
