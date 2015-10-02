@@ -62,7 +62,7 @@ A[k*M + i]
 B[j*M + k]
 C[j*M + i]
 \end{verbatim}
-From a purely theoretical standpoint, the original loop order of $i,j,k$ may not be the most efficient, as matrix A is being iterated through by indices dependent on $k$ and $i$. This would imply that the loop should be reordered to have $k$ and $i$ be the innermost two loops, and $j$ be the outermost one. 
+From a purely theoretical standpoint, the original loop order of $i,j,k$ may not be the most efficient, as matrix A is being iterated through by indices dependent on $k$ and $i$. This would imply that the loop should be reordered to have $k$ and $i$ be the innermost two loops, and $j$ be the outermost one.
 \\
 It should be noted that while this works in the initial implementation of matrix multiplication, if matrices are transposed, the loop ordering will need to be altered.
 
@@ -180,7 +180,7 @@ The plot shows that looping performs the best with loop order $(j, k, i)$ for th
     \label{aload1}
     \caption{loop orders with transpose}
   \end{subfigure}
-  
+
 \end{figure}
 
 \subsection{Blocking and Loop Order}
@@ -364,6 +364,68 @@ The plot shows that unrolling loops in compiler flags alone does not make much d
 
 
 
+
+\section{Conclusion}
+
+We summarize our finds and select the best method we have tried so far.
+
+\subsection{Best Method}
+
+The best algorithm we have tried so far is blocking, looping and copying with block size $16$ and loop order $(i, j, k)\times(j, i, k)$.
+\\
+Therefore, we carry out a local search around block size 16.
+\\
+See Figure 23$-$26 below for blocking with loop order and copy optimization.
+\\
+The plot shows that blocking, looping and copying performs the best with block size $8$ and loop order $(i, j, k)\times(j, i, k)$.
+\\
+Moreover, the performance of blocking, looping and copying is bad when size is less than 100. Thus, we combine a naive implementation with looping order $(j, k, i)$ with the blocking one.
+
+\begin{figure}[!ht]
+   \begin{subfigure}
+      \centering
+        \begin{center}
+      \includegraphics[width=0.85\textwidth] {timing_ijk_jik_3}
+        \end{center}
+      \label{aload0}
+      \caption{blocking with loop order $(i, j, k)\times(j, i, k)$ and copy optimization}
+  \end{subfigure}
+  \begin{subfigure}
+      \centering
+        \begin{center}
+      \includegraphics[width=0.85\textwidth] {timing_ijk_jik_4}
+        \end{center}
+      \label{aload1}
+      \caption{blocking with loop order $(i, j, k)\times(j, i, k)$ and copy optimization}
+  \end{subfigure}
+
+\end{figure}
+
+\begin{figure}[!ht]
+   \begin{subfigure}
+      \centering
+        \begin{center}
+      \includegraphics[width=0.85\textwidth] {timing_ijk_jik_5}
+        \end{center}
+      \label{aload0}
+      \caption{blocking with loop order $(i, j, k)\times(j, i, k)$ and copy optimization}
+  \end{subfigure}
+  \begin{subfigure}
+      \centering
+        \begin{center}
+      \includegraphics[width=0.85\textwidth] {timing_ijk_jik_6}
+        \end{center}
+      \label{aload1}
+      \caption{blocking with loop order $(i, j, k)\times(j, i, k)$ and copy optimization}
+  \end{subfigure}
+
+\end{figure}
+
+\subsection{Future Work}
+
+If we have more time, we would like to try more compiler flags and vector instructions.
+\\
+We think vector instructions could improve the performance of blocking with looping order $(i, j, k)\times(j, k, i)$ by vectorizing the inner loop of $i$.
 
 
 \section*{Reference}
