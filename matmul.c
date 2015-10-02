@@ -210,7 +210,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Usage: matmul [csv]\n");
         exit(2);
     }
-    
+
     FILE* fp;
     if (argc == 1) {
         const char* exename = argv[0];
@@ -224,15 +224,23 @@ int main(int argc, char** argv)
         free(fname);
     } else 
         fp = fopen(argv[1], "w");
-    
+
     if (!fp) {
         fprintf(stderr, "Could not open '%s' for output\n", argv[1]);
         exit(3);
     }
-    
+
     double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
+
+//    // Align matrices in memory to cache lines (64B) to allow vector
+//    // loads/stores when the matrix dimensions are evenly divisible by
+//    // the SIMD width (256b).
+//    double *A, *B, *C;
+//    posix_memalign((void**)&A, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
+//    posix_memalign((void**)&B, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
+//    posix_memalign((void**)&C, 64, MAX_SIZE * MAX_SIZE * sizeof(double));
 
     matrix_init(A);
     matrix_init(B);
