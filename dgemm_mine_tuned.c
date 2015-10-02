@@ -4,10 +4,7 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 104)
-#endif
-#ifndef BYTE_ALIGNMENT
-#define BYTE_ALIGNMENT ((int) 64)
+#define BLOCK_SIZE ((int) 128)
 #endif
 
 /*
@@ -25,7 +22,9 @@ void basic_dgemm_copied(const int M, const int N, const int K,
     for (k = 0; k < K; ++k) {
         for (j = 0; j < N; ++j) {
             for (i = 0; i < M; ++i) {
-                C[j*M+i] += A[k*M+i] * B[j*K+k];
+                double cij = C[j*M+i];
+                cij += A[k*M+i] * B[j*K+k];
+                C[j*M+i] = cij;
             }
 
         }
@@ -58,9 +57,9 @@ void do_block(const int lda,
 
 void square_dgemm(const int MM, const double *restrict A, const double *restrict B, double *restrict C)
 {
-    const double *AA = (double *) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double), BYTE_ALIGNMENT);
-    const double *BB = (double *) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double), BYTE_ALIGNMENT);
-    double *CC = (double *) _mm_malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double), BYTE_ALIGNMENT);
+    const double *AA = (double *) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    const double *BB = (double *) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
+    double *CC = (double *) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
 
     const int n_blocks = MM / BLOCK_SIZE + (MM%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
@@ -74,13 +73,13 @@ void square_dgemm(const int MM, const double *restrict A, const double *restrict
                   const int M = (i+BLOCK_SIZE > MM? MM-i : BLOCK_SIZE);
                   const int N = (j+BLOCK_SIZE > MM? MM-j : BLOCK_SIZE);
                   const int K = (k+BLOCK_SIZE > MM? MM-k : BLOCK_SIZE);
-                  const double *AAA = (double *) _mm_malloc(M * K * sizeof(double), BYTE_ALIGNMENT);
-                  const double *BBB = (double *) _mm_malloc(K * N * sizeof(double), BYTE_ALIGNMENT);
-                  double *CCC = (double *) _mm_malloc(M * N * sizeof(double), BYTE_ALIGNMENT);
+                  const double *AAA = (double *) malloc(M * K * sizeof(double));
+                  const double *BBB = (double *) malloc(K * N * sizeof(double));
+                  double *CCC = (double *) malloc(M * N * sizeof(double));
                   do_block(MM, AAA, BBB, CCC, A, B, C, i, j, k);
-                  _mm_free((void *) AAA);
-                  _mm_free((void *) BBB);
-                  _mm_free((void *) CCC);
+                  free((void *) AAA);
+                  free((void *) BBB);
+                  free((void *) CCC);
                 } else {
                   do_block(MM, AA, BB, CC, A, B, C, i, j, k);
                 }
@@ -88,7 +87,7 @@ void square_dgemm(const int MM, const double *restrict A, const double *restrict
         }
     }
 
-    _mm_free((void *) AA);
-    _mm_free((void *) BB);
-    _mm_free((void *) CC);
+    free((void *) AA);
+    free((void *) BB);
+    free((void *) CC);
 }
