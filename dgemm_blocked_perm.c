@@ -28,9 +28,13 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define NULL ((void *)0)
 #endif
 
-double *A_KERNEL = NULL;
-double *B_KERNEL = NULL;
-double *C_KERNEL = NULL;
+#define ALLOC alloc_if(1) free_if(0)
+#define FREE alloc_if(0) free_if(1)
+#define REUSE alloc_if(0) free_if(0)
+
+double * restrict A_KERNEL = NULL;
+double * restrict B_KERNEL = NULL;
+double * restrict C_KERNEL = NULL;
 
 // more convenient access; column major
 #define A(i, j) A[(j)*M + (i)]
@@ -43,7 +47,7 @@ double *C_KERNEL = NULL;
 #define C_KERNEL(i, j) C_KERNEL[i*KERNEL_SIZE + j]
 
 // assumes zmm08-15 already have the rows of B, and that zmm00-07 can be clobbered
-inline void row8x8(uint row, double * restrict A, double * restrict C,
+inline __attribute__((target(mic))) void row8x8(unsigned int row, double * restrict A, double * restrict C,
                    __m512d zmm00, __m512d zmm01, __m512d zmm02, __m512d zmm03,
                    __m512d zmm04, __m512d zmm05, __m512d zmm06, __m512d zmm07,
                    __m512d zmm08, __m512d zmm09, __m512d zmm10, __m512d zmm11,
@@ -76,10 +80,10 @@ inline void row8x8(uint row, double * restrict A, double * restrict C,
     zmm00 = _mm512_add_pd(zmm00, zmm04);
 
     // zmm00 now holds the entire row computation for C, store it back
-    _mm512_store_pd((double *) (C + row*8));
+    _mm512_store_pd((double *) (C + row*8), zmm00);
 }
 
-inline void vectorized8x8(double * restrict A, double * restrict B, double * restrict C) {
+__attribute__((target(mic))) void vectorized8x8(double * restrict A, double * restrict B, double * restrict C) {
     __assume_aligned(A, BYTE_ALIGN);
     __assume_aligned(B, BYTE_ALIGN);
     __assume_aligned(C, BYTE_ALIGN);
@@ -131,34 +135,68 @@ inline void vectorized8x8(double * restrict A, double * restrict B, double * res
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
 void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double * restrict A, const double * restrict B, double * restrict C)
+                 const double * restrict A, const double * restrict B, double * restrict C,
+                 int shortcut)
 {
-    // int i, j, k;
-    // for (j = 0; j < N; ++j) {
-    //     for (k = 0; k < K; ++k){
-    //         double bkj = B[j*lda+k];
-    //         for (i = 0; i < M; ++i) {
-    //             C[j*lda+i] += A[k*lda+i] * bkj;
-    //         }
-    //     }
-    // }
-    int i, j, k;
-    for (j = 0; j < N; ++j) {
-        // for (k = 0; k < K; ++k){
-        for (i = 0; i < M; ++i) {
-            // copy to aligned memory
-            #pragma unroll
-            for(int col = 0; col < KERNEL_SIZE; ++col) {
-                for(int row = 0; row < KERNEL_SIZE; ++row) {
-                    A_KERNEL(row, col) = A(row, col);
-                    B_KERNEL(row, col) = B(row, col*lda);
+    if(shortcut) {
+        int i, j, k;
+        for (j = 0; j < N; ++j) {
+            for (k = 0; k < K; ++k){
+                double bkj = B[j*lda+k];
+                for (i = 0; i < M; ++i) {
+                    C[j*lda+i] += A[k*lda+i] * bkj;
                 }
             }
+        }
+    }
+    else {
+        // sub-blocking based on KERNEL_SIZE
+        int n_kernels = lda / KERNEL_SIZE + (lda % KERNEL_SIZE ? 1 : 0);
+        int row, col, M_KERNEL, N_KERNEL;
+        for(int bi = 0; bi < n_kernels; ++bi) {
+            row = bi * KERNEL_SIZE;
+            for(int bj = 0; bj < n_kernels; ++bj) {
+                col = bj * KERNEL_SIZE;
 
-            // double bkj = B[j*lda+k];
-            // for (i = 0; i < M; ++i) {
-            //     C[j*lda+i] += A[k*lda+i] * bkj;
-            // }
+                M_KERNEL = (row + KERNEL_SIZE > lda ? lda - row : KERNEL_SIZE);
+                N_KERNEL = (col + KERNEL_SIZE > lda ? lda - col : KERNEL_SIZE);
+
+                // copy from A and B to byte aligned memory, zero out aligned C
+                #pragma unroll
+                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                        // if this is a valid location, copy the data
+                        // otherwise, pad with 0s
+                        if(ki < M_KERNEL && kj < N_KERNEL) {
+                            A_KERNEL(ki, kj) = A(ki+row, kj+col);// worth mentioning the defines at the top...
+                            B_KERNEL(ki, kj) = B(ki+row, kj+col);// *_KERNEL are ROW-major
+                        }
+                        else {
+                            A_KERNEL(ki, kj) = 0.0;
+                            B_KERNEL(ki, kj) = 0.0;
+                        }
+                        C_KERNEL(ki, kj) = 0.0;
+                    }
+                }
+/*
+                // we're ready to compute
+                #if KERNEL_SIZE == 8
+                    #pragma offload target(mic) in(A_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) ALLOC) in(B_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) ALLOC) inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) ALLOC)
+                    {
+                        vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                    }
+                #endif
+                */
+                
+                // copy everything back to C
+                #pragma unroll
+                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                        if(ki < M_KERNEL && kj < N_KERNEL)
+                            C(ki+row, kj+col) = C_KERNEL(ki, kj);
+                    }
+                }
+            }
         }
     }
 }
@@ -174,22 +212,48 @@ void do_block(const int lda,
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
     
     basic_dgemm(lda, M, N, K,
-                A + i + k*lda, B + k + j*lda, C + i + j*lda);
+                A + i + k*lda, B + k + j*lda, C + i + j*lda,
+                0);
 }
 
 #include <stdlib.h>
 
+void f(){
+    int *p = (int *)malloc(100*sizeof(int));
+    // Memory is allocated for p, data is sent from CPU and retained
+    #pragma offload target(mic:0) in(p[0:100] : ALLOC)
+    { p[6] = 66; }
+    // Memory for p reused from previous offload and retained once again
+    // Fresh data is sent into the memory
+    #pragma offload target(mic:0) in(p[0:100] : REUSE)
+    { p[6] = 66; }
+    // Memory for p reused from previous offload, freed after this offload.
+    // Final data is pulled from coprocessor to CPU
+    #pragma offload target(mic:0) out(p[0:100] : FREE)
+    { p[7] = 77; }
+}
+
+
 void square_dgemm(const int M, const double * restrict A, const double * restrict B, double * restrict C)
 {
+    //f();
     if (M <= BLOCK_SIZE) {
-       basic_dgemm(M, M, M, M, A, B, C);
+       basic_dgemm(M, M, M, M, A, B, C, 1);
        return;
     }
 
     A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);// BLOCK_SIZE * BLOCK_SIZE * sizeof(double), BYTE_ALIGN);
     B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);// BLOCK_SIZE * BLOCK_SIZE * sizeof(double), BYTE_ALIGN);
     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);// BLOCK_SIZE              * sizeof(double), BYTE_ALIGN);
-    
+
+
+    #pragma offload target(mic:0) in(A_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : align(BYTE_ALIGN) ALLOC)
+    {}
+    #pragma offload target(mic:0) in(B_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : align(BYTE_ALIGN) ALLOC)
+    {}
+    #pragma offload target(mic:0) in(C_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : align(BYTE_ALIGN) ALLOC)
+    {}
+
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
 
@@ -199,10 +263,18 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
             const int j = bj * BLOCK_SIZE;
             for (bk = 0; bk < n_blocks; ++bk) {
                 const int k = bk * BLOCK_SIZE;
-                do_block(M, A, B, C, i, j, k);
+                //do_block(M, A, B, C, i, j, k);
+                printf("Hi %d\n", k);
             }
         }
     }
+
+    #pragma offload target(mic:0) in(A_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : FREE)
+    {}
+    #pragma offload target(mic:0) in(B_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : FREE)
+    {}
+    #pragma offload target(mic:0) in(C_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : FREE)
+    {}
 
     _mm_free(A_KERNEL); A_KERNEL = NULL;
     _mm_free(B_KERNEL); B_KERNEL = NULL;
