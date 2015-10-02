@@ -5,7 +5,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 
 // number of doubles in one row of a block.
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE 32
+#define BLOCK_SIZE 32 
 #endif
 
 // number of blocks that fit in our L2 cache.
@@ -19,7 +19,7 @@ const char* dgemm_desc = "My awesome dgemm.";
 #endif
 
 #ifndef USE_L2_BLOCKING
-#define USE_L2_BLOCKING 1
+#define USE_L2_BLOCKING 1 
 #endif
  
 /* Copies the input matrix so that we optimize for cache hits.
@@ -36,8 +36,8 @@ const char* dgemm_desc = "My awesome dgemm.";
 double* copy_optimize_rowmajor( const int num_blocks, const int M, const double *A )
 {
     int out_dim = num_blocks * BLOCK_SIZE;
-    // double* out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ) , 64);
-    double* out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
+    double* out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ) , 64);
+    // double* out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
     int i, j; // specific row, column for the matrix. < M
     int I, J; // specific row, column for the block < num_blocks
     int ii, jj; // specific row, column within the block. < BLOCK_SIZE
@@ -70,8 +70,8 @@ double* copy_optimize_rowmajor( const int num_blocks, const int M, const double 
 double* copy_optimize_colmajor( const int num_blocks, const int M, const double *A )
 {
     int out_dim = num_blocks * BLOCK_SIZE;
-    // double* out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ) , 64);
-    double* out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
+    double* out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ) , 64);
+    // double* out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
     int i, j; // specific row, column for the matrix. < M
     int I, J; // specific row, column for the block < num_blocks
     int ii, jj; // specific row, column within the block. < BLOCK_SIZE
@@ -104,8 +104,9 @@ double* copy_optimize_colmajor( const int num_blocks, const int M, const double 
 double* copy_optimize_colmajor_L2( const int num_blocks_L2, const int M, const double *A )
 {
     int out_dim = num_blocks_L2 * BLOCK_SIZE_L2;
-    double *out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
-
+    // double *out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
+    double *out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ), 64);
+    
     int k, l; // specific column, row of the input matrix.
     int kk, ll; // {k, l} % BLOCK_SIZE_L2
     int I, J; // specific column, row of the L2 block. < num_blocks_L2
@@ -155,8 +156,9 @@ double* copy_optimize_colmajor_L2( const int num_blocks_L2, const int M, const d
 double* copy_optimize_rowmajor_L2( const int num_blocks_L2, const int M, const double *A )
 {
     int out_dim = num_blocks_L2 * BLOCK_SIZE_L2;
-    double *out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
-
+    // double *out = ( double* ) malloc( out_dim * out_dim * sizeof( double ) );
+    double *out = ( double* ) _mm_malloc( out_dim * out_dim * sizeof( double ), 64);
+    
     int k, l; // specific column, row of the input matrix.
     int kk, ll; // {k, l} % BLOCK_SIZE_L2
     int I, J; // specific column, row of the L2 block. < num_blocks_L2
@@ -215,12 +217,12 @@ void block_multiply_kernel( const int M, double *A_block, double *B_block, doubl
     for( ai = 0; ai < BLOCK_SIZE; ++ai )
     {
         double* C_row = C_block + ai * BLOCK_SIZE;
-        // __assume_aligned( C_row, 64 );
+        __assume_aligned( C_row, 64 );
         for( aj = 0; aj < BLOCK_SIZE; ++aj )
         {
             double A_element = A_block[ai * BLOCK_SIZE + aj];
             double* B_row = B_block + aj * BLOCK_SIZE;
-            // __assume_aligned( B_row, 64 );
+            __assume_aligned( B_row, 64 );
             for( bj = 0; bj < BLOCK_SIZE; ++bj )
             {
                 #pragma vector always
@@ -323,13 +325,13 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
                         for( j = 0; j < NUM_BLOCKS_PER_L2; ++j )
                         {
                             C_block = C_block2 + ( i * NUM_BLOCKS_PER_L2 + j ) * BLOCK_SIZE * BLOCK_SIZE;
-                            // __assume_aligned( C_block, 64 );
+                            __assume_aligned( C_block, 64 );
                             for( k = 0; k < NUM_BLOCKS_PER_L2; ++k )
                             {
                                 A_block = A_block2 + ( i * NUM_BLOCKS_PER_L2 + k ) * BLOCK_SIZE * BLOCK_SIZE;
                                 B_block = B_block2 + ( j * NUM_BLOCKS_PER_L2 + k ) * BLOCK_SIZE * BLOCK_SIZE;
-                                // __assume_aligned( A_block, 64 );
-                                // __assume_aligned( B_block, 64 );
+                                __assume_aligned( A_block, 64 );
+                                __assume_aligned( B_block, 64 );
                                 block_multiply_kernel( M, A_block, B_block, C_block );
                             }
                         }
@@ -340,12 +342,12 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
         copy_normal_rowmajor_L2( num_blocks_L2, M, C_copied, C );
         
-        // _mm_free(A_copied);
-        free(A_copied);
-        // _mm_free(B_copied);
-        free(B_copied);
-        // _mm_free(C_copied);
-        free(C_copied);
+        _mm_free(A_copied);
+        // free(A_copied);
+        _mm_free(B_copied);
+        // free(B_copied);
+        _mm_free(C_copied);
+        // free(C_copied);
     }
     else
     {
@@ -364,7 +366,7 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
                 // index of first element in matrix C.
                 C_idx = ( I * num_blocks + J ) * BLOCK_SIZE * BLOCK_SIZE;
                 C_block = C_copied + C_idx;
-                // __assume_aligned( C_block, 64 );
+                __assume_aligned( C_block, 64 );
                 
                 for( K = 0; K < num_blocks; ++K )
                 {
@@ -376,8 +378,8 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
                     A_block = A_copied + A_idx;
                     B_block = B_copied + B_idx;
-                    // __assume_aligned( A_block, 64 );
-                    // __assume_aligned( B_block, 64 );
+                    __assume_aligned( A_block, 64 );
+                    __assume_aligned( B_block, 64 );
                     block_multiply_kernel( M, A_block, B_block, C_block );
                 }
             }
@@ -385,12 +387,12 @@ void square_dgemm(const int M, const double *A, const double *B, double *C)
 
         copy_normal_rowmajor( num_blocks, M, C_copied, C );
         
-        // _mm_free(A_copied);
-        free(A_copied);
-        // _mm_free(B_copied);
-        free(B_copied);
-        // _mm_free(C_copied);
-        free(C_copied);
+        _mm_free(A_copied);
+        // free(A_copied);
+        _mm_free(B_copied);
+        // free(B_copied);
+        _mm_free(C_copied);
+        // free(C_copied);
     }
 }
 
