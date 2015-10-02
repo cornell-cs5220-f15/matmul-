@@ -14,12 +14,12 @@ unrolls the loop, it must be careful that the unroll factor divides \ttt{I} or
 unrolled loop and insert remainder loops to perform the remaining computation.
 
 When \ttt{I} and \ttt{J} are known at compile time, the compiler can perform
-additional optimizations. For example, it can perform more education loop
+additional optimizations. For example, it can perform more educated loop
 unrolling and can more efficiently use vector instructions.
 
 The \ttt{padded\_blocked} kernel uses copy optimization and padding in such a
 way that our inner most loops have bounds known at compile time. Concretely,
-the \ttt{padded\_blocked} defines a compile time constant \ttt{BLOCK\_SIZE}.
+the \ttt{padded\_blocked} kernel defines a compile time constant \ttt{BLOCK\_SIZE}.
 The kernel performs a blocked matrix multiplication where a block $A_{ik}$ of
 $A$ is multiplied by a block $B_{kj}$ of $B$ to produce a block $C_{ij}$ of
 $C$. Before each block multiplication, $A_{ik}$ is copied into a buffer of size

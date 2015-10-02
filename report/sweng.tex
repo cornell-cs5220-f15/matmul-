@@ -17,8 +17,8 @@ Matrix multiplications involve a lot of low-level pointer arithmetic, and in a
 programming language like C, erroneous pointer arithmetic or invalid memory
 access can be \emph{very difficult} to debug. Moreover, optimized matrix multiplication
 involves operations on a combination of row-major and column-major matrices
-using various complex access patterns involving many nested layers of blocking
-transposing and copying which greatly increase the likelihood of incorrect
+using various complex access patterns involving many nested layers of blocking,
+transposing, and copying which greatly increases the likelihood of incorrect
 code. To combat the likelihood of programming error and reduce the time spent
 debugging, we developed a modular set of universal helper functions accompanied
 with a set of unit tests.
@@ -28,7 +28,7 @@ We store all two-dimensional matrices as one-dimensional C arrays which means
 that indexing a matrix involves computing an offset. This offset computation
 depends on whether the array is stored in row-major  or column-major order.
 Things get even more complicated when indexing into a matrix that is embedded
-in a larger matrix or when transposing matrices converting them from
+in a larger matrix or when transposing matrices, converting them from
 column-major to row-major.
 
 Rather than manually inlining the index calculations, we instead developed two
@@ -56,7 +56,7 @@ quickly copied, modified, and compared. Using the original build system, this
 becomes onerous. Modifying the Makefile is easy to forget, and creating a
 script for each kernel not only creates a tremendous amount of clutter but also
 takes an annoying amount of time. The large overhead discourages prototyping
-leading to less informed optimization decisions and unexplored possibilities.
+which leads to less informed optimization decisions and unexplored possibilities.
 
 To eliminate this overhead, we first enhanced the Makefiles. We added a bit of
 Makefile logic to eliminate the need to update a Makefile with the name of
