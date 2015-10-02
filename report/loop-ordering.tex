@@ -30,11 +30,10 @@ clearly fastest, and significantly faster than the slowest loop orderings.
 \end{figure}
 
 \subsubsection{Outside Loop Ordering}
-Similarly, the order in which we choose which blocks to multiply can also be
-changed. Again, we compared the six different possible orderings, while
-keeping the inside loop ordering fixed as $j,k,i$, which was found to be the
-fastest in the previous subsection. The timing results are found in
-\figref{outsideloop}.
+Similarly, we can also change the order in which we multiply blocks. Again, we
+compared the six different possible orderings, while keeping the inside loop
+ordering fixed as $j,k,i$, which was found to be the fastest in the previous
+subsection. The timing results are found in \figref{outsideloop}.
 
 We see that some loop orderings are definitely faster than others, but unlike
 with the inside loop orderings, there is no clear best ordering as both $k,j,i$

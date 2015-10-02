@@ -4,11 +4,11 @@ increase the performance of a matrix multiplication kernel.
 
 \begin{itemize}
   \item
-    We did not use any explicit vector instructions in our kernels because the
-    overhead of correctly using explicit vector instructions was very high, and
-    we were uncertain if doing so would significantly increase the performance
-    of the kennel. In the future, we could introduce explicit vector
-    instructions.
+    We did not use any explicit vector instructions in our fully optimized
+    kernels because the overhead of correctly using explicit vector
+    instructions was very high, and we were uncertain if doing so would
+    significantly increase the performance of the kennel. In the future, we
+    could introduce explicit vector instructions.
 
   \item
     To multiply two $N \times N$ matrices, all our kernels perform at least
