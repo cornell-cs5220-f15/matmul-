@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine3 blocked f2c mkl OPT2 BGenMult4
+BUILDS=basic Vec VecAndBlock mkl
 
 # C and Fortran compilers
 CC=icc
