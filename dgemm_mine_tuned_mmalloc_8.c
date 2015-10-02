@@ -4,10 +4,10 @@
 const char* dgemm_desc = "My awesome dgemm.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 104)
+#define BLOCK_SIZE ((int) 128)
 #endif
 #ifndef BYTE_ALIGNMENT
-#define BYTE_ALIGNMENT ((int) 64)
+#define BYTE_ALIGNMENT ((int) 8)
 #endif
 
 /*
