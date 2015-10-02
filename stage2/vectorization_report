@@ -1,0 +1,1004 @@
+
+Begin optimization report for: basic_dgemm(const int, const int, const int, const int, const double *__restrict__, const double *__restrict__, double *__restrict__)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(19,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+   <Peeled>
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+      remark #15388: vectorization support: reference A has aligned access   [ dgemm_mine.c(21,13) ]
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15448: unmasked aligned unit stride loads: 1 
+      remark #15462: unmasked indexed (or gather) loads: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 10 
+      remark #15477: vector loop cost: 2.500 
+      remark #15478: estimated potential speedup: 3.870 
+      remark #15479: lightweight vector operations: 2 
+      remark #15481: heavy-overhead vector operations: 1 
+      remark #15488: --- end vector loop cost summary ---
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(25,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(26,9)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_mine.c(26,9)
+         remark #15389: vectorization support: reference smallB has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15389: vectorization support: reference B has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 10 
+         remark #15477: vector loop cost: 3.000 
+         remark #15478: estimated potential speedup: 2.850 
+         remark #15479: lightweight vector operations: 1 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15481: heavy-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(26,9)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(33,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(34,10)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+         remark #15388: vectorization support: reference smallA has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15399: vectorization support: unroll factor set to 8
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15448: unmasked aligned unit stride loads: 2 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 22 
+         remark #15477: vector loop cost: 1.750 
+         remark #15478: estimated potential speedup: 8.590 
+         remark #15479: lightweight vector operations: 7 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+      <Remainder>
+         remark #15388: vectorization support: reference smallA has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: basic_dgemm(const int, const int, const int, const int, const double *__restrict__, const double *__restrict__, double *__restrict__)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(19,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+   <Peeled>
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+      remark #15389: vectorization support: reference A has unaligned access   [ dgemm_mine.c(21,13) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15462: unmasked indexed (or gather) loads: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 10 
+      remark #15477: vector loop cost: 2.500 
+      remark #15478: estimated potential speedup: 3.870 
+      remark #15479: lightweight vector operations: 1 
+      remark #15480: medium-overhead vector operations: 1 
+      remark #15481: heavy-overhead vector operations: 1 
+      remark #15488: --- end vector loop cost summary ---
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(25,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(26,9)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(26,9)
+         remark #15389: vectorization support: reference smallB has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15389: vectorization support: reference B has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 10 
+         remark #15477: vector loop cost: 1.500 
+         remark #15478: estimated potential speedup: 5.000 
+         remark #15479: lightweight vector operations: 2 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(26,9)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(33,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(34,10)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+         remark #15388: vectorization support: reference smallA has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15399: vectorization support: unroll factor set to 8
+         remark #15448: unmasked aligned unit stride loads: 2 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 22 
+         remark #15477: vector loop cost: 1.750 
+         remark #15478: estimated potential speedup: 8.590 
+         remark #15479: lightweight vector operations: 7 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+      <Remainder>
+         remark #15388: vectorization support: reference smallA has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB has aligned access   [ dgemm_mine.c(38,17) ]
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: basic_dgemm(const int, const int, const int, const int, const double *__restrict__, const double *__restrict__, double *__restrict__)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(19,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+   <Peeled>
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+      remark #15388: vectorization support: reference A has aligned access   [ dgemm_mine.c(21,13) ]
+      remark #15442: entire loop may be executed in remainder
+      remark #15448: unmasked aligned unit stride loads: 1 
+      remark #15462: unmasked indexed (or gather) loads: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 10 
+      remark #15477: vector loop cost: 2.500 
+      remark #15478: estimated potential speedup: 3.870 
+      remark #15479: lightweight vector operations: 2 
+      remark #15481: heavy-overhead vector operations: 1 
+      remark #15488: --- end vector loop cost summary ---
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(25,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(26,9)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(26,9)
+         remark #15389: vectorization support: reference smallB has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15389: vectorization support: reference B has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 10 
+         remark #15477: vector loop cost: 3.000 
+         remark #15478: estimated potential speedup: 2.850 
+         remark #15479: lightweight vector operations: 1 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15481: heavy-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(26,9)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(33,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(34,10)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+         remark #15388: vectorization support: reference smallA has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15399: vectorization support: unroll factor set to 4
+         remark #15448: unmasked aligned unit stride loads: 2 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 22 
+         remark #15477: vector loop cost: 4.000 
+         remark #15478: estimated potential speedup: 5.180 
+         remark #15479: lightweight vector operations: 6 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+      <Remainder>
+         remark #15388: vectorization support: reference smallA has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB has aligned access   [ dgemm_mine.c(38,17) ]
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: do_block(const int, const double *__restrict__, const double *__restrict__, double *__restrict__, const int, const int, const int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(19,5) inlined into dgemm_mine.c(54,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+   <Peeled>
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+      remark #15388: vectorization support: reference A_551 has aligned access   [ dgemm_mine.c(21,13) ]
+      remark #15300: LOOP WAS VECTORIZED
+      remark #15442: entire loop may be executed in remainder
+      remark #15448: unmasked aligned unit stride loads: 1 
+      remark #15462: unmasked indexed (or gather) loads: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 10 
+      remark #15477: vector loop cost: 2.500 
+      remark #15478: estimated potential speedup: 3.870 
+      remark #15479: lightweight vector operations: 2 
+      remark #15481: heavy-overhead vector operations: 1 
+      remark #15488: --- end vector loop cost summary ---
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(25,5) inlined into dgemm_mine.c(54,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+         remark #15389: vectorization support: reference smallB.551 has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15389: vectorization support: reference B_551 has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 10 
+         remark #15477: vector loop cost: 3.000 
+         remark #15478: estimated potential speedup: 2.850 
+         remark #15479: lightweight vector operations: 1 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15481: heavy-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(33,5) inlined into dgemm_mine.c(54,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(34,10) inlined into dgemm_mine.c(54,5)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+         remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15399: vectorization support: unroll factor set to 8
+         remark #15300: LOOP WAS VECTORIZED
+         remark #15448: unmasked aligned unit stride loads: 2 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 22 
+         remark #15477: vector loop cost: 1.750 
+         remark #15478: estimated potential speedup: 8.590 
+         remark #15479: lightweight vector operations: 7 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+         remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: do_block(const int, const double *__restrict__, const double *__restrict__, double *__restrict__, const int, const int, const int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(19,5) inlined into dgemm_mine.c(54,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+   <Peeled>
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+      remark #15389: vectorization support: reference A_551 has unaligned access   [ dgemm_mine.c(21,13) ]
+      remark #15381: vectorization support: unaligned access used inside loop body
+      remark #15442: entire loop may be executed in remainder
+      remark #15450: unmasked unaligned unit stride loads: 1 
+      remark #15462: unmasked indexed (or gather) loads: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 10 
+      remark #15477: vector loop cost: 2.500 
+      remark #15478: estimated potential speedup: 3.870 
+      remark #15479: lightweight vector operations: 1 
+      remark #15480: medium-overhead vector operations: 1 
+      remark #15481: heavy-overhead vector operations: 1 
+      remark #15488: --- end vector loop cost summary ---
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(25,5) inlined into dgemm_mine.c(54,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+         remark #15389: vectorization support: reference smallB.551 has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15389: vectorization support: reference B_551 has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 10 
+         remark #15477: vector loop cost: 1.500 
+         remark #15478: estimated potential speedup: 5.000 
+         remark #15479: lightweight vector operations: 2 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(33,5) inlined into dgemm_mine.c(54,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(34,10) inlined into dgemm_mine.c(54,5)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+         remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15399: vectorization support: unroll factor set to 8
+         remark #15448: unmasked aligned unit stride loads: 2 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 22 
+         remark #15477: vector loop cost: 1.750 
+         remark #15478: estimated potential speedup: 8.590 
+         remark #15479: lightweight vector operations: 7 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+         remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: do_block(const int, const double *__restrict__, const double *__restrict__, double *__restrict__, const int, const int, const int)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(19,5) inlined into dgemm_mine.c(54,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+   <Peeled>
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+      remark #15388: vectorization support: reference A_551 has aligned access   [ dgemm_mine.c(21,13) ]
+      remark #15442: entire loop may be executed in remainder
+      remark #15448: unmasked aligned unit stride loads: 1 
+      remark #15462: unmasked indexed (or gather) loads: 1 
+      remark #15475: --- begin vector loop cost summary ---
+      remark #15476: scalar loop cost: 10 
+      remark #15477: vector loop cost: 2.500 
+      remark #15478: estimated potential speedup: 3.870 
+      remark #15479: lightweight vector operations: 2 
+      remark #15481: heavy-overhead vector operations: 1 
+      remark #15488: --- end vector loop cost summary ---
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(54,5)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(25,5) inlined into dgemm_mine.c(54,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+         remark #15389: vectorization support: reference smallB.551 has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15389: vectorization support: reference B_551 has unaligned access   [ dgemm_mine.c(27,13) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15451: unmasked unaligned unit stride stores: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 10 
+         remark #15477: vector loop cost: 3.000 
+         remark #15478: estimated potential speedup: 2.850 
+         remark #15479: lightweight vector operations: 1 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15481: heavy-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(33,5) inlined into dgemm_mine.c(54,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(34,10) inlined into dgemm_mine.c(54,5)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+         remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15399: vectorization support: unroll factor set to 4
+         remark #15448: unmasked aligned unit stride loads: 2 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 22 
+         remark #15477: vector loop cost: 4.000 
+         remark #15478: estimated potential speedup: 5.180 
+         remark #15479: lightweight vector operations: 6 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+         remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+         remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(54,5)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: square_dgemm(const int, const double *__restrict__, const double *__restrict__, double *__restrict__)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(73,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(75,9)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_mine.c(77,13)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at dgemm_mine.c(19,5) inlined into dgemm_mine.c(79,17)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+            <Peeled>
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+               remark #15388: vectorization support: reference A_551 has aligned access   [ dgemm_mine.c(21,13) ]
+               remark #15300: LOOP WAS VECTORIZED
+               remark #15442: entire loop may be executed in remainder
+               remark #15448: unmasked aligned unit stride loads: 1 
+               remark #15462: unmasked indexed (or gather) loads: 1 
+               remark #15475: --- begin vector loop cost summary ---
+               remark #15476: scalar loop cost: 10 
+               remark #15477: vector loop cost: 2.500 
+               remark #15478: estimated potential speedup: 3.870 
+               remark #15479: lightweight vector operations: 2 
+               remark #15481: heavy-overhead vector operations: 1 
+               remark #15488: --- end vector loop cost summary ---
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+            <Remainder>
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine.c(25,5) inlined into dgemm_mine.c(79,17)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+               remark #15542: loop was not vectorized: inner loop was already vectorized
+
+               LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+                  remark #15389: vectorization support: reference smallB.551 has unaligned access   [ dgemm_mine.c(27,13) ]
+                  remark #15389: vectorization support: reference B_551 has unaligned access   [ dgemm_mine.c(27,13) ]
+                  remark #15381: vectorization support: unaligned access used inside loop body
+                  remark #15300: LOOP WAS VECTORIZED
+                  remark #15450: unmasked unaligned unit stride loads: 1 
+                  remark #15451: unmasked unaligned unit stride stores: 1 
+                  remark #15475: --- begin vector loop cost summary ---
+                  remark #15476: scalar loop cost: 10 
+                  remark #15477: vector loop cost: 3.000 
+                  remark #15478: estimated potential speedup: 2.850 
+                  remark #15479: lightweight vector operations: 1 
+                  remark #15480: medium-overhead vector operations: 1 
+                  remark #15481: heavy-overhead vector operations: 1 
+                  remark #15488: --- end vector loop cost summary ---
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine.c(33,5) inlined into dgemm_mine.c(79,17)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at dgemm_mine.c(34,10) inlined into dgemm_mine.c(79,17)
+               remark #15542: loop was not vectorized: inner loop was already vectorized
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+                  remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15399: vectorization support: unroll factor set to 8
+                  remark #15300: LOOP WAS VECTORIZED
+                  remark #15448: unmasked aligned unit stride loads: 2 
+                  remark #15475: --- begin vector loop cost summary ---
+                  remark #15476: scalar loop cost: 13 
+                  remark #15477: vector loop cost: 1.750 
+                  remark #15478: estimated potential speedup: 5.740 
+                  remark #15479: lightweight vector operations: 7 
+                  remark #15488: --- end vector loop cost summary ---
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+                  remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15301: REMAINDER LOOP WAS VECTORIZED
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(62,4)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine.c(64,5)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Peeled>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15389: vectorization support: reference A has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15399: vectorization support: unroll factor set to 4
+         remark #15301: PERMUTED LOOP WAS VECTORIZED
+         remark #15442: entire loop may be executed in remainder
+         remark #15448: unmasked aligned unit stride loads: 1 
+         remark #15449: unmasked aligned unit stride stores: 1 
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 24 
+         remark #15477: vector loop cost: 2.000 
+         remark #15478: estimated potential speedup: 8.200 
+         remark #15479: lightweight vector operations: 7 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Remainder>
+         remark #15389: vectorization support: reference C has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15389: vectorization support: reference C has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15389: vectorization support: reference A has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15301: REMAINDER LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: square_dgemm(const int, const double *__restrict__, const double *__restrict__, double *__restrict__)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(73,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(75,9)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(77,13)
+         remark #25460: No loop optimizations reported
+
+         LOOP BEGIN at dgemm_mine.c(19,5) inlined into dgemm_mine.c(79,17)
+            remark #25460: No loop optimizations reported
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+            <Peeled>
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+               remark #15389: vectorization support: reference A_551 has unaligned access   [ dgemm_mine.c(21,13) ]
+               remark #15381: vectorization support: unaligned access used inside loop body
+               remark #15442: entire loop may be executed in remainder
+               remark #15450: unmasked unaligned unit stride loads: 1 
+               remark #15462: unmasked indexed (or gather) loads: 1 
+               remark #15475: --- begin vector loop cost summary ---
+               remark #15476: scalar loop cost: 10 
+               remark #15477: vector loop cost: 2.500 
+               remark #15478: estimated potential speedup: 3.870 
+               remark #15479: lightweight vector operations: 1 
+               remark #15480: medium-overhead vector operations: 1 
+               remark #15481: heavy-overhead vector operations: 1 
+               remark #15488: --- end vector loop cost summary ---
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+            <Remainder>
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine.c(25,5) inlined into dgemm_mine.c(79,17)
+            remark #25460: No loop optimizations reported
+
+            LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+               remark #25460: No loop optimizations reported
+
+               LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+                  remark #15389: vectorization support: reference smallB.551 has unaligned access   [ dgemm_mine.c(27,13) ]
+                  remark #15389: vectorization support: reference B_551 has unaligned access   [ dgemm_mine.c(27,13) ]
+                  remark #15381: vectorization support: unaligned access used inside loop body
+                  remark #15450: unmasked unaligned unit stride loads: 1 
+                  remark #15451: unmasked unaligned unit stride stores: 1 
+                  remark #15475: --- begin vector loop cost summary ---
+                  remark #15476: scalar loop cost: 10 
+                  remark #15477: vector loop cost: 1.500 
+                  remark #15478: estimated potential speedup: 5.000 
+                  remark #15479: lightweight vector operations: 2 
+                  remark #15480: medium-overhead vector operations: 1 
+                  remark #15488: --- end vector loop cost summary ---
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine.c(33,5) inlined into dgemm_mine.c(79,17)
+            remark #25460: No loop optimizations reported
+
+            LOOP BEGIN at dgemm_mine.c(34,10) inlined into dgemm_mine.c(79,17)
+               remark #25460: No loop optimizations reported
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+                  remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15399: vectorization support: unroll factor set to 8
+                  remark #15448: unmasked aligned unit stride loads: 2 
+                  remark #15475: --- begin vector loop cost summary ---
+                  remark #15476: scalar loop cost: 13 
+                  remark #15477: vector loop cost: 1.750 
+                  remark #15478: estimated potential speedup: 5.740 
+                  remark #15479: lightweight vector operations: 7 
+                  remark #15488: --- end vector loop cost summary ---
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+                  remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(62,4)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(64,5)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Peeled>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15389: vectorization support: reference A has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+         remark #15399: vectorization support: unroll factor set to 4
+         remark #15442: entire loop may be executed in remainder
+         remark #15448: unmasked aligned unit stride loads: 1 
+         remark #15449: unmasked aligned unit stride stores: 1 
+         remark #15450: unmasked unaligned unit stride loads: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 24 
+         remark #15477: vector loop cost: 2.000 
+         remark #15478: estimated potential speedup: 8.200 
+         remark #15479: lightweight vector operations: 7 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Remainder>
+         remark #15389: vectorization support: reference C has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15389: vectorization support: reference C has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15389: vectorization support: reference A has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
+
+Begin optimization report for: square_dgemm(const int, const double *__restrict__, const double *__restrict__, double *__restrict__)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(73,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(75,9)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(77,13)
+         remark #25460: No loop optimizations reported
+
+         LOOP BEGIN at dgemm_mine.c(19,5) inlined into dgemm_mine.c(79,17)
+            remark #25460: No loop optimizations reported
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+            <Peeled>
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+               remark #15388: vectorization support: reference A_551 has aligned access   [ dgemm_mine.c(21,13) ]
+               remark #15442: entire loop may be executed in remainder
+               remark #15448: unmasked aligned unit stride loads: 1 
+               remark #15462: unmasked indexed (or gather) loads: 1 
+               remark #15475: --- begin vector loop cost summary ---
+               remark #15476: scalar loop cost: 10 
+               remark #15477: vector loop cost: 2.500 
+               remark #15478: estimated potential speedup: 3.870 
+               remark #15479: lightweight vector operations: 2 
+               remark #15481: heavy-overhead vector operations: 1 
+               remark #15488: --- end vector loop cost summary ---
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(20,9) inlined into dgemm_mine.c(79,17)
+            <Remainder>
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine.c(25,5) inlined into dgemm_mine.c(79,17)
+            remark #25460: No loop optimizations reported
+
+            LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+               remark #25460: No loop optimizations reported
+
+               LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+                  remark #15389: vectorization support: reference smallB.551 has unaligned access   [ dgemm_mine.c(27,13) ]
+                  remark #15389: vectorization support: reference B_551 has unaligned access   [ dgemm_mine.c(27,13) ]
+                  remark #15381: vectorization support: unaligned access used inside loop body
+                  remark #15450: unmasked unaligned unit stride loads: 1 
+                  remark #15451: unmasked unaligned unit stride stores: 1 
+                  remark #15475: --- begin vector loop cost summary ---
+                  remark #15476: scalar loop cost: 10 
+                  remark #15477: vector loop cost: 3.000 
+                  remark #15478: estimated potential speedup: 2.850 
+                  remark #15479: lightweight vector operations: 1 
+                  remark #15480: medium-overhead vector operations: 1 
+                  remark #15481: heavy-overhead vector operations: 1 
+                  remark #15488: --- end vector loop cost summary ---
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(26,9) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine.c(33,5) inlined into dgemm_mine.c(79,17)
+            remark #25460: No loop optimizations reported
+
+            LOOP BEGIN at dgemm_mine.c(34,10) inlined into dgemm_mine.c(79,17)
+               remark #25460: No loop optimizations reported
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+                  remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15399: vectorization support: unroll factor set to 4
+                  remark #15448: unmasked aligned unit stride loads: 2 
+                  remark #15475: --- begin vector loop cost summary ---
+                  remark #15476: scalar loop cost: 14 
+                  remark #15477: vector loop cost: 4.000 
+                  remark #15478: estimated potential speedup: 3.330 
+                  remark #15479: lightweight vector operations: 6 
+                  remark #15480: medium-overhead vector operations: 1 
+                  remark #15488: --- end vector loop cost summary ---
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+                  remark #15388: vectorization support: reference smallA.551 has aligned access   [ dgemm_mine.c(38,17) ]
+                  remark #15388: vectorization support: reference smallB.551 has aligned access   [ dgemm_mine.c(38,17) ]
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine.c(36,13) inlined into dgemm_mine.c(79,17)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(62,4)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(64,5)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Peeled>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15388: vectorization support: reference A has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15399: vectorization support: unroll factor set to 4
+         remark #15442: entire loop may be executed in remainder
+         remark #15448: unmasked aligned unit stride loads: 2 
+         remark #15449: unmasked aligned unit stride stores: 1 
+         remark #15475: --- begin vector loop cost summary ---
+         remark #15476: scalar loop cost: 24 
+         remark #15477: vector loop cost: 4.000 
+         remark #15478: estimated potential speedup: 5.550 
+         remark #15479: lightweight vector operations: 6 
+         remark #15480: medium-overhead vector operations: 1 
+         remark #15488: --- end vector loop cost summary ---
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Alternate Alignment Vectorized Loop>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Remainder>
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15388: vectorization support: reference C has aligned access   [ dgemm_mine.c(65,6) ]
+         remark #15389: vectorization support: reference A has unaligned access   [ dgemm_mine.c(65,6) ]
+         remark #15381: vectorization support: unaligned access used inside loop body
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(61,3)
+      <Remainder>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================

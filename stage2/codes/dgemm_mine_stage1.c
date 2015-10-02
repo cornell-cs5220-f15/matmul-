@@ -1,47 +1,40 @@
 const char* dgemm_desc = "My awesome dgemm.";
 #include <stdlib.h>
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 32)
-#define START_BLOCK_SIZE 1200
+#define BLOCK_SIZE ((int) 80)
 #endif
-
-#include <mmintrin.h>
-#include <xmmintrin.h>  // SSE
-
+#define START_BLOCK_SIZE 1200
+#define CONFLICT_SIZE 64
 
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B, double* restrict C)
 {
-    
-    double* restrict smallA = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-    double* restrict smallB = (double*) malloc(BLOCK_SIZE * BLOCK_SIZE * sizeof(double));
-    int i, j, k;
-    for(k=0;k<K;++k){//smallA = A'
-        for(i=0;i<M;++i){
-            smallA[i*BLOCK_SIZE+k]=A[k*lda+i];
-        }
-    }
 
-    for(j=0;j<N;++j){
-        for(k=0;k<K;++k){
-            smallB[j*BLOCK_SIZE+k]=B[j*lda+k];
-        }
-    }
-    __assume_aligned(smallA,256);
-    __assume_aligned(smallB,256);
-    
+	double* restrict smallA = (double*) malloc(M * K * sizeof(double));
+	double* restrict smallB = (double*) malloc(N * K * sizeof(double));
+	
+    int i, j, k;
+	for(k=0;k<K;++k){
+		for(i=0;i<M;++i){
+			smallA[k*M+i]=A[k*lda+i];
+		}
+	}
+	for(j=0;j<N;++j){
+		for(k=0;k<K;++k){
+			smallB[j*K+k]=B[j*lda+k];
+		}
+	}
     for (j = 0; j < N; ++j) {
          for (i = 0; i < M; ++i){
             double cij = C[j*lda+i];
-            for (k = 0; k < K; k++) {
-                #pragma vector always 
-                cij += smallA[i*BLOCK_SIZE+k] * smallB[j*BLOCK_SIZE+k];
+            for (k = 0; k < K; ++k) {
+                cij += smallA[k*M+i] * smallB[j*K+k];
             }
             C[j*lda+i] = cij;
         }
     }
-    free(smallA);
-    free(smallB);
+	free(smallA);
+	free(smallB);
 }
 
 void do_block(const int lda,

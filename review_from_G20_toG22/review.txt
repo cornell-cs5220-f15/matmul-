@@ -1,0 +1,10 @@
+This is a review for Group 22 from Group 20 
+1.What you think they did well (and why)
+They've tried several ways to improve the performance and they get good results. The vectorization they've done is good.  
+
+2.What you think they could improve on (and why)
+They could try some Compiler flags. 
+
+
+3.Anything else you would like to add
+I think it is better to show some intermediate result or add some discussion about how much each the different approach effects the perfomance in the report.  

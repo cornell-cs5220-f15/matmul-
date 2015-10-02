@@ -2,7 +2,6 @@ const char* dgemm_desc = "My awesome dgemm.";
 #include <stdlib.h>
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 32)
-#define START_BLOCK_SIZE 1200
 #endif
 
 #include <mmintrin.h>
@@ -34,7 +33,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
          for (i = 0; i < M; ++i){
             double cij = C[j*lda+i];
             for (k = 0; k < K; k++) {
-                #pragma vector always 
+                #pragma vector aligned
                 cij += smallA[i*BLOCK_SIZE+k] * smallB[j*BLOCK_SIZE+k];
             }
             C[j*lda+i] = cij;
@@ -56,18 +55,6 @@ void do_block(const int lda,
 }
 void square_dgemm(const int M, const double* restrict A, const double* restrict B, double* restrict C)
 {
-	if((M<START_BLOCK_SIZE)){
-		int i, j, k;
-		for (i = 0; i < M; ++i) {
-			for (j = 0; j < M; ++j) {
-				double cij = C[j*M+i];
-				for (k = 0; k < M; ++k)
-					cij += A[k*M+i] * B[j*M+k];
-				C[j*M+i] = cij;
-			}
-		}
-		return;
-	}
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
     for (bi = 0; bi < n_blocks; ++bi) {

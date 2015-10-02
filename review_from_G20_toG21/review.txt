@@ -1,0 +1,9 @@
+This is a review for Group 21 from Group 20 
+1.What you think they did well (and why)
+They've tried many ways to improve the performance. In the report, they give a detailed discussion about what they tried and what the result looks like. 
+
+2.What you think they could improve on (and why)
+They could try different combinations. For example, they could try to change block size or compiling flags after adding the restrict key word. These things may have interaction effect.
+
+3.Anything else you would like to add
+I think this group did things similar to us. So it's useful for us to see what they've tried.
