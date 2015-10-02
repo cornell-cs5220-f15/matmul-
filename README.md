@@ -15,7 +15,6 @@ explored a large number of various tuning tricks and optimizations.
 | [`dgemm_padded_blocked.c`](dgemm_padded_blocked.c)           | Padded blocked matmul with small fixed-size blocks. `A` gets transposed, `B` gets copied.                                              |
 | [`dgemm_padded_if.c`](dgemm_padded_if.c)                     | Padded blocked matmul with small fixed-size blocks. `A` gets transposed, `B` gets copied. If statement avoids superfluous computation. |
 | [`dgemm_3_level_blocking.c`](dgemm_3_level_blocking.c)       | Very cache-friendly three-tiered blocked matmul.                                                                                       |
-| [`dgemm_3_level_blocking_V2.c`](dgemm_3_level_blocking_V2.c) | Very cache-friendly three-tiered blocked matmul with further tweaks and optimizations.                                                 |
 | [`dgemm_big_blocked.c`](dgemm_big_blocked.c)                 | Blocked matmul with large block size. `A` gets transposed in dynamically allocated blocks.                                             |
 
 Additionally, we have a few very simple kernels that we use for reference.
