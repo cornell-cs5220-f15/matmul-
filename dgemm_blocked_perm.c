@@ -56,41 +56,67 @@ double * restrict C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * s
 #define B_KERNEL(i, j) B_KERNEL[i*KERNEL_SIZE + j]
 #define C_KERNEL(i, j) C_KERNEL[i*KERNEL_SIZE + j]
 
-// assumes zmm08-15 already have the rows of B, and that zmm00-07 can be clobbered
-inline __attribute__((target(mic))) void row8x8(unsigned int row, double * restrict A, double * restrict C,
-                   __m512d zmm00, __m512d zmm01, __m512d zmm02, __m512d zmm03,
-                   __m512d zmm04, __m512d zmm05, __m512d zmm06, __m512d zmm07,
-                   __m512d zmm08, __m512d zmm09, __m512d zmm10, __m512d zmm11,
-                   __m512d zmm12, __m512d zmm13, __m512d zmm14, __m512d zmm15) {
+// assumes zmm16-31 already have the rows of B, and that ymm00-015 can be clobbered
+inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
+                   __m256d ymm00, __m256d ymm01, __m256d ymm02, __m256d ymm03, __m256d ymm04, __m256d ymm05, __m256d ymm06, __m256d ymm07,// piecewise store A
+                   __m256d ymm08, __m256d ymm09, __m256d ymm10, __m256d ymm11, __m256d ymm12, __m256d ymm13, __m256d ymm14, __m256d ymm15,
+                   __m256d ymm16, __m256d ymm17, __m256d ymm18, __m256d ymm19, __m256d ymm20, __m256d ymm21, __m256d ymm22, __m256d ymm23,// piecewise store B
+                   __m256d ymm24, __m256d ymm25, __m256d ymm26, __m256d ymm27, __m256d ymm28, __m256d ymm29, __m256d ymm30, __m256d ymm31) {
 
     __assume_aligned(A, BYTE_ALIGN);// unsure if this is necessary with an inline being called
     __assume_aligned(C, BYTE_ALIGN);// by an inline, but shouldn't cause too much of a ruckus
     
-    // Broadcast each element of Matrix A Row 1 into a zmm register
-    // note that there is no _mm512_broadcast_sd; but this works too ;)
-    zmm00 = _mm512_set1_pd(A[row*8 + 0]); zmm01 = _mm512_set1_pd(A[row*8 + 1]);
-    zmm02 = _mm512_set1_pd(A[row*8 + 2]); zmm03 = _mm512_set1_pd(A[row*8 + 3]);
-    zmm04 = _mm512_set1_pd(A[row*8 + 4]); zmm05 = _mm512_set1_pd(A[row*8 + 5]);
-    zmm06 = _mm512_set1_pd(A[row*8 + 6]); zmm07 = _mm512_set1_pd(A[row*8 + 7]);
+    // Broadcast each element of Matrix A Row 1 into a ymm register
+    // If row = [ a b c d e f g h ], then we need two registers for each
+    ymm00 = _mm256_broadcast_ss(A +  0); ymm01 = _mm256_broadcast_ss(A +  0);// a
+    ymm02 = _mm256_broadcast_ss(A +  4); ymm03 = _mm256_broadcast_ss(A +  4);// b
+    ymm04 = _mm256_broadcast_ss(A +  8); ymm05 = _mm256_broadcast_ss(A +  8);// c
+    ymm06 = _mm256_broadcast_ss(A + 12); ymm07 = _mm256_broadcast_ss(A + 12);// d
+    ymm08 = _mm256_broadcast_ss(A + 16); ymm09 = _mm256_broadcast_ss(A + 16);// e
+    ymm10 = _mm256_broadcast_ss(A + 20); ymm11 = _mm256_broadcast_ss(A + 20);// f
+    ymm12 = _mm256_broadcast_ss(A + 24); ymm13 = _mm256_broadcast_ss(A + 24);// g
+    ymm14 = _mm256_broadcast_ss(A + 30); ymm15 = _mm256_broadcast_ss(A + 30);// h
 
     // Multiply each element of A Row 1 with each Row of B
-    zmm00 = _mm512_mul_pd(zmm00, zmm08); zmm01 = _mm512_mul_pd(zmm01, zmm09);
-    zmm02 = _mm512_mul_pd(zmm02, zmm10); zmm03 = _mm512_mul_pd(zmm03, zmm11);
-    zmm04 = _mm512_mul_pd(zmm04, zmm12); zmm05 = _mm512_mul_pd(zmm05, zmm13);
-    zmm06 = _mm512_mul_pd(zmm06, zmm14); zmm07 = _mm512_mul_pd(zmm07, zmm15);
+    ymm00 = _m256_mul_pd(ymm00, ymm16); ymm01 = _m256_mul_pd(ymm01, ymm17);// row 1
+    ymm02 = _m256_mul_pd(ymm02, ymm18); ymm03 = _m256_mul_pd(ymm03, ymm19);// row 2
+    ymm04 = _m256_mul_pd(ymm04, ymm20); ymm05 = _m256_mul_pd(ymm05, ymm21);// row 3
+    ymm06 = _m256_mul_pd(ymm06, ymm22); ymm07 = _m256_mul_pd(ymm07, ymm23);// row 4
+    ymm08 = _m256_mul_pd(ymm08, ymm24); ymm09 = _m256_mul_pd(ymm09, ymm25);// row 5
+    ymm10 = _m256_mul_pd(ymm10, ymm26); ymm11 = _m256_mul_pd(ymm11, ymm27);// row 6
+    ymm12 = _m256_mul_pd(ymm12, ymm28); ymm13 = _m256_mul_pd(ymm13, ymm29);// row 7
+    ymm14 = _m256_mul_pd(ymm14, ymm30); ymm15 = _m256_mul_pd(ymm15, ymm31);// row 8
+
+    // Add up partial sums to reduce from 16 separate to 8 separate [read left right from previous]
+    ymm00 = _mm256_add_pd(ymm00, ymm01); ymm02 = _mm256_add_pd(ymm02, ymm03);
+    ymm04 = _mm256_add_pd(ymm04, ymm05); ymm06 = _mm256_add_pd(ymm06, ymm07);
+    ymm08 = _mm256_add_pd(ymm08, ymm09); ymm10 = _mm256_add_pd(ymm10, ymm11);
+    ymm12 = _mm256_add_pd(ymm12, ymm13); ymm14 = _mm256_add_pd(ymm14, ymm15);
 
     // Add up partial sums to reduce from 8 separate to 4 separate [read left right from previous]
-    zmm00 = _mm512_add_pd(zmm00, zmm01); zmm02 = _mm512_add_pd(zmm02, zmm03);
-    zmm04 = _mm512_add_pd(zmm04, zmm05); zmm06 = _mm512_add_pd(zmm06, zmm07);
+    ymm00 = _mm256_add_pd(ymm00, ymm02); ymm04 = _mm256_add_pd(ymm04, ymm06);
+    ymm08 = _mm256_add_pd(ymm08, ymm10); ymm12 = _mm256_add_pd(ymm12, ymm14);
 
     // Add up partial sums to reduce from 4 separate to 2 separate [read left right from previous]
-    zmm00 = _mm512_add_pd(zmm00, zmm02); zmm04 = _mm512_add_pd(zmm04, zmm06);
+    ymm00 = _mm256_add_pd(ymm00, ymm04); ymm08 = _mm256_add_pd(ymm08, ymm12);
 
-    // Add up partial sums to reduce from 2 separate to final value [read left right from previous]
-    zmm00 = _mm512_add_pd(zmm00, zmm04);
+    // ym00 and ym08 now hold the left and right halves, store back in C
+    _mm256_store_pd((double *) (C+0), ymm00); _mm256_store_pd((double *) (C+4), ymm08); 
 
-    // zmm00 now holds the entire row computation for C, store it back
-    _mm512_store_pd((double *) (C + row*8), zmm00);
+///////////////////////////////////////////////////
+
+
+    // zmm00 = _mm512_add_pd(zmm00, zmm01); zmm02 = _mm512_add_pd(zmm02, zmm03);
+    // zmm04 = _mm512_add_pd(zmm04, zmm05); zmm06 = _mm512_add_pd(zmm06, zmm07);
+
+    // // Add up partial sums to reduce from 4 separate to 2 separate [read left right from previous]
+    // zmm00 = _mm512_add_pd(zmm00, zmm02); zmm04 = _mm512_add_pd(zmm04, zmm06);
+
+    // // Add up partial sums to reduce from 2 separate to final value [read left right from previous]
+    // zmm00 = _mm512_add_pd(zmm00, zmm04);
+
+    // // zmm00 now holds the entire row computation for C, store it back
+    // _mm512_store_pd((double *) (C + row*8), zmm00);
 }
 
 __attribute__((target(mic))) void vectorized8x8(double * restrict A, double * restrict B, double * restrict C) {
@@ -101,41 +127,62 @@ __attribute__((target(mic))) void vectorized8x8(double * restrict A, double * re
     // adapted from:
     //     https://software.intel.com/en-us/articles/benefits-of-intel-avx-for-small-matrices
 
-    __m512d zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,// these will store A
-            zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15;// these will store B
+    __m256d ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,// piecewise store A
+            ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+            ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,// piecewise store B
+            ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31;
 
     // Read in the 8 rows of Matrix B into zmm registers
-    zmm08 = _mm512_load_pd((double *) (B + 0*8)); zmm09 = _mm512_load_pd((double *) (B + 1*8));
-    zmm10 = _mm512_load_pd((double *) (B + 2*8)); zmm11 = _mm512_load_pd((double *) (B + 3*8));
-    zmm12 = _mm512_load_pd((double *) (B + 4*8)); zmm13 = _mm512_load_pd((double *) (B + 5*8));
-    zmm14 = _mm512_load_pd((double *) (B + 6*8)); zmm15 = _mm512_load_pd((double *) (B + 7*8));
+    ymm16 = _mm256_load_pd((double *) (B + 0 *4)); ymm17 = _mm256_load_pd((double *) (B + 1 *4));// row 1
+    ymm14 = _mm256_load_pd((double *) (B + 2 *4)); ymm19 = _mm256_load_pd((double *) (B + 3 *4));// row 2
+    ymm20 = _mm256_load_pd((double *) (B + 4 *4)); ymm21 = _mm256_load_pd((double *) (B + 5 *4));// row 3
+    ymm22 = _mm256_load_pd((double *) (B + 6 *4)); ymm23 = _mm256_load_pd((double *) (B + 7 *4));// row 4
+    ymm24 = _mm256_load_pd((double *) (B + 8 *4)); ymm25 = _mm256_load_pd((double *) (B + 9 *4));// row 5
+    ymm26 = _mm256_load_pd((double *) (B + 10*4)); ymm27 = _mm256_load_pd((double *) (B + 11*4));// row 6
+    ymm24 = _mm256_load_pd((double *) (B + 12*4)); ymm29 = _mm256_load_pd((double *) (B + 13*4));// row 7
+    ymm30 = _mm256_load_pd((double *) (B + 14*4)); ymm31 = _mm256_load_pd((double *) (B + 15*4));// row 8
 
     // row by row computations
     row8x8(0, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
     row8x8(1, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
     row8x8(2, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
     row8x8(3, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
     row8x8(4, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
     row8x8(5, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
     row8x8(6, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
     row8x8(7, A, C,
-           zmm00, zmm01, zmm02, zmm03, zmm04, zmm05, zmm06, zmm07,
-           zmm08, zmm09, zmm10, zmm11, zmm12, zmm13, zmm14, zmm15);
-    
+           ymm00, ymm01, ymm02, ymm03, ymm04, ymm05, ymm06, ymm07,
+           ymm08, ymm09, ymm10, ymm11, ymm12, ymm13, ymm14, ymm15,
+           ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
+           ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
 }
 
 /*
@@ -190,17 +237,17 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                 }
 
                 // we're ready to compute
-                #if KERNEL_SIZE == 8
-                    #pragma offload target(mic) in(A_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
-                                                                 align(BYTE_ALIGN))              \
-                                                in(B_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
-                                                                 align(BYTE_ALIGN))              \
-                                                inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) \
-                                                                 align(BYTE_ALIGN))
-                    {
-                        vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
-                    }
-                #endif
+                // #if KERNEL_SIZE == 8
+                //     #pragma offload target(mic) in(A_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
+                //                                                  align(BYTE_ALIGN))              \
+                //                                 in(B_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
+                //                                                  align(BYTE_ALIGN))              \
+                //                                 inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) \
+                //                                                  align(BYTE_ALIGN))
+                //     {
+                vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                //     }
+                // #endif
 
                 // copy everything back to C
                 #pragma unroll
