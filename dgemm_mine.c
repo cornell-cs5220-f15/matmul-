@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-
 #ifndef BLOCK_SIZE
 #define BLOCK_SIZE ((int) 16)
 #endif
@@ -37,17 +35,18 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  double* restrict C)
 {
   int i, j, k;
+  __assume_aligned(A, 64);
+
   for (i = 0; i < M; ++i) {
     for (j = 0; j < N; ++j) {
       double cij = C[j*lda+i];
       for (k = 0; k < K; ++k) {
-	cij += A[i*lda+k] * B[j*lda+k];
+	    cij += A[i*lda+k] * B[j*lda+k];
       }
       C[j*lda+i] = cij;
     }
   }
 }
-
 
 #include <stdlib.h>
 
@@ -63,8 +62,8 @@ void square_dgemm_regs(const int M, const double *A, const double *B, double *C,
 
 void make_transpose(const int M, const double* restrict A, double* restrict out)
 {
-<<<<<<< HEAD
   int i, j;
+  __assume_aligned(A, 64);
   for (i = 0; i < M; ++i) {
     for (j = 0; j < M; ++j) {
       out[j*M + i] = A[i*M + j];
@@ -78,9 +77,6 @@ void make_transpose(const int M, const double* restrict A, double* restrict out)
   C is M-by-N
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
-
-
-
 void do_block(const int lda,
               const double* restrict A, const double* restrict B,
               double* restrict C, const int i, const int j, const int k, 
@@ -89,6 +85,7 @@ void do_block(const int lda,
   const int M = (i+my_blk_size > lda? lda-i : my_blk_size);
   const int N = (j+my_blk_size > lda? lda-j : my_blk_size);
   const int K = (k+my_blk_size > lda? lda-k : my_blk_size);
+  __assume_aligned(A, 64);
   basic_dgemm(lda, M, N, K,
 	      A + k + i*lda, B + k + j*lda, C + i + j*lda);
 }
@@ -101,7 +98,7 @@ void square_dgemm(const int M, const double* restrict A,
   const int n_blocks = M / blk_size + (M%blk_size? 1 : 0);
   int bi, bj, bk;
     
-  double *A_T = (double*)malloc(M * M * sizeof(double));
+  double *A_T = (double*)_mm_malloc(M * M * sizeof(double), 64);
   make_transpose(M, A, A_T);
 
   for (bi = 0; bi < n_blocks; ++bi) {
@@ -114,6 +111,7 @@ void square_dgemm(const int M, const double* restrict A,
       }
     }
   }
+  _mm_free(A_T);
 }
 
 // fits in L2 (256 KB)
