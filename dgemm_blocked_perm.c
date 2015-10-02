@@ -32,19 +32,9 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define FREE alloc_if(0) free_if(1)
 #define REUSE alloc_if(0) free_if(0)
 
-// #pragma offload_attribute (push, target(mic))
-//     double * restrict A_KERNEL = NULL;
-//     double * restrict B_KERNEL = NULL;
-//     double * restrict C_KERNEL = NULL;
-// #pragma offload_attribute (pop)
-
 double * restrict A_KERNEL = NULL;
 double * restrict B_KERNEL = NULL;
 double * restrict C_KERNEL = NULL;
-
-//double * restrict A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-//double * restrict B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-//double * restrict C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
 
 // more convenient access; column major
 #define A(i, j) A[(j)*M + (i)]
@@ -65,17 +55,17 @@ inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
 
     __assume_aligned(A, BYTE_ALIGN);// unsure if this is necessary with an inline being called
     __assume_aligned(C, BYTE_ALIGN);// by an inline, but shouldn't cause too much of a ruckus
-    
+
     // Broadcast each element of Matrix A Row 1 into a ymm register
     // If row = [ a b c d e f g h ], then we need two registers for each
-    ymm00 = _mm256_broadcast_sd(A +  0); ymm01 = _mm256_broadcast_sd(A +  0);// a
-    ymm02 = _mm256_broadcast_sd(A +  4); ymm03 = _mm256_broadcast_sd(A +  4);// b
-    ymm04 = _mm256_broadcast_sd(A +  8); ymm05 = _mm256_broadcast_sd(A +  8);// c
-    ymm06 = _mm256_broadcast_sd(A + 12); ymm07 = _mm256_broadcast_sd(A + 12);// d
-    ymm08 = _mm256_broadcast_sd(A + 16); ymm09 = _mm256_broadcast_sd(A + 16);// e
-    ymm10 = _mm256_broadcast_sd(A + 20); ymm11 = _mm256_broadcast_sd(A + 20);// f
-    ymm12 = _mm256_broadcast_sd(A + 24); ymm13 = _mm256_broadcast_sd(A + 24);// g
-    ymm14 = _mm256_broadcast_sd(A + 30); ymm15 = _mm256_broadcast_sd(A + 30);// h
+    ymm00 = _mm256_broadcast_sd(A + 0); ymm01 = _mm256_broadcast_sd(A + 0);// a
+    ymm02 = _mm256_broadcast_sd(A + 1); ymm03 = _mm256_broadcast_sd(A + 1);// b
+    ymm04 = _mm256_broadcast_sd(A + 2); ymm05 = _mm256_broadcast_sd(A + 2);// c
+    ymm06 = _mm256_broadcast_sd(A + 3); ymm07 = _mm256_broadcast_sd(A + 3);// d
+    ymm08 = _mm256_broadcast_sd(A + 4); ymm09 = _mm256_broadcast_sd(A + 4);// e
+    ymm10 = _mm256_broadcast_sd(A + 5); ymm11 = _mm256_broadcast_sd(A + 5);// f
+    ymm12 = _mm256_broadcast_sd(A + 6); ymm13 = _mm256_broadcast_sd(A + 6);// g
+    ymm14 = _mm256_broadcast_sd(A + 7); ymm15 = _mm256_broadcast_sd(A + 7);// h
 
     // Multiply each element of A Row 1 with each Row of B
     ymm00 = _mm256_mul_pd(ymm00, ymm16); ymm01 = _mm256_mul_pd(ymm01, ymm17);// row 1
@@ -101,22 +91,7 @@ inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
     ymm00 = _mm256_add_pd(ymm00, ymm04); ymm08 = _mm256_add_pd(ymm08, ymm12);
 
     // ym00 and ym08 now hold the left and right halves, store back in C
-    _mm256_store_pd((double *) (C+0), ymm00); _mm256_store_pd((double *) (C+4), ymm08); 
-
-///////////////////////////////////////////////////
-
-
-    // zmm00 = _mm512_add_pd(zmm00, zmm01); zmm02 = _mm512_add_pd(zmm02, zmm03);
-    // zmm04 = _mm512_add_pd(zmm04, zmm05); zmm06 = _mm512_add_pd(zmm06, zmm07);
-
-    // // Add up partial sums to reduce from 4 separate to 2 separate [read left right from previous]
-    // zmm00 = _mm512_add_pd(zmm00, zmm02); zmm04 = _mm512_add_pd(zmm04, zmm06);
-
-    // // Add up partial sums to reduce from 2 separate to final value [read left right from previous]
-    // zmm00 = _mm512_add_pd(zmm00, zmm04);
-
-    // // zmm00 now holds the entire row computation for C, store it back
-    // _mm512_store_pd((double *) (C + row*8), zmm00);
+    _mm256_store_pd((double *) (C+row*8), ymm00); _mm256_store_pd((double *) (C+row*8+4), ymm08); 
 }
 
 void vectorized8x8(double * restrict A, double * restrict B, double * restrict C) {
@@ -133,14 +108,14 @@ void vectorized8x8(double * restrict A, double * restrict B, double * restrict C
             ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31;
 
     // Read in the 8 rows of Matrix B into zmm registers
-    ymm16 = _mm256_load_pd((double *) (B + 0 *4)); ymm17 = _mm256_load_pd((double *) (B + 1 *4));// row 1
-    ymm14 = _mm256_load_pd((double *) (B + 2 *4)); ymm19 = _mm256_load_pd((double *) (B + 3 *4));// row 2
-    ymm20 = _mm256_load_pd((double *) (B + 4 *4)); ymm21 = _mm256_load_pd((double *) (B + 5 *4));// row 3
-    ymm22 = _mm256_load_pd((double *) (B + 6 *4)); ymm23 = _mm256_load_pd((double *) (B + 7 *4));// row 4
-    ymm24 = _mm256_load_pd((double *) (B + 8 *4)); ymm25 = _mm256_load_pd((double *) (B + 9 *4));// row 5
-    ymm26 = _mm256_load_pd((double *) (B + 10*4)); ymm27 = _mm256_load_pd((double *) (B + 11*4));// row 6
-    ymm24 = _mm256_load_pd((double *) (B + 12*4)); ymm29 = _mm256_load_pd((double *) (B + 13*4));// row 7
-    ymm30 = _mm256_load_pd((double *) (B + 14*4)); ymm31 = _mm256_load_pd((double *) (B + 15*4));// row 8
+    ymm16 = _mm256_load_pd((double *) (B + 0*8)); ymm17 = _mm256_load_pd((double *) (B + 0*8 + 4));// row 1
+    ymm14 = _mm256_load_pd((double *) (B + 1*8)); ymm19 = _mm256_load_pd((double *) (B + 1*8 + 4));// row 2
+    ymm20 = _mm256_load_pd((double *) (B + 2*8)); ymm21 = _mm256_load_pd((double *) (B + 2*8 + 4));// row 3
+    ymm22 = _mm256_load_pd((double *) (B + 3*8)); ymm23 = _mm256_load_pd((double *) (B + 3*8 + 4));// row 4
+    ymm24 = _mm256_load_pd((double *) (B + 4*8)); ymm25 = _mm256_load_pd((double *) (B + 4*8 + 4));// row 5
+    ymm26 = _mm256_load_pd((double *) (B + 5*8)); ymm27 = _mm256_load_pd((double *) (B + 5*8 + 4));// row 6
+    ymm24 = _mm256_load_pd((double *) (B + 6*8)); ymm29 = _mm256_load_pd((double *) (B + 6*8 + 4));// row 7
+    ymm30 = _mm256_load_pd((double *) (B + 7*8)); ymm31 = _mm256_load_pd((double *) (B + 7*8 + 4));// row 8
 
     // row by row computations
     row8x8(0, A, C,
@@ -184,6 +159,8 @@ void vectorized8x8(double * restrict A, double * restrict B, double * restrict C
            ymm16, ymm17, ymm18, ymm19, ymm20, ymm21, ymm22, ymm23,
            ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
 }
+
+#include <stdio.h>
 
 /*
   A is M-by-K
@@ -245,7 +222,9 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                 //                                 inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) \
                 //                                                  align(BYTE_ALIGN))
                 //     {
-                vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                // printf("BEFORE VECTORIZE\n");
+                //vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                // printf("AFTER VECTORIZE\n");
                 //     }
                 // #endif
 
