@@ -20,7 +20,7 @@ all:	$(DRIVERS)
 matmul-%: $(OBJS) dgemm_%.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
-matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o fdgemm.o
+matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) 
 
 matmul-blas: $(OBJS) dgemm_blas.o
@@ -41,7 +41,7 @@ matmul.o: matmul.c
 %.o: %.c
 	$(CC) -c $(CFLAGS) $(OPTFLAGS) $(CPPFLAGS) $<
 
-%.o: %.f
+%.o: %.f90
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
 
 dgemm_blas.o: dgemm_blas.c
