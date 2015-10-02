@@ -37,7 +37,7 @@ So, it can be seen that a minimum of three loops will be required for this probl
 
 \subsection*{Hand Tuning:}
 
-The first set of optimization techniques attempted were to examine the different ways that the basic code could be hand tuned to take advantage of the various ways memory is handled for both the software and the hardware.  Depending on which programming language is used, the memory will be either laid out in row-major order or column-major order. It is because of this that it would be very much desired to have the loops laid out in such a way so that the striding across memory is a minimum. The C language uses a row-major layout default to store 2-D arrays.  So, the loops would be ordered such that from the outermost to innermost loop the following indices are looped through: i, j, k. When this order is used a column of C and B and a single element of A are used in the innermost loop. However in the dgemm functions, all of the matrices used are one dimensional, and hence we are in complete control of the storage layout, and in fact in the dgemm functions in C are storing and accessing the matrices in column major order.  Therefore, the functions written for this assignment will take advantage of the column-major layout, so the loops are ordered as follow to take advantage of this from the outermost to inner most loop: k, j, i. Now the program should only have to take a stride of 1 to access the next element in each array.
+The first set of optimization techniques attempted were to examine the different ways that the basic code could be hand tuned to take advantage of the various ways memory is handled for both the software and the hardware.  Depending on which programming language is used, the memory will be either laid out in row-major order or column-major order. It is because of this that it would be very much desired to have the loops laid out in such a way so that the striding across memory is a minimum. The C language uses a row-major layout default to store 2-D arrays.  So, the loops would be ordered such that from the outermost to innermost loop the following indices are looped through: i, j, k. When this order is used the innermost loop takes a row of A and a column of B to compute an element of C. However in the dgemm functions, all of the matrices used are one dimensional, and hence we are in complete control of the storage layout, and in fact in the dgemm functions in C are storing and accessing the matrices in column major order.  Therefore, the functions written for this assignment will take advantage of the column-major layout, so the loops are ordered as follow to take advantage of this from the outermost to inner most loop: k, j, i. Now the program should only have to take a stride of 1 to access the next element in each array.
 
 While the above will help reduce the memory access time, it does not address the issue of the cache constantly being accessed each loop to refresh the data available which will ultimately lead to the cache becoming thrashed. Therefore, a blocked matrix design is introduced as an attempt to reduce the amount of cache misses while the code is being run. A blocked design can be thought of as the following:
 
@@ -66,24 +66,43 @@ B_{N1} & \hdots & B_{NN}
 
 In the optimized matrix-matrix multiply code, several different optimizations were brought into the code from more efficient blocking schemes to vectorizations and copy optimizations. First, the blocking schemes will be discussed, since they have already been discussed in some detail earlier in the report. A single level blocked kernel (such that the blocks fit in L2 cache) in C was implemented, and the optimal block size was found to be around 96x96. Next, a multi-level (2-level) blocked kernel in Fortran was implemented, and it was observed that the optimal inner block size such that the block fits in L1 cache is 32x32, and the outer level block size of 96x96 was used as discussed earlier. \\
 
-Next, the copy optimization will be discussed. In the C program, buffers $A_bu$f, $B_buf$, and $C_buf$ for matrix blocks of A, B, and C respectively were created, so that they could fit in L2 cache and be accessed faster. In the Fortran program, the buffers were created so that they could fit in the L1 cache. The buffers were also all aligned to a 32-byte boundary. A code snippet of the buffer creation in C can be seen below:
+Next, the copy optimization will be discussed. In the C program, buffers A\_buf, B\_buf, and C\_buf for matrix blocks of A, B, and C respectively were created, so that they could fit in L2 cache and be accessed faster. In the Fortran program, the buffers were created so that they could fit in the L1 cache. The buffers were also all aligned to a 32-byte boundary. A code snippet of the buffer creation in C can be seen below:
 
 \begin{verbatim}
-//Copy Optimization: Memory Aligned Buffers for Matrix Blocksdouble A_buf[ BLOCK_SIZE * BLOCK_SIZE ] __attribute__((aligned( 32 )));double B_buf[ BLOCK_SIZE * BLOCK_SIZE ] __attribute__((aligned( 32 )));double C_buf[ BLOCK_SIZE * BLOCK_SIZE ] __attribute__((aligned( 32 )));
+//Copy Optimization: Memory Aligned Buffers for Matrix Blocks
+double A_buf[ BLOCK_SIZE * BLOCK_SIZE ] __attribute__((aligned( 32 )));
+double B_buf[ BLOCK_SIZE * BLOCK_SIZE ] __attribute__((aligned( 32 )));
+double C_buf[ BLOCK_SIZE * BLOCK_SIZE ] __attribute__((aligned( 32 )));
 \end{verbatim}
 
 \noindent The block of matrix A was copied into $A_buf$ in its transposed row-major form to enable the innermost loop of the naive matrix multiplication i,j,k loop ordering to compute the dot product of A with a column of B in a vectorized manner. A code snippet of this copying can be found below:
 
 \begin{verbatim}
 //Copy Block of A into A_buf in row-major form to aid vectorization of matrix multiply's
-// innermost loop    for( k = 0; k < K; ++k ) {        for( i = 0; i < M; ++i ) {            A_buf[ K * i + k ] = A[ i + lda * k ];        }    }
+// innermost loop
+    for( k = 0; k < K; ++k ) {
+        for( i = 0; i < M; ++i ) {
+            A_buf[ K * i + k ] = A[ i + lda * k ];
+        }
+    }
 \end{verbatim}
 
 Now, the vectorization of the code is discussed. In the C program, the innermost k loop which computes a dot product is vectorized using the vector aligned pragma as stated by the Intel compiler. A code snippet of this can be found below. It should also be noted that this was not necessary in the Fortran code, since the compiler was smart enough to recognize the matrix-matrix multiplication area of the code as a place that could be vectorized with the AVX2 instruction set. If it did need help though a vector aligned directive would be used.
 
 \begin{verbatim}
 
-//---Vectorized Matrix Multiply Kernel: Dot Product of Rows of A_buf with Columns of B_buf    // to produce Columns of C_buf---//        for ( i = 0; i < M; ++i ) {        for ( j = 0; j < N; ++j ) {                        #pragma vector aligned            for ( k = 0; k < K; ++k ) {                C_buf[ i + M * j ] += A_buf[ K * i + k ] * B_buf[ k + K * j ];            }                    }
+//---Vectorized Matrix Multiply Kernel: Dot Product of Rows of A_buf with Columns of B_buf
+    // to produce Columns of C_buf---//
+    
+    for ( i = 0; i < M; ++i ) {
+        for ( j = 0; j < N; ++j ) {
+            
+            #pragma vector aligned
+            for ( k = 0; k < K; ++k ) {
+                C_buf[ i + M * j ] += A_buf[ K * i + k ] * B_buf[ k + K * j ];
+            }
+            
+        }
 
 \end{verbatim}
 
