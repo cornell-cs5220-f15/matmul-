@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl
+BUILDS=mine basic blocked f2c blas mkl mine_tuned mine_tuned_mmalloc_8 mine_tuned_mmalloc_16 mine_tuned_mmalloc_32 mine_tuned_mmalloc_64
 
 # C and Fortran compilers
 CC=icc
@@ -7,7 +7,7 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -O3
+OPTFLAGS = -O3 -fast -xCORE-AVX2 -unroll-aggressive -fp-model fast -vec-report2
 CFLAGS = -std=gnu99 
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main
