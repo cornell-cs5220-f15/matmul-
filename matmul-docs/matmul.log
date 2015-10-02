@@ -1,18 +1,21 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9) (preloaded format=pdflatex 2015.8.26)  1 OCT 2015 11:09
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (MiKTeX 2.9 64-bit) (preloaded format=pdflatex 2014.7.31)  1 OCT 2015 21:03
 entering extended mode
 **matmul.tex
-(C:\Users\dje88\Documents\GitHub\matmul-\matmul-docs\matmul.tex
+(C:\Users\David\Documents\GitHub\matmul-\matmul-docs\matmul.tex
 LaTeX2e <2011/06/27>
-Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, arabic, armenian, assamese, basque, bengali
-, bokmal, bulgarian, catalan, coptic, croatian, czech, danish, dutch, esperanto, estonian, farsi, finnish, french, galic
-ian, german, german-x-2013-05-26, greek, gujarati, hindi, hungarian, icelandic, indonesian, interlingua, irish, italian,
- kannada, kurmanji, latin, latvian, lithuanian, malayalam, marathi, mongolian, mongolianlmc, monogreek, ngerman, ngerman
--x-2013-05-26, nynorsk, oriya, panjabi, pinyin, polish, portuguese, romanian, russian, sanskrit, serbian, slovak, sloven
-ian, spanish, swedish, swissgerman, tamil, telugu, turkish, turkmen, ukenglish, ukrainian, uppersorbian, usenglishmax, w
-elsh, loaded.
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\article.cls"
+Babel <v3.8m> and hyphenation patterns for english, afrikaans, ancientgreek, ar
+abic, armenian, assamese, basque, bengali, bokmal, bulgarian, catalan, coptic, 
+croatian, czech, danish, dutch, esperanto, estonian, farsi, finnish, french, ga
+lician, german, german-x-2013-05-26, greek, gujarati, hindi, hungarian, iceland
+ic, indonesian, interlingua, irish, italian, kannada, kurmanji, latin, latvian,
+ lithuanian, malayalam, marathi, mongolian, mongolianlmc, monogreek, ngerman, n
+german-x-2013-05-26, nynorsk, oriya, panjabi, pinyin, polish, portuguese, roman
+ian, russian, sanskrit, serbian, slovak, slovenian, spanish, swedish, swissgerm
+an, tamil, telugu, turkish, turkmen, ukenglish, ukrainian, uppersorbian, usengl
+ishmax, welsh, loaded.
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\article.cls"
 Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\base\size12.clo"
+("C:\Program Files\MiKTeX 2.9\tex\latex\base\size12.clo"
 File: size12.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
@@ -27,24 +30,24 @@ File: size12.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 \belowcaptionskip=\skip42
 \bibindent=\dimen102
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsmath\amsmath.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsmath.sty"
 Package: amsmath 2013/01/14 v2.14 AMS math features
 \@mathmargin=\skip43
 
 For additional information on amsmath, use the `?' option.
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsmath\amstext.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amstext.sty"
 Package: amstext 2000/06/29 v2.01
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsmath\amsgen.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsgen.sty"
 File: amsgen.sty 1999/11/30 v2.0
 \@emptytoks=\toks14
 \ex@=\dimen103
 ))
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsmath\amsbsy.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsbsy.sty"
 Package: amsbsy 1999/11/29 v1.2d
 \pmbraise@=\dimen104
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\amsmath\amsopn.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\amsmath\amsopn.sty"
 Package: amsopn 1999/12/14 v2.01 operator names
 )
 \inf@bad=\count87
@@ -85,7 +88,7 @@ LaTeX Font Info:    Redeclaring font encoding OMS on input line 567.
 LaTeX Info: Redefining \[ on input line 2665.
 LaTeX Info: Redefining \] on input line 2666.
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\tools\multicol.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\tools\multicol.sty"
 Package: multicol 2011/06/27 v1.7a multicolumn formatting (FMi)
 \c@tracingmulticols=\count99
 \mult@box=\box28
@@ -133,31 +136,31 @@ Package: multicol 2011/06/27 v1.7a multicolumn formatting (FMi)
 \colbreak@box=\box53
 \multicol@sort@counter=\count107
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\graphicx.sty"
 Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\keyval.sty"
 Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks19
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\graphics.sty"
 Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\graphics\trig.sty"
+("C:\Program Files\MiKTeX 2.9\tex\latex\graphics\trig.sty"
 Package: trig 1999/03/16 v1.09 sin cos tan (DPC)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
+("C:\Program Files\MiKTeX 2.9\tex\latex\00miktex\graphics.cfg"
 File: graphics.cfg 2007/01/18 v1.5 graphics configuration of teTeX/TeXLive
 )
 Package graphics Info: Driver file: pdftex.def on input line 91.
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
+("C:\Program Files\MiKTeX 2.9\tex\latex\pdftex-def\pdftex.def"
 File: pdftex.def 2011/05/27 v0.06d Graphics/color for pdfTeX
 
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\infwarerr.sty"
 Package: infwarerr 2010/04/08 v1.3 Providing info/warning/error messages (HO)
 )
-("C:\Program Files (x86)\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
+("C:\Program Files\MiKTeX 2.9\tex\generic\oberdiek\ltxcmds.sty"
 Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 )
 \Gread@gobject=\count108
@@ -165,7 +168,7 @@ Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 \Gin@req@height=\dimen120
 \Gin@req@width=\dimen121
 )
-(C:\Users\dje88\Documents\GitHub\matmul-\matmul-docs\matmul.aux)
+(C:\Users\David\Documents\GitHub\matmul-\matmul-docs\matmul.aux)
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
 LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 16.
@@ -179,7 +182,7 @@ LaTeX Font Info:    ... okay on input line 16.
 LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 16.
 LaTeX Font Info:    ... okay on input line 16.
 
-(C:\Users\dje88\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
+(C:\Users\David\AppData\Roaming\MiKTeX\2.9\tex\context\base\supp-pdf.mkii
 [Loading MPS to PDF converter (version 2006.09.02).]
 \scratchcounter=\count109
 \scratchdimen=\dimen122
@@ -194,8 +197,10 @@ LaTeX Font Info:    ... okay on input line 16.
 \everyMPtoPDFconversion=\toks21
 ) <timing_basiclooporders_comparison.pdf, id=1, 623.77481pt x 399.55524pt>
 File: timing_basiclooporders_comparison.pdf Graphic file (type pdf)
- <use timing_basiclooporders_comparison.pdf>
-Package pdftex.def Info: timing_basiclooporders_comparison.pdf used on input line 45.
+
+<use timing_basiclooporders_comparison.pdf>
+Package pdftex.def Info: timing_basiclooporders_comparison.pdf used on input li
+ne 46.
 (pdftex.def)             Requested size: 433.62pt x 277.76018pt.
 
 
@@ -203,73 +208,114 @@ LaTeX Warning: `h' float specifier changed to `ht'.
 
 [1
 
-{C:/Users/dje88/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] [2 <C:/Users/dje88/Documents/GitHub/matmul-/matmul-d
-ocs/timing_basiclooporders_comparison.pdf>]
-Overfull \hbox (13.01399pt too wide) in paragraph at lines 85--87
-[]\OT1/cmr/m/n/12 The re-main-der of the flags (\OT1/cmtt/m/n/12 -parallel, -ansi-alias, -ftree-vectorize, -xHost,
+{C:/Users/David/AppData/Local/MiKTeX/2.9/pdftex/config/pdftex.map}] [2 <C:/User
+s/David/Documents/GitHub/matmul-/matmul-docs/timing_basiclooporders_comparison.
+pdf>]
+<timing_basic_ijk_w_wo_restrict_comparison.pdf, id=47, 686.08572pt x 399.55524p
+t>
+File: timing_basic_ijk_w_wo_restrict_comparison.pdf Graphic file (type pdf)
+ <use timing_basic_ijk_w_wo_restrict_comparison.pdf>
+Package pdftex.def Info: timing_basic_ijk_w_wo_restrict_comparison.pdf used on 
+input line 77.
+(pdftex.def)             Requested size: 433.62pt x 252.53198pt.
+ [3 <C:/Users/David/Documents/GitHub/matmul-/matmul-docs/timing_basic_ijk_w_wo_
+restrict_comparison.pdf>]
+Overfull \hbox (29.9334pt too wide) in paragraph at lines 110--114
+[]\OT1/cmr/m/n/12 The re-main-der of the flags (\OT1/cmtt/m/n/12 -ansi-alias, -
+ftree-vectorize, -xHost, -axCORE-AVX2\OT1/cmr/m/n/12 )
  []
 
-[3]
-Overfull \hbox (3.45813pt too wide) in paragraph at lines 104--105
-[]\OT1/cmr/m/n/12 On the com-pute nodes of the to-tient clus-ter, L1 cache was 32KB 8-way set-associative,
+<timing_basic_ijk_flags_comparison.pdf, id=85, 714.94354pt x 399.55524pt>
+File: timing_basic_ijk_flags_comparison.pdf Graphic file (type pdf)
+
+<use timing_basic_ijk_flags_comparison.pdf>
+Package pdftex.def Info: timing_basic_ijk_flags_comparison.pdf used on input li
+ne 125.
+(pdftex.def)             Requested size: 433.62pt x 242.33218pt.
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+
+Overfull \hbox (3.45813pt too wide) in paragraph at lines 133--135
+[]\OT1/cmr/m/n/12 On the com-pute nodes of the to-tient clus-ter, L1 cache was 
+32KB 8-way set-associative,
  []
 
-[4] <timing_blocked_comparison.pdf, id=54, 652.02097pt x 399.55524pt>
+[4] <timing_blocked_comparison.pdf, id=89, 652.02097pt x 399.55524pt>
 File: timing_blocked_comparison.pdf Graphic file (type pdf)
- <use timing_blocked_comparison.pdf>
-Package pdftex.def Info: timing_blocked_comparison.pdf used on input line 120.
-(pdftex.def)             Requested size: 455.24408pt x 278.97952pt.
 
-Overfull \hbox (3.55658pt too wide) in paragraph at lines 120--121
- [] 
- []
-
-[5 <C:/Users/dje88/Documents/GitHub/matmul-/matmul-docs/timing_blocked_comparison.pdf>]
-<timing_copyblocked_comparison_zoom.pdf, id=90, 687.12085pt x 399.55524pt>
-File: timing_copyblocked_comparison_zoom.pdf Graphic file (type pdf)
- <use timing_copyblocked_comparison_zoom.pdf>
-Package pdftex.def Info: timing_copyblocked_comparison_zoom.pdf used on input line 133.
-(pdftex.def)             Requested size: 455.24408pt x 264.7254pt.
-
-Overfull \hbox (3.55658pt too wide) in paragraph at lines 133--134
- [] 
- []
-
-
-Overfull \hbox (3.51143pt too wide) in paragraph at lines 140--141
-[]\OT1/cmr/m/n/12 Insert tim-ing[]copyblocked[]comparison[]zoom.pdf. Shows copy op-ti-miza-tion at a range
- []
-
-<timing_copyblocked_comparison.pdf, id=91, 687.01106pt x 399.55524pt>
+<use timing_blocked_comparison.pdf>
+Package pdftex.def Info: timing_blocked_comparison.pdf used on input line 150.
+(pdftex.def)             Requested size: 433.62pt x 265.72527pt.
+ [5 <C:/Users/David/Documents/GitHub/matmul-/matmul-docs/timing_basic_ijk_flags
+_comparison.pdf>] [6 <C:/Users/David/Documents/GitHub/matmul-/matmul-docs/timin
+g_blocked_comparison.pdf>]
+<timing_copyblocked_comparison.pdf, id=169, 687.01106pt x 399.55524pt>
 File: timing_copyblocked_comparison.pdf Graphic file (type pdf)
- <use timing_copyblocked_comparison.pdf>
-Package pdftex.def Info: timing_copyblocked_comparison.pdf used on input line 143.
+
+<use timing_copyblocked_comparison.pdf>
+Package pdftex.def Info: timing_copyblocked_comparison.pdf used on input line 1
+73.
 (pdftex.def)             Requested size: 455.24408pt x 264.762pt.
 
-Overfull \hbox (3.55658pt too wide) in paragraph at lines 143--144
- [] 
+Overfull \hbox (3.55658pt too wide) in paragraph at lines 173--174
+[][] 
  []
 
-[6 <C:/Users/dje88/Documents/GitHub/matmul-/matmul-docs/timing_copyblocked_comparison_zoom.pdf>] [7 <C:/Users/dje88/Docu
-ments/GitHub/matmul-/matmul-docs/timing_copyblocked_comparison.pdf>] [8] [9]
-(C:\Users\dje88\Documents\GitHub\matmul-\matmul-docs\matmul.aux) ) 
+<timing_copyblocked_comparison_zoom.pdf, id=170, 687.12085pt x 399.55524pt>
+File: timing_copyblocked_comparison_zoom.pdf Graphic file (type pdf)
+
+<use timing_copyblocked_comparison_zoom.pdf>
+Package pdftex.def Info: timing_copyblocked_comparison_zoom.pdf used on input l
+ine 188.
+(pdftex.def)             Requested size: 455.24408pt x 264.7254pt.
+
+Overfull \hbox (3.55658pt too wide) in paragraph at lines 188--189
+[][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[7 <C:/Users/David/Documents/GitHub/matmul-/matmul-docs/timing_copyblocked_comp
+arison.pdf>] <timing_blas_vs_best.pdf, id=208, 600.43762pt x 399.55524pt>
+File: timing_blas_vs_best.pdf Graphic file (type pdf)
+
+<use timing_blas_vs_best.pdf>
+Package pdftex.def Info: timing_blas_vs_best.pdf used on input line 206.
+(pdftex.def)             Requested size: 455.24408pt x 302.9518pt.
+
+Overfull \hbox (3.55658pt too wide) in paragraph at lines 206--207
+[][] 
+ []
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[8 <C:/Users/David/Documents/GitHub/matmul-/matmul-docs/timing_copyblocked_comp
+arison_zoom.pdf>] [9 <C:/Users/David/Documents/GitHub/matmul-/matmul-docs/timin
+g_blas_vs_best.pdf>] [10]
+(C:\Users\David\Documents\GitHub\matmul-\matmul-docs\matmul.aux) ) 
 Here is how much of TeX's memory you used:
- 1846 strings out of 493921
- 24119 string characters out of 3144876
- 81298 words of memory out of 3000000
- 5156 multiletter control sequences out of 15000+200000
- 8737 words of font info for 32 fonts, out of 3000000 for 9000
+ 1865 strings out of 493921
+ 24545 string characters out of 3147282
+ 81346 words of memory out of 3000000
+ 5172 multiletter control sequences out of 15000+200000
+ 8430 words of font info for 31 fonts, out of 3000000 for 9000
  841 hyphenation exceptions out of 8191
- 27i,8n,20p,1442b,271s stack positions out of 5000i,500n,10000p,200000b,50000s
-<C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/
-amsfonts/cm/cmbx12.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files (x
-86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/c
-m/cmr12.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmr8.pfb><C:/Program Files (x86)/MiKTeX 2.
-9/fonts/type1/public/amsfonts/cm/cmsy10.pfb><C:/Program Files (x86)/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt12.pfb
->
-Output written on matmul.pdf (9 pages, 155313 bytes).
+ 27i,10n,20p,470b,271s stack positions out of 5000i,500n,10000p,200000b,50000s
+<C:/Program F
+iles/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmbx12.pfb><C:/Program Files/MiK
+TeX 2.9/fonts/type1/public/amsfonts/cm/cmmi12.pfb><C:/Program Files/MiKTeX 2.9/
+fonts/type1/public/amsfonts/cm/cmmi8.pfb><C:/Program Files/MiKTeX 2.9/fonts/typ
+e1/public/amsfonts/cm/cmr12.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public
+/amsfonts/cm/cmr8.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/
+cm/cmsy10.pfb><C:/Program Files/MiKTeX 2.9/fonts/type1/public/amsfonts/cm/cmtt1
+2.pfb>
+Output written on matmul.pdf (10 pages, 193164 bytes).
 PDF statistics:
- 194 PDF objects out of 1000 (max. 8388607)
+ 304 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
- 21 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 36 words of extra memory for PDF output out of 10000 (max. 10000000)
 

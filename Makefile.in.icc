@@ -7,8 +7,7 @@ FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
-OPTFLAGS = -fast -opt-prefetch -unroll-aggressive -O3 -parallel -ansi-alias -ftree-vectorize -xHost -axCORE-AVX2 -qopt-report-phase=vec
-### -march=native
+OPTFLAGS = -O3 -opt-prefetch -unroll-aggressive -ansi-alias -ftree-vectorize -xHost -axCORE-AVX2 -qopt-report-phase=vec
 
 CFLAGS = -std=gnu99 
 FFLAGS = 
