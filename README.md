@@ -31,7 +31,7 @@ commit history to see the progression of our kernels.
 
 ## Report ##
 Our midpoint progress report can be found in the [`checkin`](checkin).
-Similarly, our final report can be found in the [`report`](directory).
+Similarly, our final report can be found in the [`report`](report).
 
 ## Reproducing Results ##
 To build, run, and plot all the kernels in this directory, first log into the
