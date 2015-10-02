@@ -1,0 +1,94 @@
+
+Begin optimization report for: square_dgemm(const int, const double *__restrict__, const double *__restrict__, double *__restrict__)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(67,5)
+   remark #15542: loop was not vectorized: inner loop was already vectorized
+
+   LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(69,9)
+      remark #15542: loop was not vectorized: inner loop was already vectorized
+
+      LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(71,13)
+         remark #15542: loop was not vectorized: inner loop was already vectorized
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(44,5) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+            remark #15527: loop was not vectorized: function call to memcpy(void *__restrict__, const void *__restrict__, size_t) cannot be vectorized   [ dgemm_mine_tuned_mmalloc_64.c(45,9) ]
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(47,5) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+            remark #15346: vector dependence: assumed OUTPUT dependence between  line 48 and  line 49
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(25,5) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(26,9) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+               remark #15542: loop was not vectorized: inner loop was already vectorized
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+               <Peeled>
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+                  remark #15300: LOOP WAS VECTORIZED
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+               <Remainder>
+                  remark #15301: REMAINDER LOOP WAS VECTORIZED
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(54,5) inlined into dgemm_mine_tuned_mmalloc_64.c(85,19)
+            remark #15527: loop was not vectorized: function call to memcpy(void *__restrict__, const void *__restrict__, size_t) cannot be vectorized   [ dgemm_mine_tuned_mmalloc_64.c(55,9) ]
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(44,5) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+            remark #15527: loop was not vectorized: function call to memcpy(void *__restrict__, const void *__restrict__, size_t) cannot be vectorized   [ dgemm_mine_tuned_mmalloc_64.c(45,9) ]
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(47,5) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+            remark #15344: loop was not vectorized: vector dependence prevents vectorization. First dependence is shown below. Use level 5 report for details
+            remark #15346: vector dependence: assumed OUTPUT dependence between  line 48 and  line 49
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(25,5) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+            remark #15542: loop was not vectorized: inner loop was already vectorized
+
+            LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(26,9) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+               remark #15542: loop was not vectorized: inner loop was already vectorized
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+               <Peeled>
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+                  remark #15300: LOOP WAS VECTORIZED
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+               <Remainder>
+                  remark #15301: REMAINDER LOOP WAS VECTORIZED
+               LOOP END
+
+               LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(27,13) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+               <Remainder>
+               LOOP END
+            LOOP END
+         LOOP END
+
+         LOOP BEGIN at dgemm_mine_tuned_mmalloc_64.c(54,5) inlined into dgemm_mine_tuned_mmalloc_64.c(80,19)
+            remark #15527: loop was not vectorized: function call to memcpy(void *__restrict__, const void *__restrict__, size_t) cannot be vectorized   [ dgemm_mine_tuned_mmalloc_64.c(55,9) ]
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
