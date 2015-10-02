@@ -7,21 +7,20 @@ const char* dgemm_desc = "My awesome dgemm.";
 #define BLOCK_SIZE ((int) 64)
 #endif
 
-// Block size that is used to fit submatrices into register
-#ifndef SUB_BLOCK_SIZE
-#define SUB_BLOCK_SIZE ((int) 8)
-#endif
 /*
-  A is M-by
+  A is M-by-K
   B is K-by-N
   C is M-by-N
   lda is the leading dimension of the matrix (the M of square_dgemm).
 */
 void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double* restrict A, const double* restrict B,
-                 double* restrict C)//, const double restrict *C_original)
+                 double* restrict C)
 {
-    // New kernal function for A stored in row-major.
+    //__assume_aligned(A, 32);
+    //__assume_aligned(B, 32);
+    //__assume_aligned(C, 32);
+    // kernel function for A stored in row-major order.
     int i, j, k;
     for(j = 0; j < N; ++j){
       for(i = 0; i < M; ++i){
@@ -58,7 +57,6 @@ void square_dgemm(const int M, const double* restrict A, const double* restrict 
       for (bk = 0; bk < n_blocks; ++bk){
         const int k = bk * BLOCK_SIZE;
 
-        // Transpose A. This part needs to be rewritten for clarity and performance
         const int M_sub = (i+BLOCK_SIZE > M? M-i : BLOCK_SIZE);
         const int K = (k+BLOCK_SIZE > M? M-k : BLOCK_SIZE);
         int it, kt;
