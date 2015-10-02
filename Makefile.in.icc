@@ -8,7 +8,7 @@ LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
 OPTFLAGS = -O3
-CFLAGS = -std=gnu99 
+CFLAGS = -std=gnu99 -Wall -fast -fstrict-aliasing -restrict -axCORE-AVX2
 FFLAGS = 
 LDFLAGS = -fopenmp -nofor_main
 
