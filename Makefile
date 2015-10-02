@@ -21,7 +21,7 @@ matmul-%: $(OBJS) dgemm_%.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 matmul-f2c: $(OBJS) dgemm_f2c.o dgemm_f2c_desc.o fdgemm.o
-	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) 
+	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 matmul-blas: $(OBJS) dgemm_blas.o
 	$(LD) -o $@ $^ $(LDFLAGS) $(LIBS) $(LIBBLAS)
@@ -45,13 +45,13 @@ matmul.o: matmul.c
 	$(FC) -c $(FFLAGS) $(OPTFLAGS) $<
 
 dgemm_blas.o: dgemm_blas.c
-	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCBLAS) $< 
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) $(INCBLAS) $<
 
 dgemm_mkl.o: dgemm_blas.c
-	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(INCMKL) $< 
+	$(CC) -o $@ -c $(CFLAGS) $(CPPFLAGS) $(INCMKL) $<
 
 dgemm_veclib.o: dgemm_blas.c
-	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $< 
+	clang -o $@ -c $(CFLAGS) $(CPPFLAGS) -DOSX_ACCELERATE $<
 
 # ---
 # Rules for building timing CSV outputs
@@ -63,7 +63,7 @@ run-local:
 	( for build in $(BUILDS) ; do ./matmul-$$build ; done )
 
 timing-%.csv: matmul-%
-	qsub job-$*.pbs
+	qsub -l nodes=1:ppn=24 job-$*.pbs
 
 # ---
 #  Rules for plotting
@@ -74,10 +74,9 @@ plot:
 
 # ---
 
-.PHONY:	clean realclean 
+.PHONY:	clean realclean
 clean:
 	rm -f matmul-* *.o
 
 realclean: clean
 	rm -f *~ timing-*.csv timing.pdf
-
