@@ -1,3 +1,8 @@
+# Final performance
+
+![We did really well](https://raw.githubusercontent.com/yalcinozhabes/matmul-/final_submission/dgemm.png)
+
+
 # Matrix multiply reference code
 
 Matrix muliplication is a good first example of code optimization

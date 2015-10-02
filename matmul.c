@@ -1,3 +1,4 @@
+// #define DEBUG_RUN
 /*
   Ideally, you won't need to change this file.  You may want to change
   a few settings to speed debugging runs, but remember to change back
@@ -63,7 +64,7 @@ const int test_sizes[] = {
  */
 void matrix_init(double *A)
 {
-    for (int i = 0; i < MAX_SIZE*MAX_SIZE; ++i) 
+    for (int i = 0; i < MAX_SIZE*MAX_SIZE; ++i)
         A[i] = drand48();
 }
 
@@ -210,7 +211,7 @@ int main(int argc, char** argv)
         fprintf(stderr, "Usage: matmul [csv]\n");
         exit(2);
     }
-    
+
     FILE* fp;
     if (argc == 1) {
         const char* exename = argv[0];
@@ -222,14 +223,14 @@ int main(int argc, char** argv)
         strcat(fname, ".csv");
         fp = fopen(fname, "w");
         free(fname);
-    } else 
+    } else
         fp = fopen(argv[1], "w");
-    
+
     if (!fp) {
         fprintf(stderr, "Could not open '%s' for output\n", argv[1]);
         exit(3);
     }
-    
+
     double* A = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* B = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
     double* C = (double*) malloc(MAX_SIZE * MAX_SIZE * sizeof(double));
@@ -254,4 +255,3 @@ int main(int argc, char** argv)
     fclose(fp);
     return 0;
 }
-

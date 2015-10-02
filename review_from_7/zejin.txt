@@ -1,0 +1,10 @@
+Group 9
+
+Things to learn
+1) The procedure to optimize by varying different block sizes for L1 blocking and differet pairs of block sizes for L2 blocking and then combining it with copy optimization is systematic and insightful. 
+2) The graphs showing the varation of speed with different loop orders is very helpful.
+
+Suggestions
+1) When we perfome copy optimization with L1 blocking, we reach close to 5GFlops/s for bigger matrices whereas the maximum obtained speed mentioned in this report is close to 3.5GFlops/s. Hence, the implementation for copy optimization can be further improved.
+2) Based on the size of L1 cache and L2 cache, the optimal blocking sizes can be calculated.
+3) Although we do not implement any vectorization, AVX optimization can be helpful in getting better performance enhancements. 

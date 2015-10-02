@@ -1,15 +1,15 @@
 # Versions to build
-BUILDS=mine basic blocked f2c blas mkl
+BUILDS=basic Vec VecAndBlock mkl
 
 # C and Fortran compilers
 CC=icc
-FC=ifort 
+FC=ifort
 LD=ifort
 
 # Compiler optimization flags.  You will definitely want to play with these!
 OPTFLAGS = -O3
-CFLAGS = -std=gnu99 
-FFLAGS = 
+CFLAGS = -std=gnu99
+FFLAGS =
 LDFLAGS = -fopenmp -nofor_main
 
 # Add -DDEBUG_RUN to CPPFLAGS to cut down on the cases.
@@ -26,4 +26,3 @@ INCBLAS=
 # Libraries and include files for BLAS
 LIBMKL=-lmkl_intel_lp64 -lmkl_core -lmkl_sequential -lpthread -lm
 INCMKL=
-
