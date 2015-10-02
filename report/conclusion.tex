@@ -5,3 +5,41 @@ flags, compiler annotations, and various blocking schemes. Using principled
 software engineering, we then combined these optimizations into a set of fully
 optimized kernels which are able to perform almost an order of magnitude more
 Gflop/s than naive algorithms.
+
+\section{Conclusion}\label{sec:conc}
+
+Fast matrix multiplication kernels are powerful and general tools. We
+experimented with various kernel optimizations, with different degrees of
+success.
+
+Some of these methods were not as successful as we had hoped.  Compiler flags
+and explicit vector instructions, in particular, made very little positive
+impact on performance, likely because the \ttt{icc} compiler with the \ttt{-O3}
+flag is already very effective at vectorizing code and making any other
+available compiler level optimizations.  Our attempt at a three level blocking
+scheme to use all 3 levels of cache available was also not as effective as we
+had hoped, ultimately being slower than what we could do with a single level of
+blocking.  We also found that padding blocks of matrices with zeros led to poor
+performance on matrices whose size was slightly larger than a multiple of the
+block size, as in these cases we had a lot of unnecessary computation.
+Changing the loop orderings led to a noticeable increase in performance, but
+this was outweighed by simply using copy optimizations, which were far more
+effective at improving the locality of our memory accesses.
+
+On the other hand, some of our other attempts at optimization went even better
+than we expected.  Simply using the \ttt{restrict} keyword, for instance,
+drastically increased performance, as the compiler was able to optimize far
+more effectively once it knew that our arrays were not aliased.  We also found
+that using copy optimizations so that our array accesses would occur with unit
+stride and with high spatial locality also led to large performance gains.
+Experimenting with different block sizes was also quite effective at minimizing
+expensive memory operations.  We also found that performance was much better
+when loop sizes were known at compile time, rather than just run time.
+
+Overall, it seemed that most of our successful optimizations fell into two
+categories: increasing the stride and locality of memory access (copy
+optimizations and blocking), and giving more information to the compiler (the
+\ttt{restrict} keyword and compile-time determined loop sizes). Using
+principled software engineering, we then combined these optimizations into a
+set of fully optimized kernels which are able to perform almost an order of
+magnitude more Gflop/s than naive algorithms.
