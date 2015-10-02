@@ -1,16 +1,16 @@
 #include <stdlib.h>
 
-const char* dgemm_desc = "Copy optimized block dgemm size 16.";
+const char* dgemm_desc = "Copy optimized block dgemm size 32.";
 
 #ifndef BLOCK_SIZE
-#define BLOCK_SIZE ((int) 16)
+#define BLOCK_SIZE ((int) 32)
 #endif
 
 void basic_dgemm(const double * restrict A, const double * restrict B, double * restrict C)
 {
-    __assume_aligned(A, 32);
-    __assume_aligned(B, 32);
-    __assume_aligned(C, 32);
+    __assume_aligned(A, 64);
+    __assume_aligned(B, 64);
+    __assume_aligned(C, 64);
     
     int i, j, k, oi, oj, ok;
     double t_b;
