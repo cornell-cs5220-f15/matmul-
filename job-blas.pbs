@@ -9,4 +9,3 @@ module load openblas
 cd $PBS_O_WORKDIR
 export OPENBLAS_NUM_THREADS=1
 ./matmul-blas
-

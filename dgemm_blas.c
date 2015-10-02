@@ -4,11 +4,13 @@
 #  include <cblas.h>
 #endif
 
+#include <omp.h>
+
 const char* dgemm_desc = "System CBLAS dgemm.";
 
 void square_dgemm(const int M, double *A, double *B, double *C)
 {
-    cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
-                M, M, M,
-                1.0, A, M, B, M, 0.0, C, M);
+  cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,
+              M, M, M,
+              1.0, A, M, B, M, 0.0, C, M);
 }

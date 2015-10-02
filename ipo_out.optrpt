@@ -1,0 +1,151 @@
+
+Begin optimization report for: square_dgemm(const int, const double *, const double *, double *)
+
+    Report from: Vector optimizations [vec]
+
+
+LOOP BEGIN at dgemm_mine.c(69,5) inlined into dgemm_mine.c(204,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(67,3) inlined into dgemm_mine.c(204,5)
+   <Peeled>
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(67,3) inlined into dgemm_mine.c(204,5)
+      remark #15301: PERMUTED LOOP WAS VECTORIZED
+   LOOP END
+
+   LOOP BEGIN at dgemm_mine.c(67,3) inlined into dgemm_mine.c(204,5)
+   <Remainder>
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(212,5)
+   remark #25460: No loop optimizations reported
+
+   LOOP BEGIN at dgemm_mine.c(217,7)
+      remark #25460: No loop optimizations reported
+
+      LOOP BEGIN at dgemm_mine.c(226,9)
+         remark #25460: No loop optimizations reported
+
+         LOOP BEGIN at dgemm_mine.c(69,5) inlined into dgemm_mine.c(261,11)
+
+            LOOP BEGIN at dgemm_mine.c(67,3) inlined into dgemm_mine.c(261,11)
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(67,3) inlined into dgemm_mine.c(261,11)
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(67,3) inlined into dgemm_mine.c(261,11)
+            LOOP END
+
+            LOOP BEGIN at dgemm_mine.c(67,3) inlined into dgemm_mine.c(261,11)
+            LOOP END
+         LOOP END
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(238,11)
+<Distributed chunk1>
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(238,11)
+<Distributed chunk1>
+   remark #15301: PARTIAL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(238,11)
+<Remainder, Distributed chunk1>
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(238,11)
+<Distributed chunk2>
+
+   LOOP BEGIN at dgemm_mine.c(242,13)
+   <Distributed chunk1>
+
+      LOOP BEGIN at dgemm_mine.c(242,13)
+      <Peeled, Multiversioned v2, Distributed chunk1>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(242,13)
+      <Multiversioned v2, Distributed chunk1>
+         remark #15301: PARTIAL LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(242,13)
+      <Remainder, Multiversioned v2, Distributed chunk1>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(250,11)
+<Distributed chunk1>
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(250,11)
+<Distributed chunk1>
+   remark #15301: PARTIAL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(250,11)
+<Remainder, Distributed chunk1>
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(250,11)
+<Distributed chunk2>
+
+   LOOP BEGIN at dgemm_mine.c(254,13)
+   <Distributed chunk1>
+
+      LOOP BEGIN at dgemm_mine.c(254,13)
+      <Peeled, Multiversioned v2, Distributed chunk1>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(254,13)
+      <Multiversioned v2, Distributed chunk1>
+         remark #15301: PARTIAL LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(254,13)
+      <Remainder, Multiversioned v2, Distributed chunk1>
+      LOOP END
+   LOOP END
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(266,9)
+<Distributed chunk1>
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(266,9)
+<Distributed chunk1>
+   remark #15301: PARTIAL LOOP WAS VECTORIZED
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(266,9)
+<Remainder, Distributed chunk1>
+LOOP END
+
+LOOP BEGIN at dgemm_mine.c(266,9)
+<Distributed chunk2>
+
+   LOOP BEGIN at dgemm_mine.c(268,11)
+   <Distributed chunk1>
+
+      LOOP BEGIN at dgemm_mine.c(268,11)
+      <Peeled, Multiversioned v2, Distributed chunk1>
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(268,11)
+      <Multiversioned v2, Distributed chunk1>
+         remark #15301: PARTIAL LOOP WAS VECTORIZED
+      LOOP END
+
+      LOOP BEGIN at dgemm_mine.c(268,11)
+      <Remainder, Multiversioned v2, Distributed chunk1>
+      LOOP END
+   LOOP END
+LOOP END
+===========================================================================
