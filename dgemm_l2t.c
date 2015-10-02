@@ -1,4 +1,4 @@
-const char* dgemm_desc = "Our optimized dgemm from stage 1.";
+const char* dgemm_desc = "Our optimized dgemm.";
 
 #include <stdlib.h>
 
