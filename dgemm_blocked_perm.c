@@ -242,17 +242,15 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
        return;
     }
 
-    A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);// BLOCK_SIZE * BLOCK_SIZE * sizeof(double), BYTE_ALIGN);
-    B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);// BLOCK_SIZE * BLOCK_SIZE * sizeof(double), BYTE_ALIGN);
-    C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);// BLOCK_SIZE              * sizeof(double), BYTE_ALIGN);
+    A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
 
-
-    #pragma offload target(mic:0) in(A_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : align(BYTE_ALIGN) ALLOC)
-    {}
-    #pragma offload target(mic:0) in(B_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : align(BYTE_ALIGN) ALLOC)
-    {}
-    #pragma offload target(mic:0) in(C_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : align(BYTE_ALIGN) ALLOC)
-    {}
+    #pragma offload_attribute (push, target(mic))
+        A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+        B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+        C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
+    #pragma offload_attribute (pop)
 
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
@@ -269,12 +267,11 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
         }
     }
 
-    #pragma offload target(mic:0) in(A_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : FREE)
-    {}
-    #pragma offload target(mic:0) in(B_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : FREE)
-    {}
-    #pragma offload target(mic:0) in(C_KERNEL[0:KERNEL_SIZE*KERNEL_SIZE] : FREE)
-    {}
+    #pragma offload_attribute (push, target(mic))
+        _mm_free(A_KERNEL);
+        _mm_free(B_KERNEL);
+        _mm_free(C_KERNEL);
+    #pragma offload_attribute (pop)
 
     _mm_free(A_KERNEL); A_KERNEL = NULL;
     _mm_free(B_KERNEL); B_KERNEL = NULL;
