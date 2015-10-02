@@ -178,15 +178,14 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                         C_KERNEL(ki, kj) = 0.0;
                     }
                 }
-/*
+
                 // we're ready to compute
                 #if KERNEL_SIZE == 8
-                    #pragma offload target(mic) in(A_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) ALLOC) in(B_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) ALLOC) inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) ALLOC)
+                    #pragma offload target(mic) in(A_KERNEL, B_KERNEL) inout(C_KERNEL)
                     {
                         vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
                     }
                 #endif
-                */
                 
                 // copy everything back to C
                 #pragma unroll
@@ -216,27 +215,8 @@ void do_block(const int lda,
                 0);
 }
 
-#include <stdlib.h>
-
-void f(){
-    int *p = (int *)malloc(100*sizeof(int));
-    // Memory is allocated for p, data is sent from CPU and retained
-    #pragma offload target(mic:0) in(p[0:100] : ALLOC)
-    { p[6] = 66; }
-    // Memory for p reused from previous offload and retained once again
-    // Fresh data is sent into the memory
-    #pragma offload target(mic:0) in(p[0:100] : REUSE)
-    { p[6] = 66; }
-    // Memory for p reused from previous offload, freed after this offload.
-    // Final data is pulled from coprocessor to CPU
-    #pragma offload target(mic:0) out(p[0:100] : FREE)
-    { p[7] = 77; }
-}
-
-
 void square_dgemm(const int M, const double * restrict A, const double * restrict B, double * restrict C)
 {
-    //f();
     if (M <= BLOCK_SIZE) {
        basic_dgemm(M, M, M, M, A, B, C, 1);
        return;
