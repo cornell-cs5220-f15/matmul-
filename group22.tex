@@ -224,7 +224,7 @@
 
         \subsection{L2 blocking}
 
-        We then implemented a multi-level blocking strategy. We first divided the matrices into blocks so that each block could fit into the L1 cache. We then created larger blocks that contained several smaller blocks and performed a block matrix multiply using those larger blocks. We created the larger blocks that contained larger submatrices that could fit into the L2 cache.  Specifically, we had 4 smaller blocks in every larger block. The result of this had a minor improvement on performance for larger matrices. The overhead of the copy optimization resulted in lower FLOP rates for smaller matrices. The results are seen below:
+        We then implemented a multi-level blocking strategy. We first divided the matrices into blocks so that each block could fit into the L1 cache. We then created larger blocks that contained several smaller blocks and performed a block matrix multiply using those larger blocks. We created the larger blocks that contained larger submatrices that could fit into the L2 cache.  Specifically, we had 4 smaller blocks in every larger block, resulting in a matrix of 64 x 64 doubles if our smaller blocks were 32 x 32 doubles. The result of this had a minor improvement on performance for larger matrices. The overhead of the copy optimization resulted in lower FLOP rates for smaller matrices. The results are seen below:
         \begin{figure}[H]
             \centering
             \includegraphics[width=4.5in]{timing_noL2.pdf}
@@ -243,7 +243,7 @@
             \includegraphics[width=4.5in]{timing_L2_2.pdf}
             \caption{With L2 blocking but branching to use L2 blocking only if the size of the leading dimension of the matrix is greater than 384.}
         \end{figure}
-    
+
         \clearpage
     \section{Summary}
         
