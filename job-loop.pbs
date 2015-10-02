@@ -1,7 +1,7 @@
 #!/bin/sh -l
 
 #PBS -l walltime=0:30:00
-#PBS -N matmul-avx
+#PBS -N matmul-loop
 #PBS -j oe
 
 module load cs5220
