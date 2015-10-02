@@ -5,4 +5,5 @@
 \contentsline {subsection}{Data alignment}{6}
 \contentsline {subsection}{Further blocking}{6}
 \contentsline {subsection}{Compiler optimization}{7}
-\contentsline {section}{Summary}{8}
+\contentsline {subsection}{L2 blocking}{8}
+\contentsline {section}{Summary}{10}

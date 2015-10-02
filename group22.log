@@ -1,15 +1,15 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.15 (TeX Live 2015/dev/Debian) (preloaded format=pdflatex 2015.8.26)  1 OCT 2015 21:43
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/Debian) (format=pdflatex 2014.10.20)  1 OCT 2015 22:35
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
-**group22.tex
+**group22.tex -recorder
 (./group22.tex
-LaTeX2e <2014/05/01>
-Babel <3.9l> and hyphenation patterns for 2 languages loaded.
+LaTeX2e <2011/06/27>
+Babel <3.9h> and hyphenation patterns for 2 languages loaded.
 (/usr/share/texlive/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2014/09/29 v1.4h Standard LaTeX document class
+Document Class: article 2007/10/19 v1.4h Standard LaTeX document class
 (/usr/share/texlive/texmf-dist/tex/latex/base/size11.clo
-File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
+File: size11.clo 2007/10/19 v1.4h Standard LaTeX file (size option)
 )
 \c@part=\count79
 \c@section=\count80
@@ -27,7 +27,7 @@ File: size11.clo 2014/09/29 v1.4h Standard LaTeX file (size option)
 Package: geometry 2010/09/12 v5.6 Page Geometry
 
 (/usr/share/texlive/texmf-dist/tex/latex/graphics/keyval.sty
-Package: keyval 2014/05/08 v1.15 key=value parser (DPC)
+Package: keyval 1999/03/16 v1.13 key=value parser (DPC)
 \KV@toks@=\toks14
 )
 (/usr/share/texlive/texmf-dist/tex/generic/oberdiek/ifpdf.sty
@@ -119,23 +119,23 @@ Package: amsfonts 2013/01/14 v3.01 Basic AMSFonts support
 LaTeX Font Info:    Overwriting math alphabet `\mathfrak' in version `bold'
 (Font)                  U/euf/m/n --> U/euf/b/n on input line 106.
 )
-(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mathtools.sty
-Package: mathtools 2014/07/16 v1.15 mathematical typesetting tools
+(/usr/share/texlive/texmf-dist/tex/latex/mh/mathtools.sty
+Package: mathtools 2013/02/12 v1.13 mathematical typesetting tools
 
 (/usr/share/texlive/texmf-dist/tex/latex/tools/calc.sty
-Package: calc 2014/10/28 v4.3 Infix arithmetic (KKT,FJ)
+Package: calc 2007/08/22 v4.3 Infix arithmetic (KKT,FJ)
 \calc@Acount=\count102
 \calc@Bcount=\count103
 \calc@Adimen=\dimen120
 \calc@Bdimen=\dimen121
 \calc@Askip=\skip46
 \calc@Bskip=\skip47
-LaTeX Info: Redefining \setlength on input line 75.
-LaTeX Info: Redefining \addtolength on input line 76.
+LaTeX Info: Redefining \setlength on input line 76.
+LaTeX Info: Redefining \addtolength on input line 77.
 \calc@Ccount=\count104
 \calc@Cskip=\skip48
 )
-(/usr/share/texlive/texmf-dist/tex/latex/mathtools/mhsetup.sty
+(/usr/share/texlive/texmf-dist/tex/latex/mh/mhsetup.sty
 Package: mhsetup 2010/01/21 v1.2a programming setup (MH)
 )
 LaTeX Info: Thecontrolsequence`\['isalreadyrobust on input line 129.
@@ -151,7 +151,7 @@ LaTeX Info: Thecontrolsequence`\]'isalreadyrobust on input line 129.
 \l_MT_below_shortintertext_sep=\dimen128
 )
 (/usr/share/texlive/texmf-dist/tex/latex/amscls/amsthm.sty
-Package: amsthm 2009/07/02 v2.20.1
+Package: amsthm 2004/08/06 v2.20
 \thm@style=\toks21
 \thm@bodyfont=\toks22
 \thm@headfont=\toks23
@@ -171,7 +171,7 @@ Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \@floatcapt=\box29
 )
 (/usr/share/texlive/texmf-dist/tex/latex/graphics/graphicx.sty
-Package: graphicx 2014/04/25 v1.0g Enhanced LaTeX Graphics (DPC,SPQR)
+Package: graphicx 1999/02/16 v1.0f Enhanced LaTeX Graphics (DPC,SPQR)
 
 (/usr/share/texlive/texmf-dist/tex/latex/graphics/graphics.sty
 Package: graphics 2009/02/05 v1.0o Standard LaTeX Graphics (DPC,SPQR)
@@ -213,23 +213,23 @@ Package: ltxcmds 2011/11/09 v1.22 LaTeX kernel commands for general use (HO)
 \lst@maxwidth=\dimen134
 
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
-File: lstmisc.sty 2014/09/06 1.5e (Carsten Heinz)
+File: lstmisc.sty 2013/08/26 1.5b (Carsten Heinz)
 \c@lstnumber=\count114
 \lst@skipnumbers=\count115
 \lst@framebox=\box31
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/listings.cfg
-File: listings.cfg 2014/09/06 1.5e listings configuration
+File: listings.cfg 2013/08/26 1.5b listings configuration
 ))
-Package: listings 2014/09/06 1.5e (Carsten Heinz)
+Package: listings 2013/08/26 1.5b (Carsten Heinz)
 
 (/usr/share/texlive/texmf-dist/tex/latex/graphics/color.sty
-Package: color 2014/04/23 v1.1a Standard LaTeX Color (DPC)
+Package: color 2005/11/14 v1.0j Standard LaTeX Color (DPC)
 
 (/usr/share/texlive/texmf-dist/tex/latex/latexconfig/color.cfg
 File: color.cfg 2007/01/18 v1.5 color configuration of teTeX/TeXLive
 )
-Package color Info: Driver file: pdftex.def on input line 137.
+Package color Info: Driver file: pdftex.def on input line 130.
 )
 (/usr/share/texlive/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
 \fancy@headwidth=\skip53
@@ -243,13 +243,13 @@ Package color Info: Driver file: pdftex.def on input line 137.
 \f@ncyO@orf=\skip61
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
-File: lstlang1.sty 2014/09/06 1.5e listings language file
+File: lstlang1.sty 2013/08/26 1.5b listings language file
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstlang1.sty
-File: lstlang1.sty 2014/09/06 1.5e listings language file
+File: lstlang1.sty 2013/08/26 1.5b listings language file
 )
 (/usr/share/texlive/texmf-dist/tex/latex/listings/lstmisc.sty
-File: lstmisc.sty 2014/09/06 1.5e (Carsten Heinz)
+File: lstmisc.sty 2013/08/26 1.5b (Carsten Heinz)
 ) (./group22.aux)
 \openout1 = `group22.aux'.
 
@@ -435,7 +435,7 @@ LaTeX Font Info:    Try loading font information for OMS+cmr on input line 205.
 
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
-File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
+File: omscmr.fd 1999/05/25 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10.95> not available
 (Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 205.
@@ -447,17 +447,42 @@ Package pdftex.def Info: timing_vector_32_64_cc_cp_align.png used on input line
 (pdftex.def)             Requested size: 325.215pt x 195.36703pt.
  [7
 
-] [8
+]
+<timing_noL2.pdf, id=41, 624.80994pt x 399.55524pt>
+File: timing_noL2.pdf Graphic file (type pdf)
+ <use timing_noL2.pdf>
+Package pdftex.def Info: timing_noL2.pdf used on input line 230.
+(pdftex.def)             Requested size: 325.215pt x 207.97719pt.
+
+<timing_L2.pdf, id=42, 624.80994pt x 399.55524pt>
+File: timing_L2.pdf Graphic file (type pdf)
+ <use timing_L2.pdf>
+Package pdftex.def Info: timing_L2.pdf used on input line 236.
+(pdftex.def)             Requested size: 325.215pt x 207.97719pt.
+
+<timing_L2_2.pdf, id=43, 624.80994pt x 399.55524pt>
+File: timing_L2_2.pdf Graphic file (type pdf)
+ <use timing_L2_2.pdf>
+Package pdftex.def Info: timing_L2_2.pdf used on input line 243.
+(pdftex.def)             Requested size: 325.215pt x 207.97719pt.
+
+[8
+
+ <./timing_noL2.pdf> <./timing_L2.pdf
+
+pdfTeX warning: pdflatex (file ./timing_L2.pdf): PDF inclusion: multiple pdfs w
+ith page group included in a single page
+>] [9 <./timing_L2_2.pdf>] [10
 
 ] (./group22.aux) ) 
 Here is how much of TeX's memory you used:
- 4996 strings out of 495020
- 71563 string characters out of 6181324
- 184808 words of memory out of 5000000
- 8118 multiletter control sequences out of 15000+600000
+ 5007 strings out of 495028
+ 71666 string characters out of 6181496
+ 184308 words of memory out of 5000000
+ 8121 multiletter control sequences out of 15000+600000
  11989 words of font info for 46 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 38i,12n,58p,666b,1033s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 38i,12n,58p,676b,1033s stack positions out of 5000i,500n,10000p,200000b,80000s
 </usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/c
 m/cmbx10.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx
 12.pfb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmcsc10.pf
@@ -468,10 +493,10 @@ e/texmf-dist/fonts/type1/public/amsfonts/cm/cmr17.pfb></usr/share/texlive/texmf
 -dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/share/texlive/texmf-dist/fo
 nts/type1/public/amsfonts/cm/cmsy10.pfb></usr/share/texlive/texmf-dist/fonts/ty
 pe1/public/amsfonts/cm/cmtt10.pfb>
-Output written on group22.pdf (8 pages, 616608 bytes).
+Output written on group22.pdf (10 pages, 651261 bytes).
 PDF statistics:
- 77 PDF objects out of 1000 (max. 8388607)
- 50 compressed objects within 1 object stream
+ 178 PDF objects out of 1000 (max. 8388607)
+ 71 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
- 31 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 46 words of extra memory for PDF output out of 10000 (max. 10000000)
 
