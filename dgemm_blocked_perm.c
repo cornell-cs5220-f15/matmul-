@@ -37,9 +37,9 @@ double * restrict B_KERNEL = NULL;
 double * restrict C_KERNEL = NULL;
 
 // more convenient access; column major
-#define A(i, j) A[(j)*M + (i)]
-#define B(i, j) B[(j)*M + (i)]
-#define C(i, j) C[(j)*M + (i)]
+#define A(i, j) A[(j) + (i)]
+#define B(i, j) B[(j) + (i)]
+#define C(i, j) C[(j) + (i)]
 
 // more convenient access; row major
 #define A_KERNEL(i, j) A_KERNEL[i*KERNEL_SIZE + j]
