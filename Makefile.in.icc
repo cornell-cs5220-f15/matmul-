@@ -15,11 +15,15 @@ BUILDS := $(filter-out mkl, $(BUILDS))
 BUILDS := $(filter-out blas, $(BUILDS))
 BUILDS := $(filter-out annotated, $(BUILDS))
 BUILDS := $(filter-out compiler, $(BUILDS))
+BUILDS := $(filter-out basic, $(BUILDS))
+BUILDS := $(filter-out blocked, $(BUILDS))
+BUILDS := $(filter-out f2c, $(BUILDS))
+BUILDS := $(filter-out copyopt, $(BUILDS))
 
 # If you want to only build or run a subset of the build rules, you can do so
 # by uncommenting out the following line and entering in the files you wish to
 # build.
-# BUILDS = basic ...
+# BUILDS =
 # BUILDS := $(BUILDS) $(shell echo padded_blocked_{8,16,32,64,128,256,512,1024})
 # BUILDS := $(BUILDS) $(shell echo big_blocked_{8,16,32,64,128,256,512,1024})
 
@@ -43,12 +47,11 @@ OPTFLAGS2 = \
 OPTFLAGS3 = \
 	$(OPTFLAGS2) \
 	-unroll-aggresive \
-	-opt-prefetch=4 \
+	-align \
+	-restrict \
+	# -opt-prefetch=4 \
 	# -ansi-alias \
 	# -fno-alias \
-	# -parallel \
-	# -align \
-	# -restrict \
 
 # Profile Guided Optimization.
 PGO_FLAG = \
