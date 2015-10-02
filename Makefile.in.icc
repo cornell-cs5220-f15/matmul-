@@ -1,5 +1,5 @@
 # Versions to build
-BUILDS=mine64
+BUILDS=mine64 mine64blockavx naive blocked f2c blas basic
 
 # C and Fortran compilers
 CC=icc

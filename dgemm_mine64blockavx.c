@@ -120,6 +120,7 @@ void square_dgemm_64(const int M,
                      const int n_blocks,
                      const int block_numel)
 {
+  int i, j;
   // Iterate over the rows of A
   for (i = 0; i < n_blocks; i++)
   {

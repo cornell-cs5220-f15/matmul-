@@ -1,0 +1,4 @@
+Compiler:	icc
+Options:	-fast -xHost -axCORE-AVX2 -opt-prefetch -funroll-loops -unroll-aggressive -ansi-alias -ftree-vectorize -restrict -parallel
+Description:	Basic, three-loop dgemm.
+
