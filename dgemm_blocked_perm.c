@@ -181,12 +181,17 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
 
                 // we're ready to compute
                 #if KERNEL_SIZE == 8
-                    #pragma offload target(mic) in(A_KERNEL, B_KERNEL) inout(C_KERNEL)
+                    #pragma offload target(mic) in(A_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
+                                                                 align(BYTE_ALIGN))              \
+                                                in(B_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
+                                                                 align(BYTE_ALIGN))              \
+                                                inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) \
+                                                                 align(BYTE_ALIGN))
                     {
                         vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
                     }
                 #endif
-                
+
                 // copy everything back to C
                 #pragma unroll
                 for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
@@ -209,7 +214,7 @@ void do_block(const int lda,
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-    
+
     basic_dgemm(lda, M, N, K,
                 A + i + k*lda, B + k + j*lda, C + i + j*lda,
                 0);
@@ -241,8 +246,7 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
             const int j = bj * BLOCK_SIZE;
             for (bk = 0; bk < n_blocks; ++bk) {
                 const int k = bk * BLOCK_SIZE;
-                //do_block(M, A, B, C, i, j, k);
-                printf("Hi %d\n", k);
+                do_block(M, A, B, C, i, j, k);
             }
         }
     }
