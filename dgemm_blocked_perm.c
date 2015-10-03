@@ -28,10 +28,6 @@ const char* dgemm_desc = "Simple blocked dgemm.";
 #define NULL ((void *)0)
 #endif
 
-#define ALLOC alloc_if(1) free_if(0)
-#define FREE alloc_if(0) free_if(1)
-#define REUSE alloc_if(0) free_if(0)
-
 double * restrict A_KERNEL = NULL;
 double * restrict B_KERNEL = NULL;
 double * restrict C_KERNEL = NULL;
@@ -42,9 +38,9 @@ double * restrict C_KERNEL = NULL;
 #define C(i, j) C[(j) + (i)]
 
 // more convenient access; row major
-#define A_KERNEL(i, j) A_KERNEL[i*KERNEL_SIZE + j]
-#define B_KERNEL(i, j) B_KERNEL[i*KERNEL_SIZE + j]
-#define C_KERNEL(i, j) C_KERNEL[i*KERNEL_SIZE + j]
+#define A_KERNEL(i, j) A_KERNEL[(i)*KERNEL_SIZE + (j)]
+#define B_KERNEL(i, j) B_KERNEL[(i)*KERNEL_SIZE + (j)]
+#define C_KERNEL(i, j) C_KERNEL[(i)*KERNEL_SIZE + (j)]
 
 // assumes zmm16-31 already have the rows of B, and that ymm00-015 can be clobbered
 inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
