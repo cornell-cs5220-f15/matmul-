@@ -220,29 +220,11 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                             else
                                 B_KERNEL(ki, kj) = B[ki+sli + (kj+col)*lda];
 
-			  /*                            if(ki+row < M)
-                                A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
-                            else
-			    A_KERNEL(ki, kj) = 0.0;*/
-
-			  /*                            if(kj+col < N)
-                                B_KERNEL(ki, kj) = B[(kj+col)*lda + ki+sli]; // B(ki+row, kj+col*N);// *_KERNEL are ROW-major
-                            else
-			    B_KERNEL(ki, kj) = 0.0; */
-                            /*
-                            if(ki < M_KERNEL && kj < N_KERNEL) {
-                                A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
-                                B_KERNEL(ki, kj) = B[(kj+col)*lda + ki+sli]; // B(ki+row, kj+col*N);// *_KERNEL are ROW-major
-                            }
-                            else {
-                                A_KERNEL(ki, kj) = 0.0;
-                                B_KERNEL(ki, kj) = 0.0;
-                            }*/
                             C_KERNEL(ki, kj) = 0.0;
                         }
                     }
 
-                        vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                    vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
 
                     // copy everything back to C
                     #pragma unroll

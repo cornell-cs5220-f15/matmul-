@@ -163,57 +163,127 @@ inline void vectorized8x8(double * restrict A, double * restrict B, double * res
 
 #include <stdio.h>
 int main(int argc, char **argv) {
-    /*
-     * +-           -++-           -+   +-                      -+
-     * | 1   2  3  4 || 17 18 19 20 |   |  250   260   270   280 |
-     * | 5   6  7  8 || 21 22 23 24 | = |  618   644   670   696 |
-     * | 9  10 11 12 || 25 26 27 28 |   |  986  1028  1070  1112 |
-     * | 13 14 15 16 || 29 30 31 32 |   | 1354  1412  1470  1528 |
-     * +-           -++-           -+   +-                      -+
-     */
     // initialize aligned kernel memory
     A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
     B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
 
+    int TEST_DIM = 17;
+    A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    C_BASIC = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+
     // add some dummy data
     int num = 1;
     printf("A_KERNEL: \n");
-    for(int i = 0; i < KERNEL_SIZE; ++i) {
-        for(int j = 0; j < KERNEL_SIZE; ++j) {
+    for(int i = 0; i < TEST_DIM; ++i) {
+        for(int j = 0; j < TEST_DIM; ++j) {
             A_KERNEL(i,j) = (double) num++;
-            printf("%*f ", 4, A_KERNEL(i,j));
+            // printf("%*f ", 4, A_KERNEL(i,j));
         }
-        printf("\n");
+        // printf("\n");
     }
     printf("\nB_KERNEL:\n");
-    for(int i = 0; i < KERNEL_SIZE; ++i) {
-        for(int j = 0; j < KERNEL_SIZE; ++j) {
+    for(int i = 0; i < TEST_DIM; ++i) {
+        for(int j = 0; j < TEST_DIM; ++j) {
             B_KERNEL(i,j) = (double) num++;
-            printf("%*f ", 4, B_KERNEL(i,j));
+            // printf("%*f ", 4, B_KERNEL(i,j));
             C_KERNEL(i,j) = 0.0;
         }
-        printf("\n");
+        // printf("\n");
     }
 
-    vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+    int M = TEST_DIM;
+    int N = TEST_DIM;
+    int K = TEST_DIM;
+    int lda = TEST_DIM;
 
-    printf("\nC_KERNEL:\n");
-    for(int i = 0; i < KERNEL_SIZE; ++i) {
-        for(int j = 0; j < KERNEL_SIZE; ++j) {
-            printf("%*f ", 4, C_KERNEL(i,j));
+    //
+    // calculate basic results for comparison
+    //
+    int i, j, k;
+    for (i = 0; i < M; ++i) {
+        for (j = 0; j < M; ++j) {
+            double cij = C[j*M+i];
+            for (k = 0; k < M; ++k)
+                cij += A[k*M+i] * B[j*M+k];
+            C_BASIC[j*M+i] = cij;
         }
-        printf("\n");
+    }
+
+    // sub-blocking based on KERNEL_SIZE
+    int max_dim = (M > K ? M : K);
+    int n_kernels = max_dim / KERNEL_SIZE + (max_dim % KERNEL_SIZE ? 1 : 0);
+    int row, col, sli, M_KERNEL, N_KERNEL, K_KERNEL;
+
+    int row_kernels = M / KERNEL_SIZE + (M % KERNEL_SIZE ? 1 : 0);
+    int col_kernels = N / KERNEL_SIZE + (N % KERNEL_SIZE ? 1 : 0);
+    int sli_kernels = K / KERNEL_SIZE + (K % KERNEL_SIZE ? 1 : 0);
+    
+    for(int bi = 0; bi < row_kernels; ++bi) {
+        row = bi * KERNEL_SIZE;
+        M_KERNEL = (row + KERNEL_SIZE > M ? M - row : KERNEL_SIZE);
+        
+        for(int bj = 0; bj < col_kernels; ++bj) {
+            col = bj * KERNEL_SIZE;
+            N_KERNEL = (col + KERNEL_SIZE > N ? N - col : KERNEL_SIZE);
+
+            for(int bk = 0; bk < sli_kernels; ++bk) {
+                sli = bk * KERNEL_SIZE;
+                K_KERNEL = (sli + KERNEL_SIZE > K ? K - sli : KERNEL_SIZE);
+
+                // copy from A and B to byte aligned memory, zero out aligned C
+                #pragma unroll
+                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                        // if this is a valid location, copy the data
+                        // otherwise, pad with 0s
+
+                        if(ki + row >= M || kj + sli >= K)
+                            A_KERNEL(ki, kj) = 0.0;
+                        else
+                            A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row];
+
+                        if (ki + sli >= K || kj + col >= N)
+                            B_KERNEL(ki,kj) = 0.0;
+                        else
+                            B_KERNEL(ki, kj) = B[ki+sli + (kj+col)*lda];
+
+                        C_KERNEL(ki, kj) = 0.0;
+                    }
+                }
+
+                vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+
+                // copy everything back to C
+                #pragma unroll
+                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                        if(ki + row < M && kj + col < N)
+                            C[(kj+col)*lda + ki+row] += C_KERNEL(ki, kj); // C(ki+row, kj+col*K) = C_KERNEL(ki, kj);
+                            // printf(" --> (  %d  ) <--\n", ((kj+col)*lda + ki+row));
+                    }
+                }
+            }
+        }
+    }
+
+    printf("\nC:\n");
+    for(int i = 0; i < TEST_DIM; ++i) {
+        for(int j = 0; j < TEST_DIM; ++j) {
+            // printf("%*f ", 4, C_KERNEL(i,j));
+            double mine = C[j*lda + i];
+            double basic = C_BASIC[j*lda + i];
+
+            if(mine != basic) {
+                printf("--> MINE: %d <--|--> BASIC: %d <--\n", mine, basic);
+            }
+        }
+        printf("\n\n");
     }
 
     printf("\n - - - - - - - - - \n");
-
-    printf("+-           -++-           -+   +-                      -+\n");
-    printf("| 1   2  3  4 || 17 18 19 20 |   |  250   260   270   280 |\n");
-    printf("| 5   6  7  8 || 21 22 23 24 | = |  618   644   670   696 |\n");
-    printf("| 9  10 11 12 || 25 26 27 28 |   |  986  1028  1070  1112 |\n");
-    printf("| 13 14 15 16 || 29 30 31 32 |   | 1354  1412  1470  1528 |\n");
-    printf("+-           -++-           -+   +-                      -+\n");
 
     _mm_free(A_KERNEL); A_KERNEL = NULL;
     _mm_free(B_KERNEL); B_KERNEL = NULL;
