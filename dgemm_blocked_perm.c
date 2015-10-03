@@ -33,9 +33,9 @@ double * restrict B_KERNEL = NULL;
 double * restrict C_KERNEL = NULL;
 
 // more convenient access; column major
-#define A(i, j) A[(j)*lda + (i)]
-#define B(i, j) B[(j)*lda + (i)]
-#define C(i, j) C[(j)*lda + (i)]
+#define A(i, j) A[(j) + (i)]
+#define B(i, j) B[(j) + (i)]
+#define C(i, j) C[(j) + (i)]
 
 // more convenient access; row major
 #define A_KERNEL(i, j) A_KERNEL[(i)*KERNEL_SIZE + (j)]
@@ -210,20 +210,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                     }
                 }
 
-                // we're ready to compute
-                // #if KERNEL_SIZE == 8
-                //     #pragma offload target(mic) in(A_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
-                //                                                  align(BYTE_ALIGN))              \
-                //                                 in(B_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
-                //                                                  align(BYTE_ALIGN))              \
-                //                                 inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) \
-                //                                                  align(BYTE_ALIGN))
-                //     {
-                // printf("BEFORE VECTORIZE\n");
-                //vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
-                // printf("AFTER VECTORIZE\n");
-                //     }
-                // #endif
+                vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
 
                 // copy everything back to C
                 #pragma unroll
@@ -237,8 +224,6 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
         }
     }
 }
-
-#include <string.h>
 
 void do_block(const int lda,
               const double * restrict A, const double * restrict B, double * restrict C,
@@ -264,12 +249,6 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
      B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
      C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
 
-    // #pragma offload_attribute (push, target(mic))
-    //     A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-    //     B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-    //     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
-    // #pragma offload_attribute (pop)
-
     const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
     int bi, bj, bk;
 
@@ -283,12 +262,6 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
             }
         }
     }
-
-    // #pragma offload_attribute (push, target(mic))
-    //     _mm_free(A_KERNEL);
-    //     _mm_free(B_KERNEL);
-    //     _mm_free(C_KERNEL);
-    // #pragma offload_attribute (pop)
 
     _mm_free(A_KERNEL); A_KERNEL = NULL;
     _mm_free(B_KERNEL); B_KERNEL = NULL;
