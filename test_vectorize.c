@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include "immintrin.h"
 
 const char* dgemm_desc = "Simple blocked dgemm.";
@@ -169,10 +170,10 @@ int main(int argc, char **argv) {
     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
 
     int TEST_DIM = 17;
-    A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    C_BASIC = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C_BASIC = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
 
     // add some dummy data
     int num = 1;
@@ -285,6 +286,7 @@ int main(int argc, char **argv) {
 
     printf("\n - - - - - - - - - \n");
 
+    free(A); free(B); free(C); free(C_BASIC);
     _mm_free(A_KERNEL); A_KERNEL = NULL;
     _mm_free(B_KERNEL); B_KERNEL = NULL;
     _mm_free(C_KERNEL); C_KERNEL = NULL;
