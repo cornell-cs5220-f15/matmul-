@@ -229,10 +229,10 @@ int main(int argc, char **argv) {
     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
 
     int TEST_DIM = 17;
-    double *A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *C_BASIC = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *A       = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *B       = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C       = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C_BASIC = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
 
     // add some dummy data
     int num = 1;
@@ -274,7 +274,7 @@ int main(int argc, char **argv) {
 
     // A + i + k*lda, B + k + j*lda, C + i + j*lda,
     test_me_please(A,B,C,10,10,10,TEST_DIM);
-    // test_me_please(A+,B,C,7,7,7,TEST_DIM);
+    test_me_please(A+10*TEST_DIM,B+10*TEST_DIM,C+10*TEST_DIM,7,7,7,TEST_DIM);
 
     printf("\nC:\n");
     for(int i = 0; i < 10; ++i) {
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
             double mine = C[j*lda + i];
             double basic = C_BASIC[j*lda + i];
 
-            if(mine != basic) {
+            if(mine != basic && mine != 0) {
                 printf("--> MINE: %d <--|--> BASIC: %d <--\n", mine, basic);
             }
         }
