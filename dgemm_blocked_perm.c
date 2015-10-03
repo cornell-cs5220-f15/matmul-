@@ -265,7 +265,7 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
 
      A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
      B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE               * sizeof(double), BYTE_ALIGN);
+     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
 
     // #pragma offload_attribute (push, target(mic))
     //     A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);

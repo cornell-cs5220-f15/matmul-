@@ -260,17 +260,17 @@ int main(int argc, char **argv) {
     printf("A_KERNEL: \n");
     for(int i = 0; i < KERNEL_SIZE; ++i) {
         for(int j = 0; j < KERNEL_SIZE; ++j) {
-            A_KERNEL(i,j) = num++;
-            printf("%d ", A_KERNEL(i,j));
+            A_KERNEL(i,j) = (double) num++;
+            printf("%f ", A_KERNEL(i,j));
         }
         printf("\n");
     }
     printf("\nB_KERNEL:\n");
     for(int i = 0; i < KERNEL_SIZE; ++i) {
         for(int j = 0; j < KERNEL_SIZE; ++j) {
-            B_KERNEL(i,j) = num++;
-            printf("%d ", B_KERNEL(i,j));
-            C_KERNEL(i,j) = 0;
+            B_KERNEL(i,j) = (double) num++;
+            printf("%f ", B_KERNEL(i,j));
+            C_KERNEL(i,j) = 0.0;
         }
         printf("\n");
     }
@@ -280,7 +280,7 @@ int main(int argc, char **argv) {
     printf("\nC_KERNEL:\n");
     for(int i = 0; i < KERNEL_SIZE; ++i) {
         for(int j = 0; j < KERNEL_SIZE; ++j) {
-            printf("%d ", C_KERNEL(i,j));
+            printf("%f ", C_KERNEL(i,j));
         }
         printf("\n");
     }

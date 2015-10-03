@@ -1,0 +1,12 @@
+#!/bin/sh -l
+
+#PBS -l walltime=0:30:00
+#PBS -N vectorize_test
+#PBS -j oe
+
+# hi
+
+module load cs5220
+cd $PBS_O_WORKDIR
+./vectorize_test
+
