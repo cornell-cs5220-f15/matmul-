@@ -253,7 +253,6 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                                 // printf(" --> (  %d  ) <--\n", ((kj+col)*lda + ki+row));
                         }
                     }
-                    }
                 }
             }
         }
