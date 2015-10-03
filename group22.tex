@@ -95,12 +95,12 @@
     \section{Our approach}
     We made six major improvements:
      \begin{enumerate}
-            \item Block multiplication.
-            \item Copy optimization.
-            \item Vectorization.
-            \item Data alignment.
-            \item Further blocking
+            \item Block multiplication
+            \item Copy optimization
+            \item Data alignment
+            \item Vectorization
             \item Compiler optimization
+            \item L2 blocking
      \end{enumerate}
     
         \vspace{1cm}
@@ -125,13 +125,23 @@
         
         \begin{figure}[H]
             \centering
-            \includegraphics[width=4.5in]{timing_32_cp.png}
+            \includegraphics[width=4in]{timing_32_cp.png}
             \caption{After copy optimization}
         \end{figure}
         
+
+
+        \subsection{Data alignment}
+        We used the functions \texttt{\_mm\_malloc()} and \texttt{\_mm\_free()} so that we can guarantee that our matrices are aligned properly in memory. Specifically, we ensure that they are aligned to 64 bytes. We do this to ensure that we can take advantage of vector operations.
+        
+        \begin{figure}[H]
+        	\centering
+            \includegraphics[width=4in]{timing_vector_32_cp.png}
+        	\caption{After data alignment}
+        \end{figure}
         \clearpage
-            
-    
+        
+        
                 
         \subsection{Vectorization}
         We aligned our data to 64 bytes in memory and we multiply the blocks in our matrices in such an order so that we can take advantage of Vector FMAs. Specifically, we start with the (0, 0) element of a block in $A$. We multiply that by the first row of a block in $B$. We add that to the first row of a block in $C$. We then iterate across the 0th row of $A$ and iterate over the rows of the block in $B$. Then our outer loop iterates over the rows of $A$. This way, on our inner loop, we can take advantage of vector operations. When we compiled our code with the flags to show us whether we have vectorization, we obtained the following output:
@@ -161,7 +171,7 @@
 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=4.5in]{timing_vector_32_cp.png}
+            \includegraphics[width=4.5in]{timing_vector_32_cp_align.png}
             \caption{After vectoriztion}
         \end{figure}
         
@@ -169,29 +179,6 @@
         
     
                     
-        \subsection{Data alignment}
-        We used the functions \texttt{\_mm\_malloc()} and \texttt{\_mm\_free()} so that we can guarantee that our matrices are aligned properly in memory. Specifically, we ensure that they are aligned to 64 bytes. We do this to ensure that we can take advantage of vector operations.
-        
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=4.5in]{timing_vector_32_cp_align.png}
-            \caption{After data alignment}
-        \end{figure}
-        
-        
-        
-        \subsection{Further blocking}
-        
-        \begin{figure}[H]
-            \centering
-            \includegraphics[width=5in]{timing_vector_32_64_cp_align.png}
-            \caption{After further blocking}
-        \end{figure}
-        
-        \clearpage
-                        
-        
-            
         \subsection{Compiler optimization}
         
         \vspace{0.5cm}
@@ -227,23 +214,24 @@
         We then implemented a multi-level blocking strategy. We first divided the matrices into blocks so that each block could fit into the L1 cache. We then created larger blocks that contained several smaller blocks and performed a block matrix multiply using those larger blocks. We created the larger blocks that contained larger submatrices that could fit into the L2 cache.  Specifically, we had 4 smaller blocks in every larger block, resulting in a matrix of 64 x 64 doubles if our smaller blocks were 32 x 32 doubles. The result of this had a minor improvement on performance for larger matrices. The overhead of the copy optimization resulted in lower FLOP rates for smaller matrices. The results are seen below:
         \begin{figure}[H]
             \centering
-            \includegraphics[width=4.5in]{timing_noL2.pdf}
-            \caption{Without L2 blocking.}
+            \includegraphics[width=4.2in]{timing_noL2.pdf}
+            \caption{Before L2 blocking.}
         \end{figure}
 
         \begin{figure}[H]
             \centering
-            \includegraphics[width=4.5in]{timing_L2.pdf}
-            \caption{With L2 blocking. Notice that the FLOP rate is marginally higher for larger matrices but lower for smaller matrices.}
+            \includegraphics[width=4.2in]{timing_L2.pdf}
+            \caption{After L2 blocking}
         \end{figure}
+		Notice that the FLOP rate is marginally higher for larger matrices but lower for smaller matrices.
 
         Looking at this, we can try just branching based on the size of the input matrix, which isn't too expensive since it is being done outside of all loops. When we do this, we get the following result. However, the compiler cannot optimize a lot of the code out if we are doing this conditional branching. This causes the overall result to be worse.
         \begin{figure}[H]
             \centering
             \includegraphics[width=4.5in]{timing_L2_2.pdf}
-            \caption{With L2 blocking but branching to use L2 blocking only if the size of the leading dimension of the matrix is greater than 384.}
+            \caption{Automatic branch to L2 blocking}
         \end{figure}
-
+		Branch to use L2 blocking only if the leading dimension of the matrix is greater than 384.
         \clearpage
     \section{Summary}
         
