@@ -91,7 +91,7 @@ inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
     ymm00 = _mm256_add_pd(ymm00, ymm04); ymm08 = _mm256_add_pd(ymm08, ymm12);
 
     // ym00 and ym08 now hold the left and right halves, store back in C
-    // _mm256_store_pd((double *) (C+row*8), ymm00); _mm256_store_pd((double *) (C+row*8+4), ymm08); 
+    _mm256_store_pd((double *) (C+row*8), ymm00); _mm256_store_pd((double *) (C+row*8+4), ymm08); 
 }
 
 inline void vectorized8x8(double * restrict A, double * restrict B, double * restrict C) {
@@ -161,86 +161,6 @@ inline void vectorized8x8(double * restrict A, double * restrict B, double * res
 }
 
 #include <stdio.h>
-
-/*
-  A is M-by-K
-  B is K-by-N
-  C is M-by-N
-  lda is the leading dimension of the matrix (the M of square_dgemm).
-*/
-void basic_dgemm(const int lda, const int M, const int N, const int K,
-                 const double * restrict A, const double * restrict B, double * restrict C,
-                 int shortcut)
-{
-    if(shortcut) {
-        int i, j, k;
-        for (j = 0; j < N; ++j) {
-            for (k = 0; k < K; ++k){
-                double bkj = B[j*lda+k];
-                for (i = 0; i < M; ++i) {
-                    C[j*lda+i] += A[k*lda+i] * bkj;
-                }
-            }
-        }
-    }
-    else {
-        // sub-blocking based on KERNEL_SIZE
-        int n_kernels = lda / KERNEL_SIZE + (lda % KERNEL_SIZE ? 1 : 0);
-        int row, col, M_KERNEL, N_KERNEL;
-        for(int bi = 0; bi < n_kernels; ++bi) {
-            row = bi * KERNEL_SIZE;
-            for(int bj = 0; bj < n_kernels; ++bj) {
-                col = bj * KERNEL_SIZE;
-
-                M_KERNEL = (row + KERNEL_SIZE > lda ? lda - row : KERNEL_SIZE);
-                N_KERNEL = (col + KERNEL_SIZE > lda ? lda - col : KERNEL_SIZE);
-
-                // copy from A and B to byte aligned memory, zero out aligned C
-                #pragma unroll
-                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                        // if this is a valid location, copy the data
-                        // otherwise, pad with 0s
-                        if(ki < M_KERNEL && kj < N_KERNEL) {
-                            A_KERNEL(ki, kj) = A(ki+row, kj+col);// worth mentioning the defines at the top...
-                            B_KERNEL(ki, kj) = B(ki+row, kj+col);// *_KERNEL are ROW-major
-                        }
-                        else {
-                            A_KERNEL(ki, kj) = 0.0;
-                            B_KERNEL(ki, kj) = 0.0;
-                        }
-                        C_KERNEL(ki, kj) = 0.0;
-                    }
-                }
-
-                // we're ready to compute
-                // #if KERNEL_SIZE == 8
-                //     #pragma offload target(mic) in(A_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
-                //                                                  align(BYTE_ALIGN))              \
-                //                                 in(B_KERNEL    : length(KERNEL_SIZE*KERNEL_SIZE) \
-                //                                                  align(BYTE_ALIGN))              \
-                //                                 inout(C_KERNEL : length(KERNEL_SIZE*KERNEL_SIZE) \
-                //                                                  align(BYTE_ALIGN))
-                //     {
-                // printf("BEFORE VECTORIZE\n");
-                //vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
-                // printf("AFTER VECTORIZE\n");
-                //     }
-                // #endif
-
-                // copy everything back to C
-                #pragma unroll
-                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                        if(ki < M_KERNEL && kj < N_KERNEL)
-                            C(ki+row, kj+col) = C_KERNEL(ki, kj);
-                    }
-                }
-            }
-        }
-    }
-}
-
 int main(int argc, char **argv) {
     /*
      * +-           -++-           -+   +-                      -+
