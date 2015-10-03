@@ -162,57 +162,7 @@ inline void vectorized8x8(double * restrict A, double * restrict B, double * res
            ymm24, ymm25, ymm26, ymm27, ymm28, ymm29, ymm30, ymm31);
 }
 
-#include <stdio.h>
-int main(int argc, char **argv) {
-    // initialize aligned kernel memory
-    A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-    B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-    C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
-
-    int TEST_DIM = 17;
-    double *A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *C_BASIC = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
-
-    // add some dummy data
-    int num = 1;
-    printf("A_KERNEL: \n");
-    for(int i = 0; i < TEST_DIM; ++i) {
-        for(int j = 0; j < TEST_DIM; ++j) {
-            A_KERNEL(i,j) = (double) num++;
-            // printf("%*f ", 4, A_KERNEL(i,j));
-        }
-        // printf("\n");
-    }
-    printf("\nB_KERNEL:\n");
-    for(int i = 0; i < TEST_DIM; ++i) {
-        for(int j = 0; j < TEST_DIM; ++j) {
-            B_KERNEL(i,j) = (double) num++;
-            // printf("%*f ", 4, B_KERNEL(i,j));
-            C_KERNEL(i,j) = 0.0;
-        }
-        // printf("\n");
-    }
-
-    int M = TEST_DIM;
-    int N = TEST_DIM;
-    int K = TEST_DIM;
-    int lda = TEST_DIM;
-
-    //
-    // calculate basic results for comparison
-    //
-    int i, j, k;
-    for (i = 0; i < M; ++i) {
-        for (j = 0; j < M; ++j) {
-            double cij = C[j*M+i];
-            for (k = 0; k < M; ++k)
-                cij += A[k*M+i] * B[j*M+k];
-            C_BASIC[j*M+i] = cij;
-        }
-    }
-
+void test_me_please(double *A, double *B, double *C, int M, int N, int K, int lda) {
     // sub-blocking based on KERNEL_SIZE
     int max_dim = (M > K ? M : K);
     int n_kernels = max_dim / KERNEL_SIZE + (max_dim % KERNEL_SIZE ? 1 : 0);
@@ -269,10 +219,66 @@ int main(int argc, char **argv) {
             }
         }
     }
+}
 
-    printf("\nC:\n");
+#include <stdio.h>
+int main(int argc, char **argv) {
+    // initialize aligned kernel memory
+    A_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+    C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
+
+    int TEST_DIM = 17;
+    double *A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C_BASIC = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+
+    // add some dummy data
+    int num = 1;
+    printf("A_KERNEL: \n");
     for(int i = 0; i < TEST_DIM; ++i) {
         for(int j = 0; j < TEST_DIM; ++j) {
+            A_KERNEL(i,j) = (double) num++;
+            // printf("%*f ", 4, A_KERNEL(i,j));
+        }
+        // printf("\n");
+    }
+    printf("\nB_KERNEL:\n");
+    for(int i = 0; i < TEST_DIM; ++i) {
+        for(int j = 0; j < TEST_DIM; ++j) {
+            B_KERNEL(i,j) = (double) num++;
+            // printf("%*f ", 4, B_KERNEL(i,j));
+            C_KERNEL(i,j) = 0.0;
+        }
+        // printf("\n");
+    }
+
+    int M = TEST_DIM;
+    int N = TEST_DIM;
+    int K = TEST_DIM;
+    int lda = TEST_DIM;
+
+    //
+    // calculate basic results for comparison
+    //
+    int i, j, k;
+    for (i = 0; i < M; ++i) {
+        for (j = 0; j < M; ++j) {
+            double cij = C[j*M+i];
+            for (k = 0; k < M; ++k)
+                cij += A[k*M+i] * B[j*M+k];
+            C_BASIC[j*M+i] = cij;
+        }
+    }
+
+    // A + i + k*lda, B + k + j*lda, C + i + j*lda,
+    test_me_please(A,B,C,10,10,10,TEST_DIM);
+    // test_me_please(A+,B,C,7,7,7,TEST_DIM);
+
+    printf("\nC:\n");
+    for(int i = 0; i < 10; ++i) {
+        for(int j = 0; j < 10; ++j) {
             // printf("%*f ", 4, C_KERNEL(i,j));
             double mine = C[j*lda + i];
             double basic = C_BASIC[j*lda + i];
