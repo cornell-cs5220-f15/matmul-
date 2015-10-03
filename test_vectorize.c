@@ -105,7 +105,32 @@ inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
     // ymm08 = _mm256_add_pd(ymm08, ymm12);// ymm08 holds right half
 
     // ym00 and ym08 now hold the left and right halves, store back in C
-    _mm256_store_pd((double *) (C+row*8), ymm00); _mm256_store_pd((double *) (C+row*8+4), ymm08); 
+    // _mm256_store_pd((double *) (C+row*8), ymm00); _mm256_store_pd((double *) (C+row*8+4), ymm08); 
+
+    if(row == 0) {
+        _mm256_store_pd((double *) (C+row*8), ymm16); _mm256_store_pd((double *) (C+row*8+4), ymm17);
+    }
+    if(row == 1) {
+        _mm256_store_pd((double *) (C+row*8), ymm18); _mm256_store_pd((double *) (C+row*8+4), ymm19);
+    }
+    if(row == 2) {
+        _mm256_store_pd((double *) (C+row*8), ymm20); _mm256_store_pd((double *) (C+row*8+4), ymm21);
+    }
+    if(row == 3) {
+        _mm256_store_pd((double *) (C+row*8), ymm22); _mm256_store_pd((double *) (C+row*8+4), ymm23);
+    }
+    if(row == 4) {
+        _mm256_store_pd((double *) (C+row*8), ymm24); _mm256_store_pd((double *) (C+row*8+4), ymm25);
+    }
+    if(row == 5) {
+        _mm256_store_pd((double *) (C+row*8), ymm26); _mm256_store_pd((double *) (C+row*8+4), ymm27);
+    }
+    if(row == 6) {
+        _mm256_store_pd((double *) (C+row*8), ymm28); _mm256_store_pd((double *) (C+row*8+4), ymm29);
+    }
+    if(row == 7) {
+        _mm256_store_pd((double *) (C+row*8), ymm30); _mm256_store_pd((double *) (C+row*8+4), ymm31);
+    }
 }
 
 inline void vectorized8x8(double * restrict A, double * restrict B, double * restrict C) {
