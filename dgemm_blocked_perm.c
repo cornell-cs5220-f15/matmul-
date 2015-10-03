@@ -209,15 +209,26 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                         for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
                             // if this is a valid location, copy the data
                             // otherwise, pad with 0s
-                            if(ki < M_KERNEL)
+
+                            if(ki + row >= M || kj + sli >= K)
+                                A_KERNEL(ki, kj) = 0.0;
+                            else
+                                A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row];
+
+                            if (ki + sli >= K || kj + col >= N)
+                                B_KERNEL(ki,kj) = 0.0;
+                            else
+                                B_KERNEL(ki, kj) = B[ki+sli + (kj+col)*lda];
+
+			  /*                            if(ki+row < M)
                                 A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
                             else
-                                A_KERNEL(ki, kj) = 0.0;
+			    A_KERNEL(ki, kj) = 0.0;*/
 
-                            if(kj < N_KERNEL)
+			  /*                            if(kj+col < N)
                                 B_KERNEL(ki, kj) = B[(kj+col)*lda + ki+sli]; // B(ki+row, kj+col*N);// *_KERNEL are ROW-major
                             else
-                                B_KERNEL(ki, kj) = 0.0;
+			    B_KERNEL(ki, kj) = 0.0; */
                             /*
                             if(ki < M_KERNEL && kj < N_KERNEL) {
                                 A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
@@ -231,17 +242,17 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                         }
                     }
 
-                    vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                        vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
 
                     // copy everything back to C
                     #pragma unroll
                     for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
                         for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                            if(ki < M_KERNEL && kj < N_KERNEL) {
+                            if(ki + row < M && kj + col < N)
                                 C[(kj+col)*lda + ki+row] += C_KERNEL(ki, kj); // C(ki+row, kj+col*K) = C_KERNEL(ki, kj);
                                 // printf(" --> (  %d  ) <--\n", ((kj+col)*lda + ki+row));
-                            }
                         }
+                    }
                     }
                 }
             }
@@ -266,7 +277,7 @@ void do_block(const int lda,
 }
 
 void square_dgemm(const int M, const double * restrict A, const double * restrict B, double * restrict C)
-{
+  {
     if (M <= BLOCK_SIZE) {
        basic_dgemm(M, M, M, M, A, B, C, 1);
        return;
