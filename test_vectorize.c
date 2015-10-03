@@ -229,17 +229,19 @@ int main(int argc, char **argv) {
     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
 
     int TEST_DIM = 17;
-    double *A       = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *B       = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *C       = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
-    double *C_BASIC = (double *) calloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
+    double *C_BASIC = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
 
     // add some dummy data
     int num = 1;
     printf("A_KERNEL: \n");
     for(int i = 0; i < TEST_DIM; ++i) {
         for(int j = 0; j < TEST_DIM; ++j) {
-            A_KERNEL(i,j) = (double) num++;
+            // A_KERNEL(i,j) = (double) num++;
+            A[j*TEST_DIM + i] = (double) num++;
+            C[j*TEST_DIM + i] = 0.0;
             // printf("%*f ", 4, A_KERNEL(i,j));
         }
         // printf("\n");
@@ -247,9 +249,10 @@ int main(int argc, char **argv) {
     printf("\nB_KERNEL:\n");
     for(int i = 0; i < TEST_DIM; ++i) {
         for(int j = 0; j < TEST_DIM; ++j) {
-            B_KERNEL(i,j) = (double) num++;
+            B[j*TEST_DIM + i] = (double) num++;
+            // B_KERNEL(i,j) = (double) num++;
             // printf("%*f ", 4, B_KERNEL(i,j));
-            C_KERNEL(i,j) = 0.0;
+            // C_KERNEL(i,j) = 0.0;
         }
         // printf("\n");
     }
