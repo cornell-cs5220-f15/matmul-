@@ -185,49 +185,62 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
         // sub-blocking based on KERNEL_SIZE
         int max_dim = (M > K ? M : K);
         int n_kernels = max_dim / KERNEL_SIZE + (max_dim % KERNEL_SIZE ? 1 : 0);
-        int row, col, M_KERNEL, N_KERNEL;
-        for(int bi = 0; bi < n_kernels; ++bi) {
+        int row, col, sli, M_KERNEL, N_KERNEL, K_KERNEL;
+
+        int row_kernels = M / KERNEL_SIZE + (M % KERNEL_SIZE ? 1 : 0);
+        int col_kernels = N / KERNEL_SIZE + (N % KERNEL_SIZE ? 1 : 0);
+        int sli_kernels = K / KERNEL_SIZE + (K % KERNEL_SIZE ? 1 : 0);
+        
+        for(int bi = 0; bi < row_kernels; ++bi) {
             row = bi * KERNEL_SIZE;
-            for(int bj = 0; bj < n_kernels; ++bj) {
+            M_KERNEL = (row + KERNEL_SIZE > M ? M - row : KERNEL_SIZE);
+            
+            for(int bj = 0; bj < col_kernels; ++bj) {
                 col = bj * KERNEL_SIZE;
+                N_KERNEL = (col + KERNEL_SIZE > N ? N - col : KERNEL_SIZE);
 
-                M_KERNEL = (row + KERNEL_SIZE > max_dim ? max_dim - row : KERNEL_SIZE);
-                N_KERNEL = (col + KERNEL_SIZE > max_dim ? max_dim - col : KERNEL_SIZE);
+                for(int bk = 0; bk < sli_kernels; ++bk) {
+                    sli = bk * KERNEL_SIZE;
+                    K_KERNEL = (sli + KERNEL_SIZE > K ? K - sli : KERNEL_SIZE);
 
-                // int i, j, k;
-                // for (i = 0; i < M; ++i)
-                //     for (j = 0; j < N; ++j) {
-                //         double cij = C[j*lda+i];
-                //         for (k = 0; k < K; ++k) {
-                //             cij += A[k*lda+i] * B[j*lda+k];
+                    // copy from A and B to byte aligned memory, zero out aligned C
+                    #pragma unroll
+                    for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                        for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                            // if this is a valid location, copy the data
+                            // otherwise, pad with 0s
+                            if(ki < M_KERNEL)
+                                A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
+                            else
+                                A_KERNEL(ki, kj) = 0.0;
 
-                // copy from A and B to byte aligned memory, zero out aligned C
-                #pragma unroll
-                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                        // if this is a valid location, copy the data
-                        // otherwise, pad with 0s
-                        if(ki < M_KERNEL && kj < N_KERNEL) {
-                            A_KERNEL(ki, kj) = A[(kj+col)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
-                            B_KERNEL(ki, kj) = B[(kj+col)*lda + ki+row]; // B(ki+row, kj+col*N);// *_KERNEL are ROW-major
+                            if(kj < N_KERNEL)
+                                B_KERNEL(ki, kj) = B[(kj+col)*lda + ki+sli]; // B(ki+row, kj+col*N);// *_KERNEL are ROW-major
+                            else
+                                B_KERNEL(ki, kj) = 0.0;
+                            /*
+                            if(ki < M_KERNEL && kj < N_KERNEL) {
+                                A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
+                                B_KERNEL(ki, kj) = B[(kj+col)*lda + ki+sli]; // B(ki+row, kj+col*N);// *_KERNEL are ROW-major
+                            }
+                            else {
+                                A_KERNEL(ki, kj) = 0.0;
+                                B_KERNEL(ki, kj) = 0.0;
+                            }*/
+                            C_KERNEL(ki, kj) = 0.0;
                         }
-                        else {
-                            A_KERNEL(ki, kj) = 0.0;
-                            B_KERNEL(ki, kj) = 0.0;
-                        }
-                        C_KERNEL(ki, kj) = 0.0;
                     }
-                }
 
-                vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                    vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
 
-                // copy everything back to C
-                #pragma unroll
-                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                        if(ki < M_KERNEL && kj < N_KERNEL) {
-                            C[(kj+col)*lda + ki+row] += C_KERNEL(ki, kj); // C(ki+row, kj+col*K) = C_KERNEL(ki, kj);
-                            // printf(" --> (  %d  ) <--\n", ((kj+col)*lda + ki+row));
+                    // copy everything back to C
+                    #pragma unroll
+                    for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                        for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                            if(ki < M_KERNEL && kj < N_KERNEL) {
+                                C[(kj+col)*lda + ki+row] += C_KERNEL(ki, kj); // C(ki+row, kj+col*K) = C_KERNEL(ki, kj);
+                                // printf(" --> (  %d  ) <--\n", ((kj+col)*lda + ki+row));
+                            }
                         }
                     }
                 }
