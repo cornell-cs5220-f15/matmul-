@@ -1,4 +1,5 @@
 #include "immintrin.h"
+#include <stdio.h>
 
 const char* dgemm_desc = "Simple blocked dgemm.";
 
@@ -182,15 +183,23 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     }
     else {
         // sub-blocking based on KERNEL_SIZE
-        int n_kernels = lda / KERNEL_SIZE + (lda % KERNEL_SIZE ? 1 : 0);
+        int max_dim = (M > K ? M : K);
+        int n_kernels = max_dim / KERNEL_SIZE + (max_dim % KERNEL_SIZE ? 1 : 0);
         int row, col, M_KERNEL, N_KERNEL;
         for(int bi = 0; bi < n_kernels; ++bi) {
             row = bi * KERNEL_SIZE;
             for(int bj = 0; bj < n_kernels; ++bj) {
                 col = bj * KERNEL_SIZE;
 
-                M_KERNEL = (row + KERNEL_SIZE > lda ? lda - row : KERNEL_SIZE);
-                N_KERNEL = (col + KERNEL_SIZE > lda ? lda - col : KERNEL_SIZE);
+                M_KERNEL = (row + KERNEL_SIZE > max_dim ? max_dim - row : KERNEL_SIZE);
+                N_KERNEL = (col + KERNEL_SIZE > max_dim ? max_dim - col : KERNEL_SIZE);
+
+                // int i, j, k;
+                // for (i = 0; i < M; ++i)
+                //     for (j = 0; j < N; ++j) {
+                //         double cij = C[j*lda+i];
+                //         for (k = 0; k < K; ++k) {
+                //             cij += A[k*lda+i] * B[j*lda+k];
 
                 // copy from A and B to byte aligned memory, zero out aligned C
                 #pragma unroll
@@ -199,8 +208,8 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                         // if this is a valid location, copy the data
                         // otherwise, pad with 0s
                         if(ki < M_KERNEL && kj < N_KERNEL) {
-                            A_KERNEL(ki, kj) = A(ki+row, kj+col);// worth mentioning the defines at the top...
-                            B_KERNEL(ki, kj) = B(ki+row, kj+col);// *_KERNEL are ROW-major
+                            A_KERNEL(ki, kj) = A[(kj+col)*lda + ki+row]; // A(ki+row, kj+col*M);// worth mentioning the defines at the top...
+                            B_KERNEL(ki, kj) = B[(kj+col)*lda + ki+row]; // B(ki+row, kj+col*N);// *_KERNEL are ROW-major
                         }
                         else {
                             A_KERNEL(ki, kj) = 0.0;
@@ -216,8 +225,10 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                 #pragma unroll
                 for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
                     for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                        if(ki < M_KERNEL && kj < N_KERNEL)
-                            C(ki+row, kj+col) = C_KERNEL(ki, kj);
+                        if(ki < M_KERNEL && kj < N_KERNEL) {
+                            C[(kj+col)*lda + ki+row] += C_KERNEL(ki, kj); // C(ki+row, kj+col*K) = C_KERNEL(ki, kj);
+                            // printf(" --> (  %d  ) <--\n", ((kj+col)*lda + ki+row));
+                        }
                     }
                 }
             }
@@ -232,6 +243,9 @@ void do_block(const int lda,
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+
+    // printf("       Sub: M=%d\n           N=%d\n           K=%d\n", M, N, K);
+
 
     basic_dgemm(lda, M, N, K,
                 A + i + k*lda, B + k + j*lda, C + i + j*lda,
@@ -258,6 +272,9 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
             const int j = bj * BLOCK_SIZE;
             for (bk = 0; bk < n_blocks; ++bk) {
                 const int k = bk * BLOCK_SIZE;
+
+                // printf("Block: lda=%d\n       i=%d\n       j=%d\n       k=%d\n", M, i, j, k);
+
                 do_block(M, A, B, C, i, j, k);
             }
         }
