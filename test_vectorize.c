@@ -58,37 +58,51 @@ inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
 
     // Broadcast each element of Matrix A Row 1 into a ymm register
     // If row = [ a b c d e f g h ], then we need two registers for each
+    
+    //
+    // process left half
+    //
+    // broadcast out
     ymm00 = _mm256_broadcast_sd(A + row*8 + 0); ymm01 = _mm256_broadcast_sd(A + row*8 + 0);// a
     ymm02 = _mm256_broadcast_sd(A + row*8 + 1); ymm03 = _mm256_broadcast_sd(A + row*8 + 1);// b
     ymm04 = _mm256_broadcast_sd(A + row*8 + 2); ymm05 = _mm256_broadcast_sd(A + row*8 + 2);// c
     ymm06 = _mm256_broadcast_sd(A + row*8 + 3); ymm07 = _mm256_broadcast_sd(A + row*8 + 3);// d
+
+    // multiply
+    ymm00 = _mm256_mul_pd(ymm00, ymm16); ymm01 = _mm256_mul_pd(ymm01, ymm17);// row 1
+    ymm02 = _mm256_mul_pd(ymm02, ymm18); ymm03 = _mm256_mul_pd(ymm03, ymm19);// row 2
+    ymm04 = _mm256_mul_pd(ymm04, ymm20); ymm05 = _mm256_mul_pd(ymm05, ymm21);// row 3
+    ymm06 = _mm256_mul_pd(ymm06, ymm22); ymm07 = _mm256_mul_pd(ymm07, ymm23);// row 4
+
+    // add up left half
+    ymm00 = _mm256_add_pd(ymm00, ymm01); ymm02 = _mm256_add_pd(ymm02, ymm03);
+    ymm04 = _mm256_add_pd(ymm04, ymm05); ymm06 = _mm256_add_pd(ymm06, ymm07);
+
+    ymm00 = _mm256_add_pd(ymm00, ymm02); ymm04 = _mm256_add_pd(ymm04, ymm06);
+
+    ymm00 = _mm256_add_pd(ymm00, ymm04);// ymm00 holds left half
+
+    //
+    // process right half
+    //
     ymm08 = _mm256_broadcast_sd(A + row*8 + 4); ymm09 = _mm256_broadcast_sd(A + row*8 + 4);// e
     ymm10 = _mm256_broadcast_sd(A + row*8 + 5); ymm11 = _mm256_broadcast_sd(A + row*8 + 5);// f
     ymm12 = _mm256_broadcast_sd(A + row*8 + 6); ymm13 = _mm256_broadcast_sd(A + row*8 + 6);// g
     ymm14 = _mm256_broadcast_sd(A + row*8 + 7); ymm15 = _mm256_broadcast_sd(A + row*8 + 7);// h
 
-    // Multiply each element of A Row 1 with each Row of B
-    ymm00 = _mm256_mul_pd(ymm00, ymm16); ymm01 = _mm256_mul_pd(ymm01, ymm17);// row 1
-    ymm02 = _mm256_mul_pd(ymm02, ymm18); ymm03 = _mm256_mul_pd(ymm03, ymm19);// row 2
-    ymm04 = _mm256_mul_pd(ymm04, ymm20); ymm05 = _mm256_mul_pd(ymm05, ymm21);// row 3
-    ymm06 = _mm256_mul_pd(ymm06, ymm22); ymm07 = _mm256_mul_pd(ymm07, ymm23);// row 4
+    // multiply
     ymm08 = _mm256_mul_pd(ymm08, ymm24); ymm09 = _mm256_mul_pd(ymm09, ymm25);// row 5
     ymm10 = _mm256_mul_pd(ymm10, ymm26); ymm11 = _mm256_mul_pd(ymm11, ymm27);// row 6
     ymm12 = _mm256_mul_pd(ymm12, ymm28); ymm13 = _mm256_mul_pd(ymm13, ymm29);// row 7
     ymm14 = _mm256_mul_pd(ymm14, ymm30); ymm15 = _mm256_mul_pd(ymm15, ymm31);// row 8
 
-    // Add up partial sums to reduce from 16 separate to 8 separate [read left right from previous]
-    ymm00 = _mm256_add_pd(ymm00, ymm01); ymm02 = _mm256_add_pd(ymm02, ymm03);
-    ymm04 = _mm256_add_pd(ymm04, ymm05); ymm06 = _mm256_add_pd(ymm06, ymm07);
+    // add up right half
     ymm08 = _mm256_add_pd(ymm08, ymm09); ymm10 = _mm256_add_pd(ymm10, ymm11);
     ymm12 = _mm256_add_pd(ymm12, ymm13); ymm14 = _mm256_add_pd(ymm14, ymm15);
 
-    // Add up partial sums to reduce from 8 separate to 4 separate [read left right from previous]
-    ymm00 = _mm256_add_pd(ymm00, ymm02); ymm04 = _mm256_add_pd(ymm04, ymm06);
     ymm08 = _mm256_add_pd(ymm08, ymm10); ymm12 = _mm256_add_pd(ymm12, ymm14);
 
-    // Add up partial sums to reduce from 4 separate to 2 separate [read left right from previous]
-    ymm00 = _mm256_add_pd(ymm00, ymm04); ymm08 = _mm256_add_pd(ymm08, ymm12);
+    ymm08 = _mm256_add_pd(ymm08, ymm12);// ymm08 holds right half
 
     // ym00 and ym08 now hold the left and right halves, store back in C
     _mm256_store_pd((double *) (C+row*8), ymm00); _mm256_store_pd((double *) (C+row*8+4), ymm08); 
@@ -181,7 +195,7 @@ int main(int argc, char **argv) {
     for(int i = 0; i < KERNEL_SIZE; ++i) {
         for(int j = 0; j < KERNEL_SIZE; ++j) {
             A_KERNEL(i,j) = (double) num++;
-            printf("%f ", A_KERNEL(i,j));
+            printf("%04f ", A_KERNEL(i,j));
         }
         printf("\n");
     }
@@ -189,7 +203,7 @@ int main(int argc, char **argv) {
     for(int i = 0; i < KERNEL_SIZE; ++i) {
         for(int j = 0; j < KERNEL_SIZE; ++j) {
             B_KERNEL(i,j) = (double) num++;
-            printf("%f ", B_KERNEL(i,j));
+            printf("%04f ", B_KERNEL(i,j));
             C_KERNEL(i,j) = 0.0;
         }
         printf("\n");
@@ -200,7 +214,7 @@ int main(int argc, char **argv) {
     printf("\nC_KERNEL:\n");
     for(int i = 0; i < KERNEL_SIZE; ++i) {
         for(int j = 0; j < KERNEL_SIZE; ++j) {
-            printf("%f ", C_KERNEL(i,j));
+            printf("%04f ", C_KERNEL(i,j));
         }
         printf("\n");
     }
