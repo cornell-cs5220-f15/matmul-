@@ -277,7 +277,7 @@ int main(int argc, char **argv) {
 
     // A + i + k*lda, B + k + j*lda, C + i + j*lda,
     test_me_please(A,B,C,10,10,10,TEST_DIM);
-    test_me_please(A+10*TEST_DIM,B+10*TEST_DIM,C+10*TEST_DIM,7,7,7,TEST_DIM);
+    test_me_please(A+10*TEST_DIM+7,B+10*TEST_DIM+7,C+10*TEST_DIM+7,7,7,7,TEST_DIM);
 
     printf("\nC:\n");
     for(int i = 0; i < 10; ++i) {
