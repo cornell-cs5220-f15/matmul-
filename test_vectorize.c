@@ -148,12 +148,12 @@ inline void vectorized8x8(double * restrict A, double * restrict B, double * res
 
     // Read in the 8 rows of Matrix B into zmm registers
     ymm16 = _mm256_load_pd((double *) (B + 0*8)); ymm17 = _mm256_load_pd((double *) (B + 0*8 + 4));// row 1
-    ymm14 = _mm256_load_pd((double *) (B + 1*8)); ymm19 = _mm256_load_pd((double *) (B + 1*8 + 4));// row 2
+    ymm18 = _mm256_load_pd((double *) (B + 1*8)); ymm19 = _mm256_load_pd((double *) (B + 1*8 + 4));// row 2
     ymm20 = _mm256_load_pd((double *) (B + 2*8)); ymm21 = _mm256_load_pd((double *) (B + 2*8 + 4));// row 3
     ymm22 = _mm256_load_pd((double *) (B + 3*8)); ymm23 = _mm256_load_pd((double *) (B + 3*8 + 4));// row 4
     ymm24 = _mm256_load_pd((double *) (B + 4*8)); ymm25 = _mm256_load_pd((double *) (B + 4*8 + 4));// row 5
     ymm26 = _mm256_load_pd((double *) (B + 5*8)); ymm27 = _mm256_load_pd((double *) (B + 5*8 + 4));// row 6
-    ymm24 = _mm256_load_pd((double *) (B + 6*8)); ymm29 = _mm256_load_pd((double *) (B + 6*8 + 4));// row 7
+    ymm28 = _mm256_load_pd((double *) (B + 6*8)); ymm29 = _mm256_load_pd((double *) (B + 6*8 + 4));// row 7
     ymm30 = _mm256_load_pd((double *) (B + 7*8)); ymm31 = _mm256_load_pd((double *) (B + 7*8 + 4));// row 8
 
     // row by row computations
