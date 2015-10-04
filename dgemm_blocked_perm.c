@@ -21,7 +21,7 @@ const char* dgemm_desc = "Simple blocked dgemm.";
  */
 
 #define BYTE_ALIGN 64
-#define BLOCK_SIZE ((361 / BYTE_ALIGN) * BYTE_ALIGN) // important to leave as a define for compiler optimizations
+#define BLOCK_SIZE 64// ((361 / BYTE_ALIGN) * BYTE_ALIGN) // important to leave as a define for compiler optimizations
 
 #define KERNEL_SIZE 8
 
@@ -167,7 +167,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double * restrict A, const double * restrict B, double * restrict C,
                  int shortcut)
 {
-    if(1) {
+    if(shortcut) {
         int i, j, k;
         for (j = 0; j < N; ++j) {
             for (k = 0; k < K; ++k){
