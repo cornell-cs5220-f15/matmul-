@@ -275,9 +275,18 @@ int main(int argc, char **argv) {
         }
     }
 
-    // A + i + k*lda, B + k + j*lda, C + i + j*lda,
-    test_me_please(A,B,C,10,10,10,TEST_DIM);
-    test_me_please(A+10*TEST_DIM+7,B+10*TEST_DIM+7,C+10*TEST_DIM+7,7,7,7,TEST_DIM);
+    const int n_blocks = M / BLOCK_SIZE + (M%BLOCK_SIZE? 1 : 0);
+    int bi, bj, bk;
+    for (bi = 0; bi < n_blocks; ++bi) {
+        const int i = bi * BLOCK_SIZE;
+        for (bj = 0; bj < n_blocks; ++bj) {
+            const int j = bj * BLOCK_SIZE;
+            for (bk = 0; bk < n_blocks; ++bk) {
+                const int k = bk * BLOCK_SIZE;
+                do_block(M, A, B, C, i, j, k);
+            }
+        }
+    }
 
     printf("\nC:\n");
     for(int i = 0; i < 10; ++i) {
