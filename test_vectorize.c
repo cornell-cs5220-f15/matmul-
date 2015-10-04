@@ -164,70 +164,69 @@ inline void vectorized8x8(double * restrict A, double * restrict B, double * res
 
 void test_me_please(double *A, double *B, double *C, int M, int N, int K, int lda) {
     // sub-blocking based on KERNEL_SIZE
-        int row_kernels = M / KERNEL_SIZE + (M % KERNEL_SIZE ? 1 : 0);
-        int col_kernels = N / KERNEL_SIZE + (N % KERNEL_SIZE ? 1 : 0);
-        int sli_kernels = K / KERNEL_SIZE + (K % KERNEL_SIZE ? 1 : 0);
+    int row_kernels = M / KERNEL_SIZE + (M % KERNEL_SIZE ? 1 : 0);
+    int col_kernels = N / KERNEL_SIZE + (N % KERNEL_SIZE ? 1 : 0);
+    int sli_kernels = K / KERNEL_SIZE + (K % KERNEL_SIZE ? 1 : 0);
 
-        int row, col, sli, // i, j, k offsets for outer loop
-            ki_row, ki_sli,// kernel row i and k offsets for copying to aligned memory
-            kj_col, kj_sli;// kernel col j and k offsets for copying to aligned memory
-        
-        for(int bj = 0; bj < col_kernels; ++bj) {
-            col = bj * KERNEL_SIZE;
+    int row, col, sli, // i, j, k offsets for outer loop
+        ki_row, ki_sli,// kernel row i and k offsets for copying to aligned memory
+        kj_col, kj_sli;// kernel col j and k offsets for copying to aligned memory
+    
+    for(int bj = 0; bj < col_kernels; ++bj) {
+        col = bj * KERNEL_SIZE;
 
-            for(int bk = 0; bk < sli_kernels; ++bk) {
-                sli = bk * KERNEL_SIZE;
+        for(int bk = 0; bk < sli_kernels; ++bk) {
+            sli = bk * KERNEL_SIZE;
 
-                for(int bi = 0; bi < row_kernels; ++bi) {
-                    row = bi * KERNEL_SIZE;
+            for(int bi = 0; bi < row_kernels; ++bi) {
+                row = bi * KERNEL_SIZE;
 
-                    // copy from A and B to byte aligned memory, zero out aligned C
-                    #pragma unroll
-                    for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                        kj_col = kj + col;
-                        kj_sli = kj + sli;
-                        for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                            ki_row = ki + row;
-                            ki_sli = ki + sli;
+                // copy from A and B to byte aligned memory, zero out aligned C
+                #pragma unroll
+                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                    kj_col = kj + col;
+                    kj_sli = kj + sli;
+                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                        ki_row = ki + row;
+                        ki_sli = ki + sli;
 
-                            // if this is a valid location, copy the data.  Otherwise, pad with 0s
-                            // A is MxK
-                            if(ki_row < M && kj_sli < K)
-                                A_KERNEL(ki, kj) = A[kj_sli*lda + ki_row];
-                            else
-                                A_KERNEL(ki, kj) = 0.0;
-                            // B is KxN
-                            if(ki_sli < K && kj_col < N)
-                                B_KERNEL(ki, kj) = B[kj_col*lda + ki_sli];
-                            else
-                                B_KERNEL(ki, kj) = 0.0;
-                            // need to zero out C for each round
-                            C_KERNEL(ki, kj) = 0.0;
+                        // if this is a valid location, copy the data.  Otherwise, pad with 0s
+                        // A is MxK
+                        if(ki_row < M && kj_sli < K)
+                            A_KERNEL(ki, kj) = A[kj_sli*lda + ki_row];
+                        else
+                            A_KERNEL(ki, kj) = 0.0;
+                        // B is KxN
+                        if(ki_sli < K && kj_col < N)
+                            B_KERNEL(ki, kj) = B[kj_col*lda + ki_sli];
+                        else
+                            B_KERNEL(ki, kj) = 0.0;
+                        // need to zero out C for each round
+                        C_KERNEL(ki, kj) = 0.0;
+                    }
+                }
+
+                // multiplies A_KERNEL and B_KERNEL, stores results in C_KERNEL
+                // vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                int i, j, k;
+                for (j = 0; j < KERNEL_SIZE; ++j) {
+                    for (k = 0; k < KERNEL_SIZE; ++k){
+                        double bkj = B_KERNEL(k, j);//B[j*lda+k];
+                        for (i = 0; i < KERNEL_SIZE; ++i) {
+                            // C[j*lda+i] += A[k*lda+i] * bkj;
+                            C_KERNEL(i, j) += A_KERNEL(i,k) * bkj;
                         }
                     }
+                }
 
-                    // multiplies A_KERNEL and B_KERNEL, stores results in C_KERNEL
-                    // vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
-                    int i, j, k;
-                    for (j = 0; j < KERNEL_SIZE; ++j) {
-                        for (k = 0; k < KERNEL_SIZE; ++k){
-                            double bkj = B_KERNEL(k, j);//B[j*lda+k];
-                            for (i = 0; i < KERNEL_SIZE; ++i) {
-                                // C[j*lda+i] += A[k*lda+i] * bkj;
-                                C_KERNEL(i, j) += A_KERNEL(i,k) * bkj;
-                            }
-                        }
-                    }
-
-                    // copy everything back to C
-                    #pragma unroll
-                    for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                        kj_col = kj + col;
-                        for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                            ki_row = ki + row;
-                            if(ki_row < M && kj_col < N)
-                                C[kj_col*lda + ki_row] += C_KERNEL(ki, kj);
-                        }
+                // copy everything back to C
+                #pragma unroll
+                for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                    kj_col = kj + col;
+                    for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
+                        ki_row = ki + row;
+                        if(ki_row < M && kj_col < N)
+                            C[kj_col*lda + ki_row] += C_KERNEL(ki, kj);
                     }
                 }
             }
