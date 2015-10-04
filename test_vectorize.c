@@ -207,17 +207,17 @@ void test_me_please(double *A, double *B, double *C, int M, int N, int K, int ld
                 }
 
                 // multiplies A_KERNEL and B_KERNEL, stores results in C_KERNEL
-                // vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
-                int i, j, k;
-                for (j = 0; j < KERNEL_SIZE; ++j) {
-                    for (k = 0; k < KERNEL_SIZE; ++k){
-                        double bkj = B_KERNEL(k, j);//B[j*lda+k];
-                        for (i = 0; i < KERNEL_SIZE; ++i) {
-                            // C[j*lda+i] += A[k*lda+i] * bkj;
-                            C_KERNEL(i, j) += A_KERNEL(i,k) * bkj;
-                        }
-                    }
-                }
+                vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
+                // int i, j, k;
+                // for (j = 0; j < KERNEL_SIZE; ++j) {
+                //     for (k = 0; k < KERNEL_SIZE; ++k){
+                //         double bkj = B_KERNEL(k, j);//B[j*lda+k];
+                //         for (i = 0; i < KERNEL_SIZE; ++i) {
+                //             // C[j*lda+i] += A[k*lda+i] * bkj;
+                //             C_KERNEL(i, j) += A_KERNEL(i,k) * bkj;
+                //         }
+                //     }
+                // }
 
                 // copy everything back to C
                 #pragma unroll
