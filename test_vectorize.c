@@ -325,6 +325,7 @@ int main(int argc, char **argv) {
             // A_KERNEL(i,j) = (double) num++;
             A[j*TEST_DIM + i] = (double) num++;
             C[j*TEST_DIM + i] = 0.0;
+            C_BASIC[j*TEST_DIM + i] = 0.0;
             // printf("%*f ", 4, A_KERNEL(i,j));
         }
         // printf("\n");
