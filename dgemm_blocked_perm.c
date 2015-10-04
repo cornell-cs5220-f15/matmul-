@@ -167,7 +167,7 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                  const double * restrict A, const double * restrict B, double * restrict C,
                  int shortcut)
 {
-    if(shortcut) {
+    if(1) {
         int i, j, k;
         for (j = 0; j < N; ++j) {
             for (k = 0; k < K; ++k){
