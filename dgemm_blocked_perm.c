@@ -183,56 +183,59 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
     }
     else {
         // sub-blocking based on KERNEL_SIZE
-        int max_dim = (M > K ? M : K);
-        int n_kernels = max_dim / KERNEL_SIZE + (max_dim % KERNEL_SIZE ? 1 : 0);
-        int row, col, sli, M_KERNEL, N_KERNEL, K_KERNEL;
-
         int row_kernels = M / KERNEL_SIZE + (M % KERNEL_SIZE ? 1 : 0);
         int col_kernels = N / KERNEL_SIZE + (N % KERNEL_SIZE ? 1 : 0);
         int sli_kernels = K / KERNEL_SIZE + (K % KERNEL_SIZE ? 1 : 0);
+
+        int row, col, sli, // i, j, k offsets for outer loop
+            ki_row, ki_sli,// kernel row i and k offsets for copying to aligned memory
+            kj_col, kj_sli;// kernel col j and k offsets for copying to aligned memory
         
         for(int bi = 0; bi < row_kernels; ++bi) {
             row = bi * KERNEL_SIZE;
-            M_KERNEL = (row + KERNEL_SIZE > M ? M - row : KERNEL_SIZE);
             
             for(int bj = 0; bj < col_kernels; ++bj) {
                 col = bj * KERNEL_SIZE;
-                N_KERNEL = (col + KERNEL_SIZE > N ? N - col : KERNEL_SIZE);
 
                 for(int bk = 0; bk < sli_kernels; ++bk) {
                     sli = bk * KERNEL_SIZE;
-                    K_KERNEL = (sli + KERNEL_SIZE > K ? K - sli : KERNEL_SIZE);
 
                     // copy from A and B to byte aligned memory, zero out aligned C
                     #pragma unroll
                     for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                        ki_row = ki + row;
+                        ki_sli = ki + sli;
                         for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                            // if this is a valid location, copy the data
-                            // otherwise, pad with 0s
+                            kj_col = kj + col;
+                            kj_sli = kj + sli;
 
-                            if(ki + row >= M || kj + sli >= K)
+                            // if this is a valid location, copy the data.  Otherwise, pad with 0s
+                            // A is MxK
+                            if(ki_row < M && kj_sli < K)
+                                A_KERNEL(ki, kj) = A[kj_sli*lda + ki_row];
+                            else
                                 A_KERNEL(ki, kj) = 0.0;
+                            // B is KxN
+                            if(ki_sli < K && kj_col < N)
+                                B_KERNEL(ki, kj) = B[kj_col*lda + ki_sli];
                             else
-                                A_KERNEL(ki, kj) = A[(kj+sli)*lda + ki+row];
-
-                            if (ki + sli >= K || kj + col >= N)
-                                B_KERNEL(ki,kj) = 0.0;
-                            else
-                                B_KERNEL(ki, kj) = B[ki+sli + (kj+col)*lda];
-
+                                B_KERNEL(ki, kj) = 0.0;
+                            // need to zero out C for each round
                             C_KERNEL(ki, kj) = 0.0;
                         }
                     }
 
+                    // multiplies A_KERNEL and B_KERNEL, stores results in C_KERNEL
                     vectorized8x8(A_KERNEL, B_KERNEL, C_KERNEL);
 
                     // copy everything back to C
                     #pragma unroll
                     for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
+                        ki_row = ki + row;
                         for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                            if(ki + row < M && kj + col < N)
-                                C[(kj+col)*lda + ki+row] += C_KERNEL(ki, kj); // C(ki+row, kj+col*K) = C_KERNEL(ki, kj);
-                                // printf(" --> (  %d  ) <--\n", ((kj+col)*lda + ki+row));
+                            kj_col = kj + col;
+                            if(ki_row < M && kj_col < N)
+                                C[kj_col*lda + ki_row] += C_KERNEL(ki, kj);
                         }
                     }
                 }
@@ -248,10 +251,6 @@ void do_block(const int lda,
     const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
     const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
     const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
-
-    // printf("       Sub: M=%d\n           N=%d\n           K=%d\n", M, N, K);
-
-
     basic_dgemm(lda, M, N, K,
                 A + i + k*lda, B + k + j*lda, C + i + j*lda,
                 0);
@@ -277,9 +276,6 @@ void square_dgemm(const int M, const double * restrict A, const double * restric
             const int j = bj * BLOCK_SIZE;
             for (bk = 0; bk < n_blocks; ++bk) {
                 const int k = bk * BLOCK_SIZE;
-
-                // printf("Block: lda=%d\n       i=%d\n       j=%d\n       k=%d\n", M, i, j, k);
-
                 do_block(M, A, B, C, i, j, k);
             }
         }
