@@ -486,6 +486,19 @@ int main(int argc, char **argv) {
         }
         printf("\n\n");
     }
+    printf("\nC:\n");
+    for(int i = 0; i < TEST_DIM; ++i) {
+        for(int j = 0; j < TEST_DIM; ++j) {
+            // printf("%*f ", 4, C_KERNEL(i,j));
+            double mine = C[j*lda + i];
+            double basic = C_BASIC[j*lda + i];
+            printf("%f ", mine);
+            // if(mine != basic && mine != 0) {
+            //     printf("--> MINE: %d <--|--> BASIC: %d <--\n", mine, basic);
+            // }
+        }
+        printf("\n\n");
+    }
 
     printf("\n - - - - - - - - - \n");
 
