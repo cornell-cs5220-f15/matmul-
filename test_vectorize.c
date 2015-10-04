@@ -290,6 +290,20 @@ void test_me_please(double *A, double *B, double *C, int M, int N, int K, int ld
     // }
 }
 
+void do_block(const int lda,
+              const double * restrict A, const double * restrict B, double * restrict C,
+              const int i, const int j, const int k)
+{
+    const int M = (i+BLOCK_SIZE > lda? lda-i : BLOCK_SIZE);
+    const int N = (j+BLOCK_SIZE > lda? lda-j : BLOCK_SIZE);
+    const int K = (k+BLOCK_SIZE > lda? lda-k : BLOCK_SIZE);
+    // void test_me_please(double *A, double *B, double *C, int M, int N, int K, int lda) {
+    test_me_please(A+i+k*lda, B+k+j*lda, C+i+j*lda, M, N, K, lda);
+    // basic_dgemm(lda, M, N, K,
+    //             A + i + k*lda, B + k + j*lda, C + i + j*lda,
+    //             0);
+}
+
 #include <stdio.h>
 int main(int argc, char **argv) {
     // initialize aligned kernel memory
