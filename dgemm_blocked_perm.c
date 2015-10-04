@@ -89,7 +89,7 @@ inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
     ymm08 = _mm256_add_pd(ymm08, ymm12);// ymm08 holds right half
 
     // ym00 and ym08 now hold the left and right halves, store back in C
-    _mm256_store_pd((double *) (C + row*8), ymm00); _mm256_store_pd((double *) (C + row*8 + 4), ymm08); 
+    _mm256_store_pd((double *) (C + row*8), ymm00); _mm256_store_pd((double *) (C + row*8 + 4), ymm08);
 }
 
 inline void vectorized8x8(double * restrict A, double * restrict B, double * restrict C) {
