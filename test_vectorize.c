@@ -396,7 +396,7 @@ int main(int argc, char **argv) {
     B_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
     C_KERNEL = (double *) _mm_malloc(KERNEL_SIZE * KERNEL_SIZE * sizeof(double), BYTE_ALIGN);
 
-    int TEST_DIM = 8;
+    int TEST_DIM = 11;
     double *A       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
     double *B       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
     double *C       = (double *) malloc(TEST_DIM * TEST_DIM * sizeof(double));
