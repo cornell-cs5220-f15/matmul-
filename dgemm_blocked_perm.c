@@ -191,23 +191,23 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
             ki_row, ki_sli,// kernel row i and k offsets for copying to aligned memory
             kj_col, kj_sli;// kernel col j and k offsets for copying to aligned memory
         
-        for(int bi = 0; bi < row_kernels; ++bi) {
-            row = bi * KERNEL_SIZE;
-            
-            for(int bj = 0; bj < col_kernels; ++bj) {
-                col = bj * KERNEL_SIZE;
+        for(int bj = 0; bj < col_kernels; ++bj) {
+            col = bj * KERNEL_SIZE;
 
-                for(int bk = 0; bk < sli_kernels; ++bk) {
-                    sli = bk * KERNEL_SIZE;
+            for(int bk = 0; bk < sli_kernels; ++bk) {
+                sli = bk * KERNEL_SIZE;
+
+                for(int bi = 0; bi < row_kernels; ++bi) {
+                    row = bi * KERNEL_SIZE;
 
                     // copy from A and B to byte aligned memory, zero out aligned C
                     #pragma unroll
                     for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                        ki_row = ki + row;
-                        ki_sli = ki + sli;
+                        kj_col = kj + col;
+                        kj_sli = kj + sli;
                         for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                            kj_col = kj + col;
-                            kj_sli = kj + sli;
+                            ki_row = ki + row;
+                            ki_sli = ki + sli;
 
                             // if this is a valid location, copy the data.  Otherwise, pad with 0s
                             // A is MxK
@@ -231,9 +231,9 @@ void basic_dgemm(const int lda, const int M, const int N, const int K,
                     // copy everything back to C
                     #pragma unroll
                     for(int kj = 0; kj < KERNEL_SIZE; ++kj) {
-                        ki_row = ki + row;
+                        kj_col = kj + col;
                         for(int ki = 0; ki < KERNEL_SIZE; ++ki) {
-                            kj_col = kj + col;
+                            ki_row = ki + row;
                             if(ki_row < M && kj_col < N)
                                 C[kj_col*lda + ki_row] += C_KERNEL(ki, kj);
                         }
