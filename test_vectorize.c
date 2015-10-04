@@ -373,8 +373,8 @@ int main(int argc, char **argv) {
     }
 
     printf("\nC:\n");
-    for(int i = 0; i < 10; ++i) {
-        for(int j = 0; j < 10; ++j) {
+    for(int i = 0; i < TEST_DIM; ++i) {
+        for(int j = 0; j < TEST_DIM; ++j) {
             // printf("%*f ", 4, C_KERNEL(i,j));
             double mine = C[j*lda + i];
             double basic = C_BASIC[j*lda + i];
