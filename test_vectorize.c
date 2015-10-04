@@ -49,10 +49,10 @@ double * restrict C_KERNEL = NULL;
 
 // assumes ymm16-31 already have the rows of B, and that ymm00-015 can be clobbered
 inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
-                   __m256d &ymm00, __m256d &ymm01, __m256d &ymm02, __m256d &ymm03, __m256d &ymm04, __m256d &ymm05, __m256d &ymm06, __m256d &ymm07,// piecewise store A
-                   __m256d &ymm08, __m256d &ymm09, __m256d &ymm10, __m256d &ymm11, __m256d &ymm12, __m256d &ymm13, __m256d &ymm14, __m256d &ymm15,
-                   __m256d &ymm16, __m256d &ymm17, __m256d &ymm18, __m256d &ymm19, __m256d &ymm20, __m256d &ymm21, __m256d &ymm22, __m256d &ymm23,// piecewise store B
-                   __m256d &ymm24, __m256d &ymm25, __m256d &ymm26, __m256d &ymm27, __m256d &ymm28, __m256d &ymm29, __m256d &ymm30, __m256d &ymm31) {
+                   __m256d ymm00, __m256d ymm01, __m256d ymm02, __m256d ymm03, __m256d ymm04, __m256d ymm05, __m256d ymm06, __m256d ymm07,// piecewise store A
+                   __m256d ymm08, __m256d ymm09, __m256d ymm10, __m256d ymm11, __m256d ymm12, __m256d ymm13, __m256d ymm14, __m256d ymm15,
+                   __m256d ymm16, __m256d ymm17, __m256d ymm18, __m256d ymm19, __m256d ymm20, __m256d ymm21, __m256d ymm22, __m256d ymm23,// piecewise store B
+                   __m256d ymm24, __m256d ymm25, __m256d ymm26, __m256d ymm27, __m256d ymm28, __m256d ymm29, __m256d ymm30, __m256d ymm31) {
 
     __assume_aligned(A, BYTE_ALIGN);// unsure if this is necessary with an inline being called
     __assume_aligned(C, BYTE_ALIGN);// by an inline, but shouldn't cause too much of a ruckus
