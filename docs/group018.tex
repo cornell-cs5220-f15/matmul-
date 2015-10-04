@@ -17,13 +17,15 @@
         morecomment=[l][\color{magenta}]{\#}
 }
 
-\title{\textbf{CS 5220 Project 1 Initial Report}}
-\author{Stephen McDowell (sjm324)\\ Guantian Zheng (gz94)\\ Jingyang Wang (jw598)}
+\title{\textbf{CS 5220 Project 1 Final Report}}
+\author{Stephen McDowell (sjm324)}
 \date{\textbf{September 2015}}
 
 \usepackage{natbib}
 \usepackage{graphicx}
 \usepackage{pdfpages}
+
+\usepackage{enumerate}
 
 \newcommand{\tab}{\hspace*{2em}}
 \newcommand{\norm}[1]{\lVert#1\rVert}
@@ -57,8 +59,8 @@
 \renewcommand{\headrulewidth}{0pt}
 \setlength{\headheight}{0.5in}
 
-\title{CS 5220: Project 1 Initial Report}
-\author{Group 018: Guantian Zheng (gz94), Stephen McDowell (sjm324)}
+\title{CS 5220: Project 1 Final Report}
+\author{Group 018: Stephen McDowell (sjm324)}
 
 \begin{document}
 \thispagestyle{empty}
@@ -78,7 +80,7 @@ Our initial findings for this assignment are somewhat discouraging.  We initiall
     \item Where we are currently is trying to query the hardware to programmatically determine the optimal \texttt{BLOCK\_SIZE}, as well as toying with the idea of transposing the \texttt{A} matrix in memory.
 \end{enumerate}
 
-\noindent Part of the reason why we have not made as much progress as we would have liked to is because we only have two group members.  This was not really made apparent to us until tonight.
+\noindent \textbf{This was the state of affairs as of the initial report.  Alas, the only thing that has changed is me trying to hand-vectorize the code.  It seems I flew a little too close to the sun, and I never bring sunscreen...Sections 5 and 6 discuss what went on here, and why it failed so miserably.}
 
 \newpage
 \section{Loop Permutations and Compilers}
@@ -168,4 +170,98 @@ Building on previous results, we decided to adopt the optimal \texttt{j-k-i} loo
 
 \noindent We plan to try new methods such as better copy optimization, compliler flags and annotations, and also want to explore the cache-oblivious variants of this project if possible.
 
+\section{Final Report}
+
+\noindent So I decided that I thought I would be cool and hand-vectorize the code.  I did some bad research, and thought that the nodes could execute \texttt{AVX512} instructions, which is far from true.  It is only the Phi boards that can do these.  With the help of a truly wonderful guide released by Intel here: \\\\\centerline{https://software.intel.com/en-us/articles/benefits-of-intel-avx-for-small-matrices}\\\\ I felt confident that I could adopt this strategy for the 512 bit case, since their code was for \texttt{float}, and ours is using \texttt{double}, it is effectively the same thing.
+
+\noindent However, as verified from this extremely valuable resource of available instructions, \\\\\centerline{https://software.intel.com/sites/landingpage/IntrinsicsGuide/}\\\\ it would need a little tweaking (e.g. there is no \texttt{\_mm512\_broadcast}, but instead you could use \texttt{\_mm512\_set1\_pd(double a)}), but the logic would be the same.  After writing this kernel, I realized I had no way to test it unless I could find a way to offload this to the Phi boards.  I tried.  But failed.  It turns out that manually managing the memory for the Phi boards is rather complicated, and it seems that the \texttt{\#pragma offload *} with associated \texttt{in, out, inout} is generally designed for less control than what I am used to (\texttt{CUDA}).  But it also seems that, if I dig a little more, it can be done.  If it means anything, the following were excellent resources that the class might benefit from:
+
+\begin{enumerate}
+    \item https://software.intel.com/en-us/articles/effective-use-of-the-intel-compilers-offload-features
+
+    This might actually be the most comprehensive resource out there, given the authoring entity.
+
+    \item http://www.prace-ri.eu/best-practice-guide-intel-xeon-phi-html/
+
+    I already put this on Piazza.  Very thorough.
+
+    \item https://cvw.cac.cornell.edu/MIC/
+
+    This one actually may be a little outdated though...
+
+    \item https://portal.tacc.utexas.edu/documents/13601/901837/offload\_slides\_DJ2013-3.pdf/4b27de31-e8c4-4848-b100-c4b670b48148
+
+    This was shown in class.
+\end{enumerate}
+
+\noindent After a long while, I finally gave up on this, and just went back to working with the nodes.  The two main problems I ran into were
+
+\begin{enumerate}[1.]
+    \item Vectorizing and 8x8 kernel for doubles with 32 vector registers
+
+    This worked, in the end, but I made a small but impactful mistake of adding up the wrong things.  If the first element of a matrix is named $a$, we need to broadcast this into 2 registers in order to do the full 8x8 kernel.  When you add things up, with how my code is, you need to add the left half top down and the right half top down, and I was doing left right.
+
+    By halves, I mean that you treat the left half of the matrix as the first 256 bits, and the right half of the matrix as the last 256 bits.
+
+    The relevant code exists in \texttt{dgemm\_blocked\_perm.c}.
+
+    \item Sub-blocking based off of an 8x8 kernel that requires exactly 64 values.
+
+    The loop structure for this sub-blocking routine took me a \emph{lot} longer than I expected.  I'm not entirely convinced this was the best way to do it, but I only promised myself that I would get it functional.  I was only able to debug the hand-vectorized code after I got this working.
+\end{enumerate}
+
+\noindent At this time I must note that I didn't dream up the compiler flags used in the final result.  I am currently working next to my partner for a different class, who gave me his compiler flags so that I could see what was going on.
+
+\begin{enumerate}[a)]
+    \item The flags:
+    \begin{enumerate}[i)]
+        \item -O3
+        \item -fast
+        \item -axCORE-AVX2
+        \item -unroll-aggressive
+        \item -mtune=core-avx2
+        \item -ipo
+        \item -xHost
+    \end{enumerate}
+
+    \item The group:
+
+    Group 22, I will spare the explanation of the flags because you probably have already seen them, and their final report explains them as well.
+\end{enumerate}
+
+\noindent Finally, we have some results.  My initial ``smart" strategy to fit things according to \texttt{BLOCK\_SIZE} described at the top of \texttt{dgemm\_blocked\_perm.c} seems to be invalid.
+
+\noindent My hand-vectorized code, with that logic:
+
+\begin{center}
+    \includegraphics[scale=0.5]{benchmarking/hand-vectorized/my_vectorized_350_ish.pdf}
+\end{center}
+
+\noindent Well...that's depressing.  That dropoff there is where my vectorized code actually starts being used.  If the input matrix dimensions were less than \texttt{BLOCK\_SIZE}, then I short-circuit and just do naive. So, if in the \texttt{basic\_dgemm} we short-circuit always (and just do naive), then we get
+
+\begin{center}
+    \includegraphics[scale=0.5]{benchmarking/hand-vectorized/naive_350_ish.pdf}
+\end{center}
+
+\noindent Not so surprisingly, this does significantly better.  Because I don't know how to vectorize well, only vectorize functionally.
+
+\noindent So, if we change up the block-size to something smaller, say 64 just for shiggles, then we would expect to get much better performance.  My vectorized code:
+
+\begin{center}
+    \includegraphics[scale=0.5]{benchmarking/hand-vectorized/my_vectorized_64.pdf}
+\end{center}
+
+\noindent Guess not.  For reference, this would be the intel vectorized code with a \texttt{BLOCK\_SIZE} of 64:
+
+\begin{center}
+    \includegraphics[scale=0.5]{benchmarking/hand-vectorized/naive_64.pdf}
+\end{center}
+
+\noindent Oh snap!  The 1024 drop being somewhat expected here, since I must admit that a block size of 64 is really not a great choice.
+
+\section{Summary}
+
+\noindent So had I more time, I would have liked to experiment a lot more with vectorized code.  Specifically, I don't take advantage of the fused-multiply-add capabilities, and very much would have liked to.  Good thing we have another assignment!!!  I realize full-well that the reason my vectorized code does so poorly is not because the 8x8 kernel is bad itself, but indeed because I am not very careful about how I am copying data over to the kernel matrices.  This has a significant impact, which overwhelms any potential increase I may have had from vectorizing the code myself.  If there even was one in the first place.\\
+
+\noindent Better luck next time, champ.
 \end{document}
