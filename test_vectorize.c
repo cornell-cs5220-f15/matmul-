@@ -59,14 +59,14 @@ inline void row8x8(unsigned int row, double * restrict A, double * restrict C,
 
     // Broadcast each element of matrix A Row [row] into a ymm register
     // If row = [ a b c d e f g h ], then we need two registers for each
-    ymm00 = _mm256_broadcast_sd(A + row*8 + 0); ymm01 = _mm256_broadcast_sd(A + row*8 + 0);// a
-    ymm02 = _mm256_broadcast_sd(A + row*8 + 1); ymm03 = _mm256_broadcast_sd(A + row*8 + 1);// b
-    ymm04 = _mm256_broadcast_sd(A + row*8 + 2); ymm05 = _mm256_broadcast_sd(A + row*8 + 2);// c
-    ymm06 = _mm256_broadcast_sd(A + row*8 + 3); ymm07 = _mm256_broadcast_sd(A + row*8 + 3);// d
-    ymm08 = _mm256_broadcast_sd(A + row*8 + 4); ymm09 = _mm256_broadcast_sd(A + row*8 + 4);// e
-    ymm10 = _mm256_broadcast_sd(A + row*8 + 5); ymm11 = _mm256_broadcast_sd(A + row*8 + 5);// f
-    ymm12 = _mm256_broadcast_sd(A + row*8 + 6); ymm13 = _mm256_broadcast_sd(A + row*8 + 6);// g
-    ymm14 = _mm256_broadcast_sd(A + row*8 + 7); ymm15 = _mm256_broadcast_sd(A + row*8 + 7);// h
+    ymm00 = _mm256_broadcast_sd((double *)(A + row*8 + 0)); ymm01 = _mm256_broadcast_sd((double *)(A + row*8 + 0));// a
+    ymm02 = _mm256_broadcast_sd((double *)(A + row*8 + 1)); ymm03 = _mm256_broadcast_sd((double *)(A + row*8 + 1));// b
+    ymm04 = _mm256_broadcast_sd((double *)(A + row*8 + 2)); ymm05 = _mm256_broadcast_sd((double *)(A + row*8 + 2));// c
+    ymm06 = _mm256_broadcast_sd((double *)(A + row*8 + 3)); ymm07 = _mm256_broadcast_sd((double *)(A + row*8 + 3));// d
+    ymm08 = _mm256_broadcast_sd((double *)(A + row*8 + 4)); ymm09 = _mm256_broadcast_sd((double *)(A + row*8 + 4));// e
+    ymm10 = _mm256_broadcast_sd((double *)(A + row*8 + 5)); ymm11 = _mm256_broadcast_sd((double *)(A + row*8 + 5));// f
+    ymm12 = _mm256_broadcast_sd((double *)(A + row*8 + 6)); ymm13 = _mm256_broadcast_sd((double *)(A + row*8 + 6));// g
+    ymm14 = _mm256_broadcast_sd((double *)(A + row*8 + 7)); ymm15 = _mm256_broadcast_sd((double *)(A + row*8 + 7));// h
 
     // multiply
     // left half
