@@ -78,27 +78,45 @@ def basic_dgemm(lda, M, N, K, A_START, B_START, C_START):
     row_kernels = M / KERNEL_SIZE if M % KERNEL_SIZE == 0 else (M / KERNEL_SIZE) + 1
     col_kernels = N / KERNEL_SIZE if N % KERNEL_SIZE == 0 else (N / KERNEL_SIZE) + 1
     sli_kernels = K / KERNEL_SIZE if K % KERNEL_SIZE == 0 else (K / KERNEL_SIZE) + 1
+
+    print "[%d, %d, %d]" % (M, N, K)
+    print "(%d, %d, %d)" % (row_kernels, col_kernels, sli_kernels)
     
     for bi in range(row_kernels):
         row = bi * KERNEL_SIZE
 
+        M_KERNEL = M-row if row + KERNEL_SIZE > M else KERNEL_SIZE
+
         for bj in range(col_kernels):
             col = bj * KERNEL_SIZE
+
+            N_KERNEL = N-col if col + KERNEL_SIZE > N else KERNEL_SIZE
 
             for bk in range(sli_kernels):
                 sli = bk * KERNEL_SIZE
 
+                K_KERNEL = K-sli if sli + KERNEL_SIZE > K else KERNEL_SIZE
+
+                print "    (%d, %d, %d)" % (row, col, sli)
+
                 for ki in range(KERNEL_SIZE):
+                    ki_row = ki + row
+                    ki_sli = ki + sli
                     for kj in range(KERNEL_SIZE):
-                        if ki + row >= M or kj + sli >= K:
+                        kj_col = kj + col
+                        kj_sli = kj + sli
+
+                        # if ki + row >= M or kj + sli >= K:
+                        if ki_row >= M or kj_sli >= K:
                             A_KERNEL[ki][kj] = 0
                         else:
-                            A_KERNEL[ki][kj] = A[(kj+sli)*lda + ki+row + A_START]
+                            A_KERNEL[ki][kj] = A[kj_sli*lda + ki_row + A_START]
 
-                        if ki + sli >= K or kj + col >= N:
+                        # if ki + sli >= K or kj + col >= N:
+                        if ki_sli >= K or kj_col >= N:
                             B_KERNEL[ki][kj] = 0
                         else:
-                            B_KERNEL[ki][kj] = B[(kj+col)*lda + ki+sli + B_START]
+                            B_KERNEL[ki][kj] = B[(kj_col)*lda + ki_sli + B_START]
 
                         C_KERNEL[ki][kj] = 0
         
@@ -109,16 +127,21 @@ def basic_dgemm(lda, M, N, K, A_START, B_START, C_START):
                     for jjj in range(KERNEL_SIZE):
                         cij = C_KERNEL[iii][jjj]
                         for kkk in range(KERNEL_SIZE):
-                            cij += A_KERNEL[iii][jjj] * B_KERNEL[iii][jjj]
+                            cij += A_KERNEL[iii][kkk] * B_KERNEL[kkk][jjj]
                         C_KERNEL[iii][jjj] = cij
 
                 #
                 # copy back to C
                 #
                 for ki in range(KERNEL_SIZE):
+                    ki_row = ki + row
+                    # ri_sli = ki + sli
                     for kj in range(KERNEL_SIZE):
-                        if ki + row < M and kj + col < N:
-                            C[(kj+col)*lda + ki+row + C_START] += C_KERNEL[ki][kj]
+                        kj_col = kj + col
+                        # rj_sli = kj + sli
+                        # if ki + row < M and kj + col < N:
+                        if ki_row < M and kj_col < N:
+                            C[kj_col*lda + ki_row + C_START] += C_KERNEL[ki][kj]
 
 ##########################################################################################
 ##########################################################################################
